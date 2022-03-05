@@ -93,12 +93,13 @@ public class TunnelServer extends Thread {
             this.data_relay_thread.start();
 
             while (true) {
+                cleanUpThreads();
                 try {
                     socket = serverSocket.accept();
                 } catch (IOException e) {
                     System.out.println("I/O error: " + e);
+                    continue;
                 }
-                cleanUpThreads();
 
                 // new threads for a client
                 TunnelClient client = new TunnelClient(tunnel_interface, socket);

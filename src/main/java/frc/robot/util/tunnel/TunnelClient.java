@@ -14,6 +14,7 @@ public class TunnelClient {
     public InputStream input = null;
     public OutputStream output = null;
     private boolean isOpen = false;
+    private boolean shouldCloseThreads = false;
 
     private TunnelReadThread read_thread;
     private TunnelWriteThread write_thread;
@@ -36,11 +37,13 @@ public class TunnelClient {
         }
 
         read_thread = new TunnelReadThread(this);
+        write_thread = new TunnelWriteThread(this);
     }
 
     public void start() {
         read_thread.start();
         write_thread.start();
+        shouldCloseThreads = false;
     }
 
     public boolean isAlive() {
@@ -55,6 +58,10 @@ public class TunnelClient {
         return isOpen;
     }
 
+    public boolean getShouldCloseThreads() {
+        return shouldCloseThreads;
+    }
+
     public void setIsOpen(boolean isOpen) {
         this.isOpen = isOpen;
     }
@@ -65,6 +72,7 @@ public class TunnelClient {
             input.close();
             output.close();
             socket.close();
+            shouldCloseThreads = true;
         }
         catch (IOException e) {
             e.printStackTrace();

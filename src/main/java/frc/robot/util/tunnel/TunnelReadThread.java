@@ -20,18 +20,21 @@ public class TunnelReadThread extends Thread {
         if (Objects.isNull(client.input)) {
             return;
         }
-        
+
         System.out.println("Starting read thread");
         while (true) {
+            if (client.getShouldCloseThreads()) {
+                break;
+            }
             try {
                 int num_chars_read = client.input.read(buffer, unparsed_index, buffer_size - unparsed_index);
                 if (num_chars_read == 0) {
                     continue;
                 }
                 if (num_chars_read == -1) {
-                    System.out.println("Closing client");
+                    System.out.println("No more data. Closing client");
                     client.socket.close();
-                    return;
+                    break;
                 }
                 
                 int buffer_stop = unparsed_index + num_chars_read;
@@ -66,8 +69,9 @@ public class TunnelReadThread extends Thread {
             } catch (IOException e) {
                 e.printStackTrace();
                 client.setIsOpen(false);
-                return;
+                break;
             }
         }
+        System.out.println("Stopping read thread");
     }
 }

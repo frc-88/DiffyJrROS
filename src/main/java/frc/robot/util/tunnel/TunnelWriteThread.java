@@ -22,14 +22,14 @@ public class TunnelWriteThread extends Thread {
 
     public void run()
     {
-        if (Objects.isNull(client.output)) {
-            return;
-        }
-        
         System.out.println("Starting write thread");
         while (true) {
+            if (client.getShouldCloseThreads()) {
+                break;
+            }
             dequeBuffer();
         }
+        System.out.println("Stopping write thread");
     }
 
     private void writeBuffer(byte[] buffer) throws IOException
