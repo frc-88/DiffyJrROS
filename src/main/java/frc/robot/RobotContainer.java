@@ -67,6 +67,7 @@ public class RobotContainer {
 
   private void configurePeriodics(Robot robot) {
     robot.addPeriodic(m_ros_interface::updateSlow, 0.1, 0.05);
+    robot.addPeriodic(m_ros_interface::update, 1.0 / 30.0, 0.025);
     robot.addPeriodic(m_drive.getSwerve()::controllerPeriodic, Constants.DifferentialSwerveModule.kDt, 0.0025);
   }
 

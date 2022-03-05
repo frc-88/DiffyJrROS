@@ -3,17 +3,17 @@ package frc.robot.util.tunnel;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class TunnelServer extends Thread {
 
     private int port = 0;
     private TunnelInterface tunnel_interface;
-    private ArrayList<TunnelClient> clients;
-    private TunnelDataRelayThread data_relay_thread;
+    private TunnelClient client;
 
     public static TunnelServer instance = null;
+    private static ReentrantLock client_lock = new ReentrantLock();
 
     public TunnelServer(TunnelInterface tunnel_interface, int port, int data_relay_delay_ms, boolean auto_start)
     {
@@ -22,10 +22,8 @@ public class TunnelServer extends Thread {
         }
         instance = this;
 
-        clients = new ArrayList<TunnelClient>();
         this.port = port;
         this.tunnel_interface = tunnel_interface;
-        this.data_relay_thread = new TunnelDataRelayThread(tunnel_interface, data_relay_delay_ms);
 
         if (auto_start) {
             this.start();
@@ -38,38 +36,23 @@ public class TunnelServer extends Thread {
 
     public boolean anyClientsAlive()
     {
-        for (int index = 0; index < clients.size(); index++)
-        {
-            TunnelClient client = clients.get(index);
-            if (client.isAlive() && client.isOpen()) {
-                return true;
-            }
+        client_lock.lock();
+        if (Objects.isNull(client)) {
+            return false;
         }
-        return false;
-    }
-
-    private void cleanUpThreads()
-    {
-        for (int index = 0; index < clients.size(); index++)
-        {
-            if (!clients.get(index).isAlive() || !clients.get(index).isOpen()) {
-                clients.get(index).close();
-                clients.remove(index);
-                index--;
-            }
-        }
+        boolean isActive = client.isActive();
+        client_lock.unlock();
+        return isActive;
     }
 
     // Write a packet to all connected clients
     public void writePacket(String category, Object... objects)
     {
-        for (int index = 0; index < clients.size(); index++)
-        {
-            TunnelClient client = clients.get(index);
-            if (client.isAlive() && client.isOpen()) {
-                client.writePacket(category, objects);
-            }
+        client_lock.lock();
+        if (Objects.nonNull(client) && client.isActive()) {
+            client.writePacket(category, objects);
         }
+        client_lock.unlock();
     }
 
     // Send message to all clients
@@ -79,21 +62,18 @@ public class TunnelServer extends Thread {
 
     private void loop() {
         ServerSocket serverSocket = null;
-        Socket socket = null;
 
         try {
             serverSocket = new ServerSocket(port);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("IOException encountered a new socket: " + e.getMessage());
             return;
         }
         System.out.println("Socket is open");
         try
         {
-            this.data_relay_thread.start();
-
             while (true) {
-                cleanUpThreads();
+                Socket socket = null;
                 try {
                     socket = serverSocket.accept();
                 } catch (IOException e) {
@@ -101,23 +81,31 @@ public class TunnelServer extends Thread {
                     continue;
                 }
 
-                // new threads for a client
-                TunnelClient client = new TunnelClient(tunnel_interface, socket);
-                clients.add(client);
-                client.start();
+                client_lock.lock();
+                if (Objects.isNull(client)) {
+                    // new threads for a client
+                    client = new TunnelClient(tunnel_interface, socket);
+                }
+                else {
+                    client.close();
+                    Thread.sleep(50);
+                    client.init(socket);
+                }
+                client_lock.unlock();
             }
         }
+        catch (InterruptedException e) {}
         finally {
             try {
                 System.out.println("Closing socket");
                 serverSocket.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("IOException encountered closing socket: " + e.getMessage());
             }
             try {
-                Thread.sleep(500);
+                Thread.sleep(50);
             }
-            catch (InterruptedException e) {  }
+            catch (InterruptedException e) {}
         }
     }
 

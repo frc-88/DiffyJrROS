@@ -23,7 +23,7 @@ public class TunnelReadThread extends Thread {
 
         System.out.println("Starting read thread");
         while (true) {
-            if (client.getShouldCloseThreads()) {
+            if (client.getShouldClose()) {
                 break;
             }
             try {
@@ -33,7 +33,6 @@ public class TunnelReadThread extends Thread {
                 }
                 if (num_chars_read == -1) {
                     System.out.println("No more data. Closing client");
-                    client.socket.close();
                     break;
                 }
                 
@@ -67,11 +66,11 @@ public class TunnelReadThread extends Thread {
                 while (result.getErrorCode() != -1);
 
             } catch (IOException e) {
-                e.printStackTrace();
-                client.setIsOpen(false);
+                System.out.println("IOException encountered while parsing packets: " + e.getMessage());
                 break;
             }
         }
+        client.setShouldClose(true);
         System.out.println("Stopping read thread");
     }
 }

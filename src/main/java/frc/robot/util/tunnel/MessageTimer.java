@@ -33,6 +33,6 @@ public class MessageTimer {
         if (Objects.isNull(client)) {
             return false;
         }
-        return client.isAlive() && client.isOpen();
+        return client.isActive();
     }
 }

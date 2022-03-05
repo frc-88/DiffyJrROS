@@ -24,63 +24,65 @@ public class TunnelWriteThread extends Thread {
     {
         System.out.println("Starting write thread");
         while (true) {
-            if (client.getShouldCloseThreads()) {
+            if (client.getShouldClose()) {
                 break;
             }
-            dequeBuffer();
+
+            byte[] data = null;
+            try {
+                TunnelWriteThread.write_lock.lock();
+                data = TunnelWriteThread.write_queue.poll();
+                if (Objects.isNull(data)) {
+                    Thread.sleep(5);
+                    continue;
+                }
+                if (!writeBuffer(data)) {
+                    break;
+                }
+            }
+            catch (InterruptedException e) {
+                break;
+            }
+            catch (IOException e) {
+                if (Objects.isNull(data)) {
+                    System.out.println("Failed while writing data: " + TunnelUtil.packetToString(data) + ". " + e.getMessage());
+                }
+                else {
+                    System.out.println("Failed while writing uninitialized data. " + e.getMessage());
+                }
+            }
+            finally {
+                TunnelWriteThread.write_lock.unlock();
+            }
         }
+        client.setShouldClose(true);
         System.out.println("Stopping write thread");
     }
 
-    private void writeBuffer(byte[] buffer) throws IOException
+    private boolean writeBuffer(byte[] buffer) throws IOException
     {
         if (buffer.length == 0) {
             System.out.println("Buffer is empty. Skipping write.");
-            return;
+            return true;
         }
-        if (Objects.isNull(client.output) || !client.isOpen()) {
+        if (Objects.isNull(client.output)) {
             System.out.println("Socket is closed! Skipping write.");
-            return;
+            return false;
         }
         try {
             client.output.write(buffer, 0, buffer.length);
             client.output.flush();
         }
         catch (SocketException e) {
-            e.printStackTrace();
-            client.setIsOpen(false);
-            System.out.println("Failed while writing buffer: " + TunnelUtil.packetToString(buffer));
+            System.out.println("Failed while writing buffer: " + TunnelUtil.packetToString(buffer) + ". " + e.getMessage());
+            return false;
         }
+        return true;
     }
 
     public void queueBuffer(byte[] buffer) {
         TunnelWriteThread.queue_lock.lock();
         TunnelWriteThread.write_queue.add(buffer);
         TunnelWriteThread.queue_lock.unlock();
-    }
-
-    private void dequeBuffer() {
-        byte[] data = null;
-        try {
-            TunnelWriteThread.write_lock.lock();
-            data = TunnelWriteThread.write_queue.poll();
-            if (Objects.isNull(data)) {
-                return;
-            }
-            writeBuffer(data);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            if (Objects.isNull(data)) {
-                System.out.println("Failed while writing data: " + TunnelUtil.packetToString(data));
-            }
-            else {
-                System.out.println("Failed while writing uninitialized data");
-            }
-            client.setIsOpen(false);
-        }
-        finally {
-            TunnelWriteThread.write_lock.unlock();
-        }
     }
 }

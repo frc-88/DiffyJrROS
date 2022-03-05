@@ -244,7 +244,6 @@ public class TunnelProtocol {
             recv_checksum = TunnelUtil.hexToByte(new String(Arrays.copyOfRange(buffer, checksum_start, buffer.length - 1)));
         }
         catch (IllegalArgumentException e) {
-            e.printStackTrace();
             System.out.println(String.format("Checksum failed! Illegal character encountered. %s", TunnelUtil.packetToString(buffer)));
             read_packet_num++;
             return new PacketResult(CHECKSUMS_DONT_MATCH_ERROR, recv_time);
