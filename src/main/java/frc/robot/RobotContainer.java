@@ -45,8 +45,9 @@ public class RobotContainer {
   }
 
   private void configureDriveCommand() {
-    m_drive.setDefaultCommand(m_joystickDriveCommand);
-    m_joystick.getAllowRosButton().whileHeld(m_passthroughRosCommand);
+    // m_drive.setDefaultCommand(m_joystickDriveCommand);
+    m_drive.setDefaultCommand(m_passthroughRosCommand);
+    // m_joystick.getAllowRosButton().whileHeld(m_passthroughRosCommand);
   }
 
   private void configureAutoCommand(int autoIndex) {
@@ -66,8 +67,8 @@ public class RobotContainer {
   }
 
   private void configurePeriodics(Robot robot) {
-    robot.addPeriodic(m_ros_interface::updateSlow, 0.1, 0.05);
-    robot.addPeriodic(m_ros_interface::update, 1.0 / 30.0, 0.025);
+    // robot.addPeriodic(m_ros_interface::updateSlow, 0.1, 0.05);
+    // robot.addPeriodic(m_ros_interface::update, 1.0 / 30.0, 0.025);
     robot.addPeriodic(m_drive.getSwerve()::controllerPeriodic, Constants.DifferentialSwerveModule.kDt, 0.0025);
   }
 
@@ -82,6 +83,10 @@ public class RobotContainer {
     else {
       return "blue";
     }
+  }
+
+  public void setEnableDrive(boolean enabled) {
+    m_drive.setEnabled(enabled);
   }
 
   /**

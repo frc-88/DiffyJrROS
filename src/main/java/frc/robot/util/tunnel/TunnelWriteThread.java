@@ -2,23 +2,18 @@ package frc.robot.util.tunnel;
 
 import java.io.IOException;
 import java.net.SocketException;
-import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class TunnelWriteThread extends Thread {
     private TunnelClient client;
+    private Queue<byte[]> write_queue;
 
-    private static ReentrantLock write_lock = new ReentrantLock();
-    private static ReentrantLock queue_lock = new ReentrantLock();
-    private static Queue<byte[]> write_queue = new LinkedList<byte[]>();
-
-    
-    public TunnelWriteThread(TunnelClient client) {
+    public TunnelWriteThread(TunnelClient client, ReentrantLock write_lock, Queue<byte[]> write_queue) {
         this.client = client;
+        this.write_queue = write_queue;
     }
-
 
     public void run()
     {
@@ -28,31 +23,8 @@ public class TunnelWriteThread extends Thread {
                 break;
             }
 
-            byte[] data = null;
-            try {
-                TunnelWriteThread.write_lock.lock();
-                data = TunnelWriteThread.write_queue.poll();
-                if (Objects.isNull(data)) {
-                    Thread.sleep(5);
-                    continue;
-                }
-                if (!writeBuffer(data)) {
-                    break;
-                }
-            }
-            catch (InterruptedException e) {
+            if (!dequeBuffer()) {
                 break;
-            }
-            catch (IOException e) {
-                if (Objects.isNull(data)) {
-                    System.out.println("Failed while writing data: " + TunnelUtil.packetToString(data) + ". " + e.getMessage());
-                }
-                else {
-                    System.out.println("Failed while writing uninitialized data. " + e.getMessage());
-                }
-            }
-            finally {
-                TunnelWriteThread.write_lock.unlock();
             }
         }
         client.setShouldClose(true);
@@ -80,9 +52,40 @@ public class TunnelWriteThread extends Thread {
         return true;
     }
 
+    public boolean dequeBuffer()
+    {
+        byte[] data = null;
+        try {
+            while (!write_queue.isEmpty()) {
+                data = write_queue.poll();
+                if (Objects.isNull(data)) {
+                    continue;
+                }
+                if (!writeBuffer(data)) {
+                    return false;
+                }
+            }
+        }
+        catch (IOException e) {
+            if (Objects.isNull(data)) {
+                System.out.println("Failed while writing data: " + TunnelUtil.packetToString(data) + ". " + e.getMessage());
+            }
+            else {
+                System.out.println("Failed while writing uninitialized data. " + e.getMessage());
+            }
+        }
+        return true;
+    }
+
     public void queueBuffer(byte[] buffer) {
-        TunnelWriteThread.queue_lock.lock();
-        TunnelWriteThread.write_queue.add(buffer);
-        TunnelWriteThread.queue_lock.unlock();
+        write_queue.add(buffer);
+        // try {
+        //     if (!writeBuffer(buffer)) {
+        //         client.setShouldClose(true);
+        //     }
+        // }
+        // catch (IOException e) {
+        //     System.out.println("Failed while writing uninitialized data. " + e.getMessage());
+        // }
     }
 }

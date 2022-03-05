@@ -28,9 +28,9 @@ public class SwerveJoystick extends SubsystemBase {
 
   @Override
   public void periodic() {
-    double vx = Helpers.applyDeadband(-this.gamepad.getX(), JOYSTICK_DEADBAND);
-    double vy = Helpers.applyDeadband(-this.gamepad.getY(), JOYSTICK_DEADBAND);
-    double vt = Helpers.applyDeadband(-this.gamepad.getTheta(), JOYSTICK_DEADBAND);
+    double vx = Helpers.applyDeadband(this.gamepad.getX(), JOYSTICK_DEADBAND);
+    double vy = Helpers.applyDeadband(this.gamepad.getY(), JOYSTICK_DEADBAND);
+    double vt = Helpers.applyDeadband(this.gamepad.getTheta(), JOYSTICK_DEADBAND);
 
     vx *= Constants.DriveTrain.MAX_CHASSIS_SPEED;
     vy *= Constants.DriveTrain.MAX_CHASSIS_SPEED;

@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.LinkedList;
 import java.util.Objects;
+import java.util.Queue;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 public class TunnelClient {
@@ -17,6 +20,9 @@ public class TunnelClient {
 
     private TunnelReadThread read_thread;
     private TunnelWriteThread write_thread;
+
+    private static ReentrantLock write_lock = new ReentrantLock();
+    private static Queue<byte[]> write_queue = new LinkedList<byte[]>();
 
     private boolean shouldClose = false;
     
@@ -31,8 +37,10 @@ public class TunnelClient {
     }
 
     public void writePacket(String category, Object... objects) {
+        write_lock.lock();
         byte[] data = protocol.makePacket(category, objects);
         write_thread.queueBuffer(data);
+        write_lock.unlock();
     }
 
     public boolean getShouldClose() {
@@ -73,8 +81,10 @@ public class TunnelClient {
             System.out.println("Failed to open client. " + e.getMessage());
         }
 
+        write_queue.clear();
+
         read_thread = new TunnelReadThread(this);
-        write_thread = new TunnelWriteThread(this);
+        write_thread = new TunnelWriteThread(this, write_lock, write_queue);
 
         read_thread.start();
         write_thread.start();

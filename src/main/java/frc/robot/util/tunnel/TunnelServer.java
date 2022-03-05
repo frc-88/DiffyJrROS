@@ -13,7 +13,7 @@ public class TunnelServer extends Thread {
     private TunnelClient client;
 
     public static TunnelServer instance = null;
-    private static ReentrantLock client_lock = new ReentrantLock();
+    private TunnelDataRelayThread data_relay_thread;
 
     public TunnelServer(TunnelInterface tunnel_interface, int port, int data_relay_delay_ms, boolean auto_start)
     {
@@ -24,6 +24,7 @@ public class TunnelServer extends Thread {
 
         this.port = port;
         this.tunnel_interface = tunnel_interface;
+        this.data_relay_thread = new TunnelDataRelayThread(tunnel_interface, data_relay_delay_ms);
 
         if (auto_start) {
             this.start();
@@ -36,23 +37,19 @@ public class TunnelServer extends Thread {
 
     public boolean anyClientsAlive()
     {
-        client_lock.lock();
         if (Objects.isNull(client)) {
             return false;
         }
         boolean isActive = client.isActive();
-        client_lock.unlock();
         return isActive;
     }
 
     // Write a packet to all connected clients
     public void writePacket(String category, Object... objects)
     {
-        client_lock.lock();
         if (Objects.nonNull(client) && client.isActive()) {
             client.writePacket(category, objects);
         }
-        client_lock.unlock();
     }
 
     // Send message to all clients
@@ -72,6 +69,7 @@ public class TunnelServer extends Thread {
         System.out.println("Socket is open");
         try
         {
+            this.data_relay_thread.start();
             while (true) {
                 Socket socket = null;
                 try {
@@ -81,7 +79,6 @@ public class TunnelServer extends Thread {
                     continue;
                 }
 
-                client_lock.lock();
                 if (Objects.isNull(client)) {
                     // new threads for a client
                     client = new TunnelClient(tunnel_interface, socket);
@@ -91,7 +88,6 @@ public class TunnelServer extends Thread {
                     Thread.sleep(50);
                     client.init(socket);
                 }
-                client_lock.unlock();
             }
         }
         catch (InterruptedException e) {}
