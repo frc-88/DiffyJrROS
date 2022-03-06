@@ -13,12 +13,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.roswaypoints.GoalStatus;
 import frc.robot.util.roswaypoints.WaypointMap;
 import frc.robot.util.roswaypoints.WaypointsPlan;
-import frc.robot.util.tunnel.ROSInterface;
-import frc.robot.util.tunnel.VelocityCommand;
+import frc.robot.util.coprocessortable.CoprocessorTable;
+import frc.robot.util.coprocessortable.VelocityCommand;
 
 public class NavigationSubsystem extends SubsystemBase {
   private final WaypointMap m_waypointMap = new WaypointMap();
-  private final ROSInterface m_tunnel;
+  private final CoprocessorTable m_coprocessor;
 
   public static enum RosAutoState {
     SEND_PLAN, WAIT_FOR_RUNNING, WAIT_FOR_FINISHED, FINISHED
@@ -33,8 +33,8 @@ public class NavigationSubsystem extends SubsystemBase {
   private long m_is_finished_timeout = 0;
 
   /** Creates a new NavigationSubsystem. */
-  public NavigationSubsystem(ROSInterface tunnel) {
-    m_tunnel = tunnel;
+  public NavigationSubsystem(CoprocessorTable coprocessor) {
+    m_coprocessor = coprocessor;
   }
 
   @Override
@@ -43,11 +43,11 @@ public class NavigationSubsystem extends SubsystemBase {
   }
 
   public WaypointsPlan makeEmptyWaypointPlan() {
-    return new WaypointsPlan(m_tunnel);
+    return new WaypointsPlan(m_coprocessor);
   }
 
   private Pose2d getRobotPose() {
-    return m_tunnel.getGlobalPose();
+    return m_coprocessor.getGlobalPose();
   }
 
   private Pose2d getCenterWaypoint() {
@@ -119,7 +119,7 @@ public class NavigationSubsystem extends SubsystemBase {
   }
 
   public void cancelAutoGoal() {
-    m_tunnel.cancelGoal();
+    m_coprocessor.cancelGoal();
     m_ros_auto_state = RosAutoState.FINISHED;
   }
 
@@ -140,7 +140,7 @@ public class NavigationSubsystem extends SubsystemBase {
         m_is_running_timer = getTime();
         break;
       case WAIT_FOR_RUNNING:
-        if (m_tunnel.getGoalStatus() == GoalStatus.RUNNING) {
+        if (m_coprocessor.getGoalStatus() == GoalStatus.RUNNING) {
           m_ros_auto_state = RosAutoState.WAIT_FOR_FINISHED;
           m_is_finished_timer = getTime();
         }
@@ -154,7 +154,7 @@ public class NavigationSubsystem extends SubsystemBase {
           System.out.println("Timeout exceeded while waiting for goal to signal running");
           m_ros_auto_state = RosAutoState.FINISHED;
         }
-        switch (m_tunnel.getGoalStatus()) {
+        switch (m_coprocessor.getGoalStatus()) {
           case RUNNING:
             break;
           case INVALID:
@@ -165,8 +165,8 @@ public class NavigationSubsystem extends SubsystemBase {
             m_ros_auto_state = RosAutoState.FINISHED;
             break;
         }
-        if (m_tunnel.isCommandActive()) {
-          command = m_tunnel.getCommand();
+        if (m_coprocessor.isCommandActive()) {
+          command = m_coprocessor.getCommand();
         }
         break;
       case FINISHED:

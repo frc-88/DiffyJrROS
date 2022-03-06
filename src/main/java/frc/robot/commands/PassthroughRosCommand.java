@@ -6,15 +6,15 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.util.tunnel.ROSInterface;
+import frc.robot.util.coprocessortable.CoprocessorTable;
 
 public class PassthroughRosCommand extends CommandBase {
   private final DriveSubsystem m_drive;
-  private final ROSInterface m_tunnel;
+  private final CoprocessorTable m_coprocessor;
   /** Creates a new PassthroughRosCommand. */
-  public PassthroughRosCommand(DriveSubsystem drive, ROSInterface tunnel) {
+  public PassthroughRosCommand(DriveSubsystem drive, CoprocessorTable coprocessor) {
     m_drive = drive;
-    m_tunnel = tunnel;
+    m_coprocessor = coprocessor;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(drive);
   }
@@ -26,8 +26,8 @@ public class PassthroughRosCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (m_tunnel.isCommandActive()) {
-        m_drive.drive(m_tunnel.getCommand());
+    if (m_coprocessor.isCommandActive()) {
+        m_drive.drive(m_coprocessor.getCommand());
     }
   }
 

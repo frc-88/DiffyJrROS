@@ -10,8 +10,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import frc.robot.util.tunnel.ChassisInterface;
-import frc.robot.util.tunnel.VelocityCommand;
+import frc.robot.util.coprocessortable.ChassisInterface;
+import frc.robot.util.coprocessortable.VelocityCommand;
 
 
 public class DiffSwerveChassis implements ChassisInterface {

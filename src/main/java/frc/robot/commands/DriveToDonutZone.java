@@ -13,9 +13,8 @@ import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.NavigationSubsystem;
 import frc.robot.subsystems.NavigationSubsystem.RosAutoState;
 import frc.robot.util.roswaypoints.Waypoint;
-import frc.robot.util.roswaypoints.WaypointMap;
 import frc.robot.util.roswaypoints.WaypointsPlan;
-import frc.robot.util.tunnel.VelocityCommand;
+import frc.robot.util.coprocessortable.VelocityCommand;
 
 public class DriveToDonutZone extends CommandBase {
   private final NavigationSubsystem m_nav;

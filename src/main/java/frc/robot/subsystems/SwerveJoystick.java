@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj2.command.button.Button;
 import frc.robot.util.NetworkTablesJoystick;
 import frc.robot.util.diffswerve.Constants;
 import frc.robot.util.diffswerve.Helpers;
-import frc.robot.util.tunnel.VelocityCommand;
+import frc.robot.util.coprocessortable.VelocityCommand;
 
 public class SwerveJoystick extends SubsystemBase {
   private final double JOYSTICK_DEADBAND = 0.1;
@@ -23,7 +23,7 @@ public class SwerveJoystick extends SubsystemBase {
   }
 
   public Button getAllowRosButton() {
-    return this.gamepad.getButton("X");
+    return this.gamepad.getButton("RT");
   }
 
   @Override
@@ -32,9 +32,9 @@ public class SwerveJoystick extends SubsystemBase {
     double vy = Helpers.applyDeadband(this.gamepad.getY(), JOYSTICK_DEADBAND);
     double vt = Helpers.applyDeadband(this.gamepad.getTheta(), JOYSTICK_DEADBAND);
 
-    vx *= Constants.DriveTrain.MAX_CHASSIS_SPEED;
-    vy *= Constants.DriveTrain.MAX_CHASSIS_SPEED;
-    vt *= Constants.DriveTrain.MAX_CHASSIS_ANG_VEL;
+    vx *= Constants.DriveTrain.MAX_CHASSIS_SPEED * 0.75;
+    vy *= Constants.DriveTrain.MAX_CHASSIS_SPEED * 0.75;
+    vt *= Constants.DriveTrain.MAX_CHASSIS_ANG_VEL * 0.15;
 
     // If magnitude of translation is in the "no-go" zone (_zero_epsilon..._min_linear_cmd),
     // set vx, vy to _min_linear_cmd with heading applied

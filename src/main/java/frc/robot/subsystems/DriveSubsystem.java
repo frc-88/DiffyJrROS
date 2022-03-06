@@ -6,7 +6,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.diffswerve.DiffSwerveChassis;
-import frc.robot.util.tunnel.VelocityCommand;
+import frc.robot.util.coprocessortable.VelocityCommand;
 
 public class DriveSubsystem extends SubsystemBase {
   private DiffSwerveChassis swerve;

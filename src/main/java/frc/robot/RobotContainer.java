@@ -14,7 +14,7 @@ import frc.robot.subsystems.NavigationSubsystem;
 import frc.robot.subsystems.SwerveJoystick;
 import frc.robot.util.roswaypoints.Waypoint;
 import frc.robot.util.roswaypoints.WaypointsPlan;
-import frc.robot.util.tunnel.ThisRobotInterface;
+import frc.robot.util.coprocessortable.DiffyJrTable;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -30,7 +30,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DriveSubsystem m_drive = new DriveSubsystem();
   private final SwerveJoystick m_joystick = new SwerveJoystick();
-  private final ThisRobotInterface m_ros_interface = new ThisRobotInterface(m_drive.getSwerve());
+  private final DiffyJrTable m_ros_interface = new DiffyJrTable(m_drive.getSwerve(), "10.0.88.35", 5800, 0.01);
   private final NavigationSubsystem m_nav = new NavigationSubsystem(m_ros_interface);
 
   private final CommandBase m_joystickDriveCommand = new DriveSwerveJoystickCommand(m_drive, m_joystick);
@@ -45,9 +45,8 @@ public class RobotContainer {
   }
 
   private void configureDriveCommand() {
-    // m_drive.setDefaultCommand(m_joystickDriveCommand);
-    m_drive.setDefaultCommand(m_passthroughRosCommand);
-    // m_joystick.getAllowRosButton().whileHeld(m_passthroughRosCommand);
+    m_drive.setDefaultCommand(m_joystickDriveCommand);
+    m_joystick.getAllowRosButton().whileHeld(m_passthroughRosCommand);
   }
 
   private void configureAutoCommand(int autoIndex) {
@@ -67,8 +66,7 @@ public class RobotContainer {
   }
 
   private void configurePeriodics(Robot robot) {
-    // robot.addPeriodic(m_ros_interface::updateSlow, 0.1, 0.05);
-    // robot.addPeriodic(m_ros_interface::update, 1.0 / 30.0, 0.025);
+    robot.addPeriodic(m_ros_interface::update, 1.0 / 60.0, 0.01);
     robot.addPeriodic(m_drive.getSwerve()::controllerPeriodic, Constants.DifferentialSwerveModule.kDt, 0.0025);
   }
 

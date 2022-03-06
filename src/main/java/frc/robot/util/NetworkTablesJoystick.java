@@ -1,5 +1,8 @@
 package frc.robot.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.button.Button;
@@ -8,6 +11,9 @@ public class NetworkTablesJoystick {
     private NetworkTable table;
     private NetworkTable axis_table;
     private NetworkTable button_table;
+    
+    Map<String, Button> buttons = new HashMap<>();
+
     public NetworkTablesJoystick() {
         table = NetworkTableInstance.getDefault().getTable("joystick");
         axis_table = table.getSubTable("axis");
@@ -28,6 +34,9 @@ public class NetworkTablesJoystick {
     }
 
     public Button getButton(String name) {
-        return new Button(() -> this.getButtonValue(name));
+        if (!buttons.containsKey(name)) {
+            buttons.put(name, new Button(() -> this.getButtonValue(name)));
+        }
+        return buttons.get(name);
     }
 }
