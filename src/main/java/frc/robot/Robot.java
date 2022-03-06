@@ -50,6 +50,9 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     m_robotContainer.setEnableDrive(false);
+    if (m_autonomousCommand != null) {
+      m_autonomousCommand.cancel();
+    }
   }
 
   @Override

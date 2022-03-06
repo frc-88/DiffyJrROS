@@ -10,26 +10,26 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.NavigationSubsystem;
-import frc.robot.subsystems.NavigationSubsystem.RosAutoState;
+import frc.robot.subsystems.Navigation;
+import frc.robot.subsystems.Navigation.RosAutoState;
 import frc.robot.util.roswaypoints.Waypoint;
 import frc.robot.util.roswaypoints.WaypointsPlan;
 import frc.robot.util.coprocessortable.VelocityCommand;
 
 public class DriveToDonutZone extends CommandBase {
-  private final NavigationSubsystem m_nav;
+  private final Navigation m_nav;
   private final DriveSubsystem m_drive;
   private long m_is_finished_timeout = 0;
 
   /** Creates a new DriveToDonutZone. */
-  public DriveToDonutZone(NavigationSubsystem nav, DriveSubsystem drive, long is_finished_timeout) {
+  public DriveToDonutZone(Navigation nav, DriveSubsystem drive, long is_finished_timeout) {
     m_nav = nav;
     m_drive = drive;
     m_is_finished_timeout = is_finished_timeout;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(nav);
   }
-  public DriveToDonutZone(NavigationSubsystem nav, DriveSubsystem drive) {
+  public DriveToDonutZone(Navigation nav, DriveSubsystem drive) {
     this(nav, drive, 15_000_000);
   }
 

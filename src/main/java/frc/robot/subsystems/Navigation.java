@@ -16,7 +16,7 @@ import frc.robot.util.roswaypoints.WaypointsPlan;
 import frc.robot.util.coprocessortable.CoprocessorTable;
 import frc.robot.util.coprocessortable.VelocityCommand;
 
-public class NavigationSubsystem extends SubsystemBase {
+public class Navigation extends SubsystemBase {
   private final WaypointMap m_waypointMap = new WaypointMap();
   private final CoprocessorTable m_coprocessor;
 
@@ -33,7 +33,7 @@ public class NavigationSubsystem extends SubsystemBase {
   private long m_is_finished_timeout = 0;
 
   /** Creates a new NavigationSubsystem. */
-  public NavigationSubsystem(CoprocessorTable coprocessor) {
+  public Navigation(CoprocessorTable coprocessor) {
     m_coprocessor = coprocessor;
   }
 
@@ -119,6 +119,7 @@ public class NavigationSubsystem extends SubsystemBase {
   }
 
   public void cancelAutoGoal() {
+    System.out.println("Cancelling auto goal");
     m_coprocessor.cancelGoal();
     m_ros_auto_state = RosAutoState.FINISHED;
   }

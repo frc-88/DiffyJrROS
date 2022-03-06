@@ -10,7 +10,7 @@ import frc.robot.commands.DriveSwerveJoystickCommand;
 import frc.robot.commands.DriveWithWaypointsPlan;
 import frc.robot.commands.PassthroughRosCommand;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.NavigationSubsystem;
+import frc.robot.subsystems.Navigation;
 import frc.robot.subsystems.SwerveJoystick;
 import frc.robot.util.roswaypoints.Waypoint;
 import frc.robot.util.roswaypoints.WaypointsPlan;
@@ -31,7 +31,7 @@ public class RobotContainer {
   private final DriveSubsystem m_drive = new DriveSubsystem();
   private final SwerveJoystick m_joystick = new SwerveJoystick();
   private final DiffyJrTable m_ros_interface = new DiffyJrTable(m_drive.getSwerve(), "10.0.88.35", 5800, 0.01);
-  private final NavigationSubsystem m_nav = new NavigationSubsystem(m_ros_interface);
+  private final Navigation m_nav = new Navigation(m_ros_interface);
 
   private final CommandBase m_joystickDriveCommand = new DriveSwerveJoystickCommand(m_drive, m_joystick);
   private final CommandBase m_passthroughRosCommand = new PassthroughRosCommand(m_drive, m_ros_interface);

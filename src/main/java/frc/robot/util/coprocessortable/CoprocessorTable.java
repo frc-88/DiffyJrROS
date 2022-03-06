@@ -19,6 +19,7 @@ public class CoprocessorTable {
 
     private NetworkTableInstance instance;
     protected NetworkTable rootTable;
+    private double updateInterval = 0.01;
     private NetworkTableEntry pingEntry;
     private NetworkTableEntry pingReturnEntry;
 
@@ -65,7 +66,7 @@ public class CoprocessorTable {
     private NetworkTableEntry teamColorEntry;
     private NetworkTableEntry matchUpdateEntry;
 
-    private NetworkTable waypointSegmentTable;
+    private NetworkTable waypointPlanTable;
     private NetworkTableEntry waypointNameEntry;
     private NetworkTableEntry waypointPoseXEntry;
     private NetworkTableEntry waypointPoseYEntry;
@@ -76,8 +77,6 @@ public class CoprocessorTable {
     private NetworkTableEntry waypointIgnoreObstaclesEntry;
     private NetworkTableEntry waypointIgnoreWallsEntry;
     private NetworkTableEntry waypointInterruptableByEntry;
-    private NetworkTableEntry waypointPoseUpdateEntry;
-    private NetworkTableEntry waypointNameUpdateEntry;
     private int numSentGoals = 0;
 
     private NetworkTable planControlTable;
@@ -100,6 +99,7 @@ public class CoprocessorTable {
         instance = NetworkTableInstance.create();
         instance.startClient(address, port);
         instance.setUpdateRate(updateInterval);
+        this.updateInterval = updateInterval;
 
         rootTable = instance.getTable("ROS");
         pingEntry = rootTable.getEntry("ping");
@@ -150,19 +150,7 @@ public class CoprocessorTable {
         teamColorEntry = matchTable.getEntry("team_color");
         matchUpdateEntry = matchTable.getEntry("update");
 
-        waypointSegmentTable = rootTable.getSubTable("goal");
-        waypointNameEntry = waypointSegmentTable.getEntry("name");
-        waypointPoseXEntry = waypointSegmentTable.getEntry("x");
-        waypointPoseYEntry = waypointSegmentTable.getEntry("y");
-        waypointPoseTEntry = waypointSegmentTable.getEntry("t");
-        waypointIsContinuousEntry = waypointSegmentTable.getEntry("is_continuous");
-        waypointIgnoreOrientationEntry = waypointSegmentTable.getEntry("ignore_orientation");
-        waypointIntermediateToleranceEntry = waypointSegmentTable.getEntry("intermediate_tolerance");
-        waypointIgnoreObstaclesEntry = waypointSegmentTable.getEntry("ignore_obstacles");
-        waypointIgnoreWallsEntry = waypointSegmentTable.getEntry("ignore_walls");
-        waypointInterruptableByEntry = waypointSegmentTable.getEntry("interruptable_by");
-        waypointPoseUpdateEntry = waypointSegmentTable.getEntry("pose_update");
-        waypointNameUpdateEntry = waypointSegmentTable.getEntry("name_update");
+        waypointPlanTable = rootTable.getSubTable("goal");
 
         planControlTable = rootTable.getSubTable("plan");
         execPlanEntry = planControlTable.getEntry("exec");
@@ -195,7 +183,7 @@ public class CoprocessorTable {
     }
 
     private void goalStatusCallback(EntryNotification notification) {
-        goalStatus = GoalStatus.getStatus((int)notification.getEntry().getDouble(-1.0));
+        goalStatus = GoalStatus.getStatus((int)goalStatusEntry.getDouble(-1.0));
         goalStatusTimer.reset();
     }
 
@@ -260,27 +248,36 @@ public class CoprocessorTable {
         return goalStatusTimer.isActive();
     }
 
+    public double getUpdateInterval() {
+        return updateInterval;
+    }
+
     /***
      * Setters for sending data to the coprocessor
      */
     
     public void sendGoal(Waypoint waypoint) {
-        setCommonWaypointEntries(waypoint);
-        if (waypoint.waypoint_name.length() > 0) {
-            waypointNameEntry.setValue(waypoint.waypoint_name);
-            waypointNameUpdateEntry.setDouble(getTime());
-        }
-        else {
-            waypointPoseXEntry.setValue(waypoint.pose.getX());
-            waypointPoseYEntry.setValue(waypoint.pose.getY());
-            waypointPoseTEntry.setValue(waypoint.pose.getRotation().getRadians());
-            waypointPoseUpdateEntry.setDouble(getTime());
-        }
-        
+        setCommonWaypointEntries(numSentGoals, waypoint);
+        waypointNameEntry.setValue(waypoint.waypoint_name);  // if the name is not empty, pose entries are ignored by planner
+        waypointPoseXEntry.setValue(waypoint.pose.getX());
+        waypointPoseYEntry.setValue(waypoint.pose.getY());
+        waypointPoseTEntry.setValue(waypoint.pose.getRotation().getRadians());
         numSentGoals++;
     }
 
-    private void setCommonWaypointEntries(Waypoint waypoint) {
+    private void setCommonWaypointEntries(int index, Waypoint waypoint) {
+        NetworkTable waypointSegmentTable = waypointPlanTable.getSubTable(String.valueOf(index));
+        waypointNameEntry = waypointSegmentTable.getEntry("name");
+        waypointPoseXEntry = waypointSegmentTable.getEntry("x");
+        waypointPoseYEntry = waypointSegmentTable.getEntry("y");
+        waypointPoseTEntry = waypointSegmentTable.getEntry("t");
+        waypointIsContinuousEntry = waypointSegmentTable.getEntry("is_continuous");
+        waypointIgnoreOrientationEntry = waypointSegmentTable.getEntry("ignore_orientation");
+        waypointIntermediateToleranceEntry = waypointSegmentTable.getEntry("intermediate_tolerance");
+        waypointIgnoreObstaclesEntry = waypointSegmentTable.getEntry("ignore_obstacles");
+        waypointIgnoreWallsEntry = waypointSegmentTable.getEntry("ignore_walls");
+        waypointInterruptableByEntry = waypointSegmentTable.getEntry("interruptable_by");
+
         waypointIsContinuousEntry.setValue(waypoint.is_continuous);
         waypointIgnoreOrientationEntry.setValue(waypoint.ignore_orientation);
         waypointIntermediateToleranceEntry.setValue(waypoint.intermediate_tolerance);
@@ -290,18 +287,17 @@ public class CoprocessorTable {
     }
 
     public void executeGoal() {
-        // System.out.println("Sending execute command. Num waypoints: " + num_sent_goals);
         execPlanEntry.setValue(numSentGoals);
         execUpdatePlanEntry.setDouble(getTime());
         numSentGoals = 0;
     }
 
     public void cancelGoal() {
-        resetPlanEntry.setDouble(getTime());
+        cancelPlanEntry.setDouble(getTime());
     }
     
     public void resetPlan() {
-        cancelPlanEntry.setDouble(getTime());
+        resetPlanEntry.setDouble(getTime());
         numSentGoals = 0;
     }
 
