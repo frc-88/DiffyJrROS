@@ -5,7 +5,7 @@
 package frc.robot.commands;
 
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.SwerveJoystick;
+import frc.robot.subsystems.joystick.SwerveJoystick;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
 /** An example command that uses an example subsystem. */
@@ -23,7 +23,7 @@ public class DriveSwerveJoystickCommand extends CommandBase {
     m_drive = drive;
     m_joystick = joystick;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(drive, joystick);
+    addRequirements(drive);
   }
 
   // Called when the command is initially scheduled.

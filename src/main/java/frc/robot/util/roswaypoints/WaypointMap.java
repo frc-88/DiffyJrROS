@@ -1,16 +1,32 @@
 package frc.robot.util.roswaypoints;
 
+import java.util.Objects;
 import java.util.Set;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
+import frc.robot.util.coprocessortable.CoprocessorTable;
 
 public class WaypointMap {
-    private NetworkTable table;
-    public WaypointMap() {
-        table = NetworkTableInstance.getDefault().getTable("ROS/status/waypoints");
+    private final NetworkTable table;
+    private NewWaypointInterface m_callback;
+    private final CoprocessorTable m_coprocessor;
+    public WaypointMap(CoprocessorTable coprocessor, NewWaypointInterface callback) {
+        m_coprocessor = coprocessor;
+        table = m_coprocessor.getWaypointsTable();
+        table.addSubTableListener((parent, name, table) -> {newWaypointCallback(name);}, true);
+        m_callback = callback;
+    }
+    public WaypointMap(CoprocessorTable coprocessor) {
+        m_coprocessor = coprocessor;
+        table = m_coprocessor.getWaypointsTable();
+    }
+
+    private void newWaypointCallback(String name) {
+        if (Objects.nonNull(m_callback)) {
+            m_callback.newWaypointCallback(this, name);
+        }
     }
     public Set<String> getWaypointNames() {
         return table.getSubTables();

@@ -18,6 +18,9 @@ public class CoprocessorTable {
     protected ChassisInterface chassis;
 
     private NetworkTableInstance instance;
+    private String address;
+    private int port;
+
     protected NetworkTable rootTable;
     private double updateInterval = 0.01;
     private NetworkTableEntry pingEntry;
@@ -92,9 +95,12 @@ public class CoprocessorTable {
     private NetworkTableEntry poseEstEntryUpdate;
 
     private NetworkTable jointsTable;
+    private NetworkTable waypointsTable;
 
     public CoprocessorTable(ChassisInterface chassis, String address, int port, double updateInterval) {
         this.chassis = chassis;
+        this.address = address;
+        this.port = port;
 
         instance = NetworkTableInstance.create();
         instance.startClient(address, port);
@@ -102,6 +108,7 @@ public class CoprocessorTable {
         this.updateInterval = updateInterval;
 
         rootTable = instance.getTable("ROS");
+        
         pingEntry = rootTable.getEntry("ping");
         pingReturnEntry = rootTable.getEntry("ping_return");
 
@@ -165,6 +172,8 @@ public class CoprocessorTable {
         poseEstEntryUpdate = poseEstTable.getEntry("update");
 
         jointsTable = rootTable.getSubTable("joints");
+
+        waypointsTable = rootTable.getSubTable("waypoints");
     }
 
     private void cmdVelCallback(EntryNotification notification) {
@@ -199,6 +208,10 @@ public class CoprocessorTable {
     }
 
     public void update() {
+        if (!instance.isConnected()) {
+            return;
+        }
+
         Pose2d pose = this.chassis.getOdometryPose();
         ChassisSpeeds velocity = this.chassis.getChassisVelocity();
         odomEntryX.setDouble(pose.getX());
@@ -214,6 +227,22 @@ public class CoprocessorTable {
             DriverStation.getMatchTime(),
             DriverStation.getAlliance()
         );
+    }
+
+    public void stopClient() {
+        if (isConnected()) {
+            instance.stopClient();
+        }
+    }
+
+    public void startClient() {
+        if (!isConnected()) {
+            instance.startClient(address, port);
+        }
+    }
+
+    public boolean isConnected() {
+        return instance.isConnected();
     }
 
     private double getTime() {
@@ -325,5 +354,9 @@ public class CoprocessorTable {
 
     public void setJointPosition(int index, double position) {
         jointsTable.getEntry(String.valueOf(index)).setDouble(position);
+    }
+
+    public NetworkTable getWaypointsTable() {
+        return waypointsTable;
     }
 }

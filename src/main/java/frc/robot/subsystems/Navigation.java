@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import java.util.Objects;
+import java.util.Set;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -13,12 +14,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.roswaypoints.GoalStatus;
 import frc.robot.util.roswaypoints.WaypointMap;
 import frc.robot.util.roswaypoints.WaypointsPlan;
+import frc.robot.commands.SetGlobalPoseToWaypoint;
 import frc.robot.util.coprocessortable.CoprocessorTable;
 import frc.robot.util.coprocessortable.VelocityCommand;
 
 public class Navigation extends SubsystemBase {
-  private final WaypointMap m_waypointMap = new WaypointMap();
+  private final WaypointMap m_waypointMap;
   private final CoprocessorTable m_coprocessor;
+  public static final String CENTER_WAYPOINT_NAME = "center";
 
   public static enum RosAutoState {
     SEND_PLAN, WAIT_FOR_RUNNING, WAIT_FOR_FINISHED, FINISHED
@@ -35,23 +38,46 @@ public class Navigation extends SubsystemBase {
   /** Creates a new NavigationSubsystem. */
   public Navigation(CoprocessorTable coprocessor) {
     m_coprocessor = coprocessor;
+    m_waypointMap = new WaypointMap(m_coprocessor);
   }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+
+  }
+  public Set<String> getWaypointNames() {
+    return m_waypointMap.getWaypointNames();
+  }
+  public boolean doesWaypointExist(String waypointName) {
+    return m_waypointMap.doesWaypointExist(waypointName);
+  }
+
+  public boolean isConnected() {
+    return m_coprocessor.isConnected();
   }
 
   public WaypointsPlan makeEmptyWaypointPlan() {
     return new WaypointsPlan(m_coprocessor);
   }
 
-  private Pose2d getRobotPose() {
+  public Pose2d getRobotPose() {
     return m_coprocessor.getGlobalPose();
   }
 
-  private Pose2d getCenterWaypoint() {
-    return m_waypointMap.getWaypoint("center");
+  public Pose2d getWaypoint(String name) {
+    return m_waypointMap.getWaypoint(name);
+  }
+
+  public Pose2d getCenterWaypoint() {
+    return getWaypoint(CENTER_WAYPOINT_NAME);
+  }
+
+  public void setPoseEstimate(Pose2d pose) {
+    m_coprocessor.setPoseEstimate(pose);
+  }
+
+  public boolean isPoseValid(Pose2d pose) {
+    return m_waypointMap.isPoseValid(pose);
   }
 
   private Pose2d calculateNearestRingPose(double ringRadius) {
@@ -119,7 +145,6 @@ public class Navigation extends SubsystemBase {
   }
 
   public void cancelAutoGoal() {
-    System.out.println("Cancelling auto goal");
     m_coprocessor.cancelGoal();
     m_ros_auto_state = RosAutoState.FINISHED;
   }
