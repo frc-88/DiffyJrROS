@@ -14,12 +14,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.roswaypoints.GoalStatus;
 import frc.robot.util.roswaypoints.WaypointMap;
 import frc.robot.util.roswaypoints.WaypointsPlan;
+import frc.robot.commands.SetGlobalPoseToWaypoint;
 import frc.robot.util.coprocessortable.CoprocessorTable;
 import frc.robot.util.coprocessortable.VelocityCommand;
 
 public class Navigation extends SubsystemBase {
   private final WaypointMap m_waypointMap;
   private final CoprocessorTable m_coprocessor;
+  public static final String CENTER_WAYPOINT_NAME = "center";
 
   public static enum RosAutoState {
     SEND_PLAN, WAIT_FOR_RUNNING, WAIT_FOR_FINISHED, FINISHED
@@ -41,7 +43,7 @@ public class Navigation extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+
   }
 
   public CoprocessorTable getCoprocessorTable() {
@@ -94,7 +96,6 @@ public class Navigation extends SubsystemBase {
   }
 
   public void cancelAutoGoal() {
-    System.out.println("Cancelling auto goal");
     m_coprocessor.cancelGoal();
     m_ros_auto_state = RosAutoState.FINISHED;
   }

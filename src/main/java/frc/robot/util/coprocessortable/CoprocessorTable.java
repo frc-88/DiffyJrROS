@@ -116,6 +116,7 @@ public class CoprocessorTable {
         this.updateInterval = updateInterval;
 
         rootTable = instance.getTable("ROS");
+        
         pingEntry = rootTable.getEntry("ping");
         pingReturnEntry = rootTable.getEntry("ping_return");
 

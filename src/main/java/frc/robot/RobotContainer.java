@@ -47,8 +47,10 @@ public class RobotContainer {
   }
 
   private void configureDriveCommand() {
-    m_drive.setDefaultCommand(m_joystickDriveCommand);
-    m_joystick.getAllowRosButton().whileHeld(m_passthroughRosCommand);
+    m_drive.setDefaultCommand(m_passthroughRosCommand);
+    // m_drive.setDefaultCommand(m_joystickDriveCommand);
+    m_joystick.getAllowRosButton().whileHeld(m_joystickDriveCommand);
+    // m_joystick.getAllowRosButton().whileHeld(m_passthroughRosCommand);
   }
 
   private void configureAutoCommand() {

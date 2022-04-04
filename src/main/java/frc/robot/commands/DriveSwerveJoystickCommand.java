@@ -23,7 +23,7 @@ public class DriveSwerveJoystickCommand extends CommandBase {
     m_drive = drive;
     m_joystick = joystick;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(drive, joystick);
+    addRequirements(drive);
   }
 
   // Called when the command is initially scheduled.
