@@ -13,13 +13,12 @@ public class DiffyJrTable extends CoprocessorTable {
         this.swerve = swerve;
     }
 
-    @Override
-    public void update() {
-        super.update();
-        // TunnelServer.writePacket("imu",
-        //     this.swerve.imu.getYaw(), this.swerve.imu.getYawRate(),
-        //     this.swerve.imu.getAccelX(), this.swerve.imu.getAccelY()
-        // );
+    // @Override
+    // public void update() {
+    //     super.update();
+    // }
+
+    public void updateSlow() {
         DiffSwerveModule[] modules = this.swerve.getModules();
         for (int index = 0; index < modules.length; index++) {
             DiffSwerveModule module = modules[index];

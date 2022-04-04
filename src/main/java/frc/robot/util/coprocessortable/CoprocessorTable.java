@@ -1,5 +1,8 @@
 package frc.robot.util.coprocessortable;
 
+import java.util.ArrayList;
+import java.util.Objects;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -13,11 +16,14 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.util.roswaypoints.GoalStatus;
 import frc.robot.util.roswaypoints.Waypoint;
+import frc.robot.util.roswaypoints.WaypointMap;
 
 public class CoprocessorTable {
     protected ChassisInterface chassis;
 
     private NetworkTableInstance instance;
+    private String address;
+    private int port;
     protected NetworkTable rootTable;
     private double updateInterval = 0.01;
     private NetworkTableEntry pingEntry;
@@ -92,9 +98,17 @@ public class CoprocessorTable {
     private NetworkTableEntry poseEstEntryUpdate;
 
     private NetworkTable jointsTable;
+    private NetworkTable jointCommandsTable;
+    ArrayList<NetworkTableEntry> jointCommandEntries = new ArrayList<>();
+    ArrayList<Double> jointCommandValues = new ArrayList<>();
+    ArrayList<MessageTimer> jointCommandTimers = new ArrayList<>();
+
+    private NetworkTable waypointsTable;
 
     public CoprocessorTable(ChassisInterface chassis, String address, int port, double updateInterval) {
         this.chassis = chassis;
+        this.address = address;
+        this.port = port;
 
         instance = NetworkTableInstance.create();
         instance.startClient(address, port);
@@ -165,6 +179,9 @@ public class CoprocessorTable {
         poseEstEntryUpdate = poseEstTable.getEntry("update");
 
         jointsTable = rootTable.getSubTable("joints");
+        jointCommandsTable = jointsTable.getSubTable("commands");
+
+        waypointsTable = rootTable.getSubTable("waypoints");
     }
 
     private void cmdVelCallback(EntryNotification notification) {
@@ -194,11 +211,32 @@ public class CoprocessorTable {
         this.chassis.resetPosition(new Pose2d(x, y, new Rotation2d(theta)));
     }
 
+    private void jointCommandCallback(EntryNotification notification, int jointIndex, NetworkTableEntry valueEntry) {
+        if (Objects.isNull(jointCommandValues.get(jointIndex))) {
+            System.out.println("WARNING! jointCommandValues is null! Can't set joint command");
+            return;
+        }
+        if (Objects.isNull(jointCommandTimers.get(jointIndex))) {
+            System.out.println("WARNING! jointCommandTimers is null! Can't set joint command");
+            return;
+        }
+        jointCommandValues.set(jointIndex, valueEntry.getDouble(0.0));
+        jointCommandTimers.get(jointIndex).reset();
+    }
+
     public NetworkTableInstance getNetworkTableInstance() {
         return instance;
     }
 
+    public NetworkTable getRootTable() {
+        return rootTable;
+    }
+
     public void update() {
+        if (!instance.isConnected()) {
+            return;
+        }
+        
         Pose2d pose = this.chassis.getOdometryPose();
         ChassisSpeeds velocity = this.chassis.getChassisVelocity();
         odomEntryX.setDouble(pose.getX());
@@ -216,7 +254,27 @@ public class CoprocessorTable {
         );
     }
 
-    private double getTime() {
+    public NetworkTable getWaypointsTable() {
+        return waypointsTable;
+    }
+
+    public void stopComms() {
+        if (instance.isConnected()) {
+            instance.stopClient();
+        }
+    }
+
+    public void startComms() {
+        if (!instance.isConnected()) {
+            instance.startClient(address, port);
+        }
+    }
+
+    public boolean isConnected() {
+        return instance.isConnected();
+    }
+
+    protected double getTime() {
         return RobotController.getFPGATime() * 1E-6;
     }
 
@@ -252,13 +310,22 @@ public class CoprocessorTable {
         return updateInterval;
     }
 
+    public double getJointCommand(int jointIndex) {
+        return jointCommandValues.get(jointIndex);
+    }
+
+    public boolean isJointCommandActive(int jointIndex) {
+        return jointCommandTimers.get(jointIndex).isActive();
+    }
+
     /***
      * Setters for sending data to the coprocessor
      */
     
     public void sendGoal(Waypoint waypoint) {
+        String waypointName = WaypointMap.parseWaypointName(waypoint.waypoint_name);
         setCommonWaypointEntries(numSentGoals, waypoint);
-        waypointNameEntry.setValue(waypoint.waypoint_name);  // if the name is not empty, pose entries are ignored by planner
+        waypointNameEntry.setValue(waypointName);  // if the name is not empty, pose entries are ignored by planner
         waypointPoseXEntry.setValue(waypoint.pose.getX());
         waypointPoseYEntry.setValue(waypoint.pose.getY());
         waypointPoseTEntry.setValue(waypoint.pose.getRotation().getRadians());
@@ -325,5 +392,22 @@ public class CoprocessorTable {
 
     public void setJointPosition(int index, double position) {
         jointsTable.getEntry(String.valueOf(index)).setDouble(position);
+
+        while (index >= jointCommandEntries.size()) {
+            jointCommandEntries.add(null);
+            jointCommandValues.add(null);
+            jointCommandTimers.add(null);
+        }
+        if (Objects.isNull(jointCommandEntries.get(index))) {
+            NetworkTableEntry jointUpdateEntry = jointCommandsTable.getEntry("update/" + String.valueOf(index));
+            NetworkTableEntry jointValueEntry = jointCommandsTable.getEntry("value/" + String.valueOf(index));
+            jointUpdateEntry.addListener(
+                (notification) -> jointCommandCallback(notification, index, jointValueEntry), 
+                EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+            jointCommandEntries.set(index, jointUpdateEntry);
+            jointCommandValues.set(index, 0.0);
+            jointCommandTimers.set(index, new MessageTimer(1_000_000));
+        }
+
     }
 }

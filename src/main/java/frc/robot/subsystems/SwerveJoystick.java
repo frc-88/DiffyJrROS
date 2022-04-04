@@ -6,31 +6,77 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Button;
-import frc.robot.util.NetworkTablesJoystick;
 import frc.robot.util.diffswerve.Constants;
 import frc.robot.util.diffswerve.Helpers;
+import frc.robot.util.controllers.NetworkTablesJoystick;
+import frc.robot.util.controllers.XboxController;
 import frc.robot.util.coprocessortable.VelocityCommand;
 
 public class SwerveJoystick extends SubsystemBase {
+  public enum SwerveControllerType {
+    XBOX,
+    NT
+  }
+  private final SwerveControllerType m_type;
+
   private final double JOYSTICK_DEADBAND = 0.1;
-  private final NetworkTablesJoystick gamepad;
+  private NetworkTablesJoystick nt_gamepad;
+  private XboxController xbox_gamepad;
 
   private VelocityCommand command = new VelocityCommand();
   
   /** Creates a new BasicJoystick. */
-  public SwerveJoystick() {
-    this.gamepad = new NetworkTablesJoystick();
+  public SwerveJoystick(SwerveControllerType type) {
+    m_type = type;
+    if (type == SwerveControllerType.NT) {
+      this.nt_gamepad = new NetworkTablesJoystick();
+    }
+    else {
+      this.xbox_gamepad = new XboxController(0);
+    }
   }
 
   public Button getAllowRosButton() {
-    return this.gamepad.getButton("RT");
+    if (m_type == SwerveControllerType.NT) {
+      return this.nt_gamepad.getButton("RT");
+    }
+    else {
+      return new Button(() -> this.xbox_gamepad.getRightTrigger() > 0.0);
+    }
+  }
+
+  public double getVelocityX() {
+    if (m_type == SwerveControllerType.NT) {
+      return this.nt_gamepad.getX();
+    }
+    else {
+      return this.xbox_gamepad.getLeftStickX();
+    }
+  }
+
+  public double getVelocityY() {
+    if (m_type == SwerveControllerType.NT) {
+      return this.nt_gamepad.getY();
+    }
+    else {
+      return this.xbox_gamepad.getLeftStickY();
+    }
+  }
+
+  public double getVelocityTheta() {
+    if (m_type == SwerveControllerType.NT) {
+      return this.nt_gamepad.getTheta();
+    }
+    else {
+      return this.xbox_gamepad.getRightStickX();
+    }
   }
 
   @Override
   public void periodic() {
-    double vx = Helpers.applyDeadband(this.gamepad.getX(), JOYSTICK_DEADBAND);
-    double vy = Helpers.applyDeadband(this.gamepad.getY(), JOYSTICK_DEADBAND);
-    double vt = Helpers.applyDeadband(this.gamepad.getTheta(), JOYSTICK_DEADBAND);
+    double vx = Helpers.applyDeadband(this.getVelocityX(), JOYSTICK_DEADBAND);
+    double vy = Helpers.applyDeadband(this.getVelocityY(), JOYSTICK_DEADBAND);
+    double vt = Helpers.applyDeadband(this.getVelocityTheta(), JOYSTICK_DEADBAND);
 
     vx *= Constants.DriveTrain.MAX_CHASSIS_SPEED * 0.75;
     vy *= Constants.DriveTrain.MAX_CHASSIS_SPEED * 0.75;
