@@ -83,6 +83,7 @@ public class CoprocessorTable {
     private NetworkTableEntry waypointIgnoreObstaclesEntry;
     private NetworkTableEntry waypointIgnoreWallsEntry;
     private NetworkTableEntry waypointInterruptableByEntry;
+    private NetworkTableEntry waypointTimeoutEntry;
     private int numSentGoals = 0;
 
     private NetworkTable planControlTable;
@@ -345,6 +346,7 @@ public class CoprocessorTable {
         waypointIgnoreObstaclesEntry = waypointSegmentTable.getEntry("ignore_obstacles");
         waypointIgnoreWallsEntry = waypointSegmentTable.getEntry("ignore_walls");
         waypointInterruptableByEntry = waypointSegmentTable.getEntry("interruptable_by");
+        waypointTimeoutEntry = waypointSegmentTable.getEntry("timeout");
 
         waypointIsContinuousEntry.setValue(waypoint.is_continuous);
         waypointIgnoreOrientationEntry.setValue(waypoint.ignore_orientation);
@@ -352,6 +354,7 @@ public class CoprocessorTable {
         waypointIgnoreObstaclesEntry.setValue(waypoint.ignore_obstacles);
         waypointIgnoreWallsEntry.setValue(waypoint.ignore_walls);
         waypointInterruptableByEntry.setValue(waypoint.interruptableBy);
+        waypointTimeoutEntry.setValue(waypoint.timeout);
     }
 
     public void executeGoal() {

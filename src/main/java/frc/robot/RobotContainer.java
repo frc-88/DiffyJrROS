@@ -5,6 +5,7 @@
 package frc.robot;
 
 import frc.robot.commands.DriveSwerveJoystickCommand;
+import frc.robot.commands.DriveToPowercell;
 import frc.robot.commands.DriveWithWaypointsPlan;
 import frc.robot.commands.PassthroughRosCommand;
 import frc.robot.subsystems.DriveSubsystem;
@@ -13,6 +14,7 @@ import frc.robot.subsystems.SwerveJoystick;
 import frc.robot.subsystems.SwerveJoystick.SwerveControllerType;
 import frc.robot.util.roswaypoints.Waypoint;
 import frc.robot.util.roswaypoints.WaypointsPlan;
+import frc.robot.util.sensors.Limelight;
 import frc.robot.util.coprocessortable.DiffyJrTable;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -27,13 +29,14 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DriveSubsystem m_drive = new DriveSubsystem();
-  private final SwerveJoystick m_joystick = new SwerveJoystick(SwerveControllerType.NT);
+  private final SwerveJoystick m_joystick = new SwerveJoystick(SwerveControllerType.XBOX);
   private final DiffyJrTable m_ros_interface = new DiffyJrTable(
     m_drive.getSwerve(),
     Robot.isSimulation() ? Constants.COPROCESSOR_ADDRESS_SIMULATED : Constants.COPROCESSOR_ADDRESS,
     Constants.COPROCESSOR_PORT,
     Constants.COPROCESSOR_TABLE_UPDATE_DELAY);
   private final Navigation m_nav = new Navigation(m_ros_interface);
+  private final Limelight m_limelight = new Limelight();
 
   private final CommandBase m_joystickDriveCommand = new DriveSwerveJoystickCommand(m_drive, m_joystick);
   private final CommandBase m_passthroughRosCommand = new PassthroughRosCommand(m_drive, m_ros_interface);
@@ -42,8 +45,9 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer(Robot robot) {
     configureDriveCommand();
-    configureAutoCommand();
+    m_autoCommand = configureAutoCommand();
     configurePeriodics(robot);
+    m_limelight.ledOff();
   }
 
   private void configureDriveCommand() {
@@ -53,17 +57,21 @@ public class RobotContainer {
     // m_joystick.getAllowRosButton().whileHeld(m_passthroughRosCommand);
   }
 
-  private void configureAutoCommand() {
+  private CommandBase configureAutoCommand() {
     WaypointsPlan autoPlan = new WaypointsPlan(m_ros_interface);
     autoPlan.addWaypoint(new Waypoint("<team>_" + "_point_a"));
     autoPlan.addWaypoint(new Waypoint("<team>_" + "_point_b"));
     autoPlan.addWaypoint(new Waypoint("<team>_" + "_end"));
     autoPlan.addWaypoint(new Waypoint("powercell"));
 
-    m_autoCommand = new SequentialCommandGroup(
+    CommandBase auto1 = new SequentialCommandGroup(
       // new DriveDistanceMeters(m_drive, 0.5, 0.5),
       new DriveWithWaypointsPlan(m_nav, m_drive, autoPlan)
     );
+    CommandBase auto2 = new DriveToPowercell(m_nav, m_drive);
+
+    // return auto1;
+    return auto2;
   }
 
   private void configurePeriodics(Robot robot) {
@@ -74,6 +82,7 @@ public class RobotContainer {
 
   public void setEnableDrive(boolean enabled) {
     m_drive.setEnabled(enabled);
+    m_limelight.ledOff();
   }
 
   /**
@@ -82,7 +91,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An ExampleCommand will run in autonomous
     return m_autoCommand;
   }
 }

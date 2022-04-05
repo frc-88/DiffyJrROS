@@ -18,6 +18,9 @@ public final class Constants {
 	public static final double SHOOTING_ZONE_INNER_RADIUS_METERS = 0.2;
 	public static final double SHOOTING_ZONE_OUTER_RADIUS_METERS = 0.3;
 
+	public static final double FIELD_VISION_TARGET_HEIGHT = 102;
+	public static final double FIELD_UPPER_HUB_RADIUS = 20.0;
+
 	// ROS Interface
 	public static final String COPROCESSOR_ADDRESS = "10.0.88.35";
 	public static final String COPROCESSOR_ADDRESS_SIMULATED = "127.0.0.1";

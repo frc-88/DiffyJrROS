@@ -27,7 +27,10 @@ public class PassthroughRosCommand extends CommandBase {
   @Override
   public void execute() {
     if (m_coprocessor.isCommandActive()) {
-        m_drive.drive(m_coprocessor.getCommand());
+      m_drive.drive(m_coprocessor.getCommand());
+    }
+    else {
+      m_drive.stop();
     }
   }
 

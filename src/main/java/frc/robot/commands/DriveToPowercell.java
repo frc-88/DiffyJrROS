@@ -18,7 +18,7 @@ public class DriveToPowercell extends CommandBase {
   private final Navigation m_nav;
   private final DriveSubsystem m_drive;
   private WaypointsPlan m_plan;
-  private final String m_waypointName = "powercell";
+  private final String m_waypointName = "power_cell";
   private long m_is_finished_timeout = 0;
 
   /** Creates a new DriveToWaypoint. */
@@ -27,14 +27,19 @@ public class DriveToPowercell extends CommandBase {
     m_drive = drive;
     m_is_finished_timeout = is_finished_timeout;
     m_plan = new WaypointsPlan(m_nav.getCoprocessorTable());
-    m_plan.addWaypoint(new Waypoint(m_waypointName));
+
+    double timeout = 0.0;
+    if (is_finished_timeout > 0) {
+      timeout = is_finished_timeout * 1E-6;
+    }
+    m_plan.addWaypoint(new Waypoint(m_waypointName).makeWithTimeout(timeout));
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(nav);
     addRequirements(drive);
   }
   public DriveToPowercell(Navigation nav, DriveSubsystem drive) {
-    this(nav, drive, 15_000_000);
+    this(nav, drive, -1);  // no timeout
   }
 
   // Called when the command is initially scheduled.
