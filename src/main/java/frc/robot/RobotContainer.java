@@ -85,6 +85,10 @@ public class RobotContainer {
     m_limelight.ledOff();
   }
 
+  public void disabledPeriodic() {
+    m_limelight.ledOff();
+  }
+
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *

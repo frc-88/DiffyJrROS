@@ -8,13 +8,11 @@ import java.util.Objects;
 import java.util.Set;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.roswaypoints.GoalStatus;
 import frc.robot.util.roswaypoints.WaypointMap;
 import frc.robot.util.roswaypoints.WaypointsPlan;
-import frc.robot.commands.SetGlobalPoseToWaypoint;
 import frc.robot.util.coprocessortable.CoprocessorTable;
 import frc.robot.util.coprocessortable.VelocityCommand;
 
@@ -71,6 +69,10 @@ public class Navigation extends SubsystemBase {
 
   public Pose2d getWaypoint(String name) {
     return m_waypointMap.getWaypoint(name);
+  }
+
+  public Pose2d getCenterWaypoint() {
+    return getWaypoint(CENTER_WAYPOINT_NAME);
   }
 
   public void setPoseEstimate(Pose2d pose) {
