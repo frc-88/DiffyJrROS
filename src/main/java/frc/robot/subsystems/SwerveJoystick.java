@@ -45,6 +45,15 @@ public class SwerveJoystick extends SubsystemBase {
     }
   }
 
+  public Button getPointToCenterButton() {
+    if (m_type == SwerveControllerType.NT) {
+      return this.nt_gamepad.getButton("LT");
+    }
+    else {
+      return new Button(() -> this.xbox_gamepad.getLeftTrigger() > 0.0);
+    }
+  }
+
   public double getVelocityX() {
     if (m_type == SwerveControllerType.NT) {
       return this.nt_gamepad.getX();

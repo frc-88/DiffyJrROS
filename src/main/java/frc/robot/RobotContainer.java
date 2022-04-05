@@ -8,6 +8,7 @@ import frc.robot.commands.DriveSwerveJoystickCommand;
 import frc.robot.commands.DriveToPowercell;
 import frc.robot.commands.DriveWithWaypointsPlan;
 import frc.robot.commands.PassthroughRosCommand;
+import frc.robot.commands.PointToCenterDriveCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Navigation;
 import frc.robot.subsystems.SwerveJoystick;
@@ -40,6 +41,9 @@ public class RobotContainer {
 
   private final CommandBase m_joystickDriveCommand = new DriveSwerveJoystickCommand(m_drive, m_joystick);
   private final CommandBase m_passthroughRosCommand = new PassthroughRosCommand(m_drive, m_ros_interface);
+  private final CommandBase m_pointToCenterDriveCommand = new PointToCenterDriveCommand(
+    m_drive, m_ros_interface, m_joystick,
+    frc.robot.util.diffswerve.Constants.DriveTrain.MAX_CHASSIS_ANG_VEL * 0.75);
   private CommandBase m_autoCommand;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -55,6 +59,7 @@ public class RobotContainer {
     // m_drive.setDefaultCommand(m_joystickDriveCommand);
     m_joystick.getAllowRosButton().whileHeld(m_joystickDriveCommand);
     // m_joystick.getAllowRosButton().whileHeld(m_passthroughRosCommand);
+    m_joystick.getPointToCenterButton().whileHeld(m_pointToCenterDriveCommand);
   }
 
   private CommandBase configureAutoCommand() {
