@@ -65,6 +65,16 @@ public class DiffSwerveModule {
         this.moduleLocation = moduleLocation;
     }
 
+    public void setCoast(boolean coast) {
+        if (coast) {
+            hiMotor.setNeutralMode(NeutralMode.Coast);
+            loMotor.setNeutralMode(NeutralMode.Coast);
+        }
+        else {
+            hiMotor.setNeutralMode(NeutralMode.Brake);
+            loMotor.setNeutralMode(NeutralMode.Brake);
+        }
+    }
 
     public void setEnabled(boolean enabled) {
         is_enabled = enabled;

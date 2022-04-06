@@ -110,6 +110,13 @@ public class DiffSwerveChassis implements ChassisInterface {
         System.out.println("Model created!");
     }
 
+    public void setCoast(boolean coast)
+    {
+        for (DiffSwerveModule module : modules) {
+            module.setCoast(coast);
+        }
+    }
+
     public void setEnabled(boolean is_enabled)
     {
         for (DiffSwerveModule module : modules) {

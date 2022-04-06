@@ -25,6 +25,10 @@ public class DriveSubsystem extends SubsystemBase {
     return swerve;
   }
 
+  public void setCoast(boolean coast) {
+    swerve.setCoast(coast);
+  }
+
   public void setEnabled(boolean enabled) {
     swerve.setEnabled(enabled);
   }
