@@ -201,7 +201,8 @@ def main():
         elif t[i] < l1:
             # r = np.array([[input_modulus(angles[i])], [0.0], [4.48]])
             # r = np.array([[0.0], [0.0], [velocities[i]]])
-            r = np.array([[input_modulus(angles[i])], [0.0], [velocities[i]]])
+            # r = np.array([[input_modulus(angles[i])], [0.0], [velocities[i]]])
+            r = np.array([[0.001], [0.0], [0.0]])
             # r = np.array([[input_modulus(10.0)], [0.0], [4.48]])
             # r = np.array([[0.0], [0.0], [0.05]])
         else:
