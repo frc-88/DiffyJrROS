@@ -95,7 +95,7 @@ public class DiffSwerveModule {
         motor.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 20, Constants.DifferentialSwerveModule.TIMEOUT);
         motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, Constants.DifferentialSwerveModule.TIMEOUT);
         motor.configForwardSoftLimitEnable(false);
-        motor.configNeutralDeadband(0.0, Constants.DifferentialSwerveModule.TIMEOUT);
+        motor.configNeutralDeadband(Constants.DifferentialSwerveModule.NEUTRAL_DEADBAND_PERCENT, Constants.DifferentialSwerveModule.TIMEOUT);
         motor.configOpenloopRamp(0, Constants.DifferentialSwerveModule.TIMEOUT);
         motor.configClosedloopRamp(0, Constants.DifferentialSwerveModule.TIMEOUT);
         motor.configSupplyCurrentLimit(

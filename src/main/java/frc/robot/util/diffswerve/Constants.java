@@ -65,6 +65,7 @@ public class Constants {
         public static final double AZIMUTH_ROTATIONS_TO_RADIANS = 2.0 * Math.PI;  // radians per rotation of azimuth sensor
         public static final double VOLTAGE = 12.0;  // volts
         public static final double FEED_FORWARD = VOLTAGE / FALCON_FREE_SPEED;
+        public static final double NEUTRAL_DEADBAND_PERCENT = 0.0;
 
         public static final boolean ENABLE_CURRENT_LIMIT = true;
         public static final double CURRENT_LIMIT = 60.0;  // amps
