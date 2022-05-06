@@ -19,35 +19,26 @@ B = [0, 0;
 C = eye(3);
 D = zeros([3, 2]);
 
-module_ss = ss(A, B, C, D);
-
 Q = [0.08, 0, 0;
      0, 1.1, 0;
      0, 0, 1.0];
-%Q = Q * 100;
+
 R = [12, 0;
      0, 12];
-[K] = lqr(A, B, Q, R);
-Nbar = rscale(A, B, C, D, K);
 
-Bbar_1 = B(:, 1) * Nbar(1);
-Bbar_2 = B(:, 2) * Nbar(2);
-Bbar = [
-    Bbar_1(:), Bbar_2(:)
+Q_model = [
+    0.1, 0, 0;
+    0, 5.0, 0;
+    0, 0, 5.0
 ];
-sys_cl = ss(A - B * K, Bbar, C, D);
+R_model = [
+    0.5, 0, 0;
+    0, 0.1, 0;
+    0, 0, 0.1
+];
 
-t=0:0.1:10;
+[LQR_K] = lqr(A, B, Q, R);
 
-% opt = stepDataOptions('InputOffset', 0.0, 'StepAmplitude', [1.0, 1.0]);
-% step(sys_cl, opt);
-% step(module_ss, opt);
-
-% u = [zeros(size(t)); ones(size(t)) * 12.0];
-u = [ones(size(t)) * 12; ones(size(t)) * 12];
-[Y, T] = lsim(sys_cl, u, t);
-close all
-hold all
-figure(1)
-plot(T, Y)
-legend('angle', 'angular v', 'wheel v')
+out = sim("DiffSwerveModule.slx", 10);
+% sim_result = reshape(out.sim_response.Data, [], 1);
+% sim_time = out.sim_response.Time;
