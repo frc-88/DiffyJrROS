@@ -10,9 +10,9 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Navigation;
 import frc.robot.subsystems.Navigation.RosAutoState;
+import frc.robot.util.coprocessor.VelocityCommand;
 import frc.robot.util.roswaypoints.Waypoint;
 import frc.robot.util.roswaypoints.WaypointsPlan;
-import frc.robot.util.coprocessortable.VelocityCommand;
 
 public class DriveToPowercell extends CommandBase {
   private final Navigation m_nav;
@@ -26,7 +26,7 @@ public class DriveToPowercell extends CommandBase {
     m_nav = nav;
     m_drive = drive;
     m_is_finished_timeout = is_finished_timeout;
-    m_plan = new WaypointsPlan(m_nav.getCoprocessorTable());
+    m_plan = new WaypointsPlan(m_nav.getCoprocessorBase());
 
     double timeout = 0.0;
     if (is_finished_timeout > 0) {

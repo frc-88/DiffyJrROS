@@ -1,6 +1,8 @@
-package frc.robot.util.coprocessortable;
+package frc.robot.util.coprocessor.networktables;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -13,12 +15,15 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.util.coprocessor.ChassisInterface;
+import frc.robot.util.coprocessor.MessageTimer;
+import frc.robot.util.coprocessor.VelocityCommand;
+import frc.robot.util.coprocessor.tunnel.CoprocessorBase;
 import frc.robot.util.roswaypoints.GoalStatus;
 import frc.robot.util.roswaypoints.Waypoint;
 import frc.robot.util.roswaypoints.WaypointMap;
 
-public class CoprocessorTable {
+public class CoprocessorTable extends CoprocessorBase {
     protected ChassisInterface chassis;
 
     private NetworkTableInstance instance;
@@ -44,7 +49,7 @@ public class CoprocessorTable {
     private NetworkTableEntry cmdVelEntryT;
     private NetworkTableEntry cmdVelEntryUpdate;
     private VelocityCommand command = new VelocityCommand();
-    private MessageTimer commandTimer = new MessageTimer(1_000_000);
+    private MessageTimer commandTimer = new MessageTimer(DEFAULT_MESSAGE_TIMEOUT);
 
     private NetworkTable globalPoseTable;
     private NetworkTableEntry globalPoseEntryX;
@@ -52,12 +57,12 @@ public class CoprocessorTable {
     private NetworkTableEntry globalPoseEntryT;
     private NetworkTableEntry globalPoseEntryUpdate;
     private Pose2d globalPose = new Pose2d();
-    private MessageTimer globalPoseTimer = new MessageTimer(1_000_000);
+    private MessageTimer globalPoseTimer = new MessageTimer(DEFAULT_MESSAGE_TIMEOUT);
 
     private NetworkTable goalStatusTable;
     private NetworkTableEntry goalStatusEntry;
     private NetworkTableEntry goalStatusUpdateEntry;
-    private MessageTimer goalStatusTimer = new MessageTimer(1_000_000);
+    private MessageTimer goalStatusTimer = new MessageTimer(DEFAULT_MESSAGE_TIMEOUT);
     protected GoalStatus goalStatus = GoalStatus.INVALID;
 
     private NetworkTable odomResetTable;
@@ -101,13 +106,14 @@ public class CoprocessorTable {
     private NetworkTable jointsTable;
     private NetworkTable jointCommandsTable;
     ArrayList<NetworkTableEntry> jointCommandEntries = new ArrayList<>();
-    ArrayList<Double> jointCommandValues = new ArrayList<>();
-    ArrayList<MessageTimer> jointCommandTimers = new ArrayList<>();
 
     private NetworkTable waypointsTable;
+    protected Map<String, NetworkTableEntry> waypointXEntries = new HashMap<>();
+    protected Map<String, NetworkTableEntry> waypointYEntries = new HashMap<>();
+    protected Map<String, NetworkTableEntry> waypointTEntries = new HashMap<>();
 
     public CoprocessorTable(ChassisInterface chassis, String address, int port, double updateInterval) {
-        this.chassis = chassis;
+        super(chassis);
         this.address = address;
         this.port = port;
 
@@ -184,6 +190,7 @@ public class CoprocessorTable {
         jointCommandsTable = jointsTable.getSubTable("commands");
 
         waypointsTable = rootTable.getSubTable("waypoints");
+        waypointsTable.addSubTableListener((parent, name, table) -> {newWaypointCallback(name);}, true);
     }
 
     private void cmdVelCallback(EntryNotification notification) {
@@ -260,6 +267,46 @@ public class CoprocessorTable {
         return waypointsTable;
     }
 
+    private void newWaypointCallback(String name) {
+        NetworkTableEntry xEntry = waypointsTable.getSubTable(name).getEntry("x");
+        NetworkTableEntry yEntry = waypointsTable.getSubTable(name).getEntry("y");
+        NetworkTableEntry tEntry = waypointsTable.getSubTable(name).getEntry("theta");
+        waypointXEntries.put(name, xEntry);
+        waypointYEntries.put(name, yEntry);
+        waypointTEntries.put(name, tEntry);
+        xEntry.addListener((notification) -> this.waypointXEntryCallback(name, notification), EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+        yEntry.addListener((notification) -> this.waypointYEntryCallback(name, notification), EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+        tEntry.addListener((notification) -> this.waypointTEntryCallback(name, notification), EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+    }
+
+    private void waypointXEntryCallback(String waypointName, EntryNotification notification) {
+        Pose2d old_pose = waypoints.get(waypointName);
+        Pose2d new_pose = new Pose2d(
+            waypointXEntries.get(waypointName).getDouble(0.0),
+            old_pose.getY(),
+            old_pose.getRotation()
+        );
+        waypoints.put(waypointName, new_pose);
+    }
+    private void waypointYEntryCallback(String waypointName, EntryNotification notification) {
+        Pose2d old_pose = waypoints.get(waypointName);
+        Pose2d new_pose = new Pose2d(
+            old_pose.getX(),
+            waypointYEntries.get(waypointName).getDouble(0.0),
+            old_pose.getRotation()
+        );
+        waypoints.put(waypointName, new_pose);
+    }
+    private void waypointTEntryCallback(String waypointName, EntryNotification notification) {
+        Pose2d old_pose = waypoints.get(waypointName);
+        Pose2d new_pose = new Pose2d(
+            old_pose.getX(),
+            old_pose.getY(),
+            new Rotation2d(waypointTEntries.get(waypointName).getDouble(0.0))
+        );
+        waypoints.put(waypointName, new_pose);
+    }
+
     public void stopComms() {
         if (instance.isConnected()) {
             instance.stopClient();
@@ -280,44 +327,8 @@ public class CoprocessorTable {
         return RobotController.getFPGATime() * 1E-6;
     }
 
-    /***
-     * Getters for data received from coprocessor
-     */
-
-    public boolean isCommandActive() {
-        return commandTimer.isActive();
-    }
-
-    public VelocityCommand getCommand() {
-        return command;
-    }
-
-    public Pose2d getGlobalPose() {
-        return globalPose;
-    }
-
-    public boolean isGlobalPoseActive() {
-        return globalPoseTimer.isActive();
-    }
-
-    public GoalStatus getGoalStatus() {
-        return goalStatus;
-    }
-
-    public boolean isGoalStatusActive() {
-        return goalStatusTimer.isActive();
-    }
-
     public double getUpdateInterval() {
         return updateInterval;
-    }
-
-    public double getJointCommand(int jointIndex) {
-        return jointCommandValues.get(jointIndex);
-    }
-
-    public boolean isJointCommandActive(int jointIndex) {
-        return jointCommandTimers.get(jointIndex).isActive();
     }
 
     /***
@@ -373,16 +384,8 @@ public class CoprocessorTable {
     }
 
     public void sendMatchStatus(boolean is_autonomous, double match_timer, DriverStation.Alliance team_color) {
-        String team_name = "";
-        if (team_color == Alliance.Red) {
-            team_name = "red";
-        }
-        else if (team_color == Alliance.Blue) {
-            team_name = "blue";
-        }
-        
         isAutonomousEntry.setBoolean(is_autonomous);
-        teamColorEntry.setString(team_name);
+        teamColorEntry.setString(getTeamName(team_color));
         matchTimerEntry.setDouble(match_timer);
         matchUpdateEntry.setDouble(getTime());
     }
@@ -410,7 +413,7 @@ public class CoprocessorTable {
                 EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
             jointCommandEntries.set(index, jointUpdateEntry);
             jointCommandValues.set(index, 0.0);
-            jointCommandTimers.set(index, new MessageTimer(1_000_000));
+            jointCommandTimers.set(index, new MessageTimer(DEFAULT_MESSAGE_TIMEOUT));
         }
 
     }

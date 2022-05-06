@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Navigation;
 import frc.robot.subsystems.Navigation.RosAutoState;
+import frc.robot.util.coprocessor.VelocityCommand;
 import frc.robot.util.roswaypoints.WaypointsPlan;
-import frc.robot.util.coprocessortable.VelocityCommand;
 
 public class DriveWithWaypointsPlan extends CommandBase {
   private final Navigation m_nav;

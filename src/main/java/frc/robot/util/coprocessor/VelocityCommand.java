@@ -1,4 +1,4 @@
-package frc.robot.util.coprocessortable;
+package frc.robot.util.coprocessor;
 
 public class VelocityCommand {
     public double vx = 0.0;  // x velocity (robot centric) in meters per second

@@ -6,13 +6,13 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.util.coprocessortable.CoprocessorTable;
+import frc.robot.util.coprocessor.tunnel.CoprocessorBase;
 
 public class PassthroughRosCommand extends CommandBase {
   private final DriveSubsystem m_drive;
-  private final CoprocessorTable m_coprocessor;
+  private final CoprocessorBase m_coprocessor;
   /** Creates a new PassthroughRosCommand. */
-  public PassthroughRosCommand(DriveSubsystem drive, CoprocessorTable coprocessor) {
+  public PassthroughRosCommand(DriveSubsystem drive, CoprocessorBase coprocessor) {
     m_drive = drive;
     m_coprocessor = coprocessor;
     // Use addRequirements() here to declare subsystem dependencies.

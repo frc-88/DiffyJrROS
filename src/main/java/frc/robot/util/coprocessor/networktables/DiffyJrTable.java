@@ -1,10 +1,12 @@
-package frc.robot.util.coprocessortable;
+package frc.robot.util.coprocessor.networktables;
 
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.EntryNotification;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
+import frc.robot.util.coprocessor.ChassisInterface;
+import frc.robot.util.coprocessor.MessageTimer;
 import frc.robot.util.diffswerve.DiffSwerveChassis;
 import frc.robot.util.diffswerve.DiffSwerveModule;
 

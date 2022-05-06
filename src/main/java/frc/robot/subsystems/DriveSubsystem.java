@@ -5,8 +5,9 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.coprocessor.VelocityCommand;
 import frc.robot.util.diffswerve.DiffSwerveChassis;
-import frc.robot.util.coprocessortable.VelocityCommand;
+import frc.robot.util.diffswerve.NavX;
 
 public class DriveSubsystem extends SubsystemBase {
   private DiffSwerveChassis swerve;
@@ -23,6 +24,10 @@ public class DriveSubsystem extends SubsystemBase {
 
   public DiffSwerveChassis getSwerve() {
     return swerve;
+  }
+
+  public NavX getImu() {
+    return swerve.getImu();
   }
 
   public void setCoast(boolean coast) {
