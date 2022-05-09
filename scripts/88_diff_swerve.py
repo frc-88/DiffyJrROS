@@ -152,14 +152,16 @@ class DiffSwerve(fct.System):
         next_r -- next controller reference (default: current reference)
         """
         # update_plant
-        self.x = self.sysd.A @ self.x + self.sysd.B @ self.u
-        self.y = self.sysd.C @ self.x + self.sysd.D @ self.u
+        # self.x = self.sysd.A @ self.x + self.sysd.B @ self.u
+        # self.y = self.sysd.C @ self.x + self.sysd.D @ self.u
+        self.update_plant()
         
         # correct_observer
         # self.y[0][0] = input_modulus(self.y[0][0]) * np.random.rand(1) / (Constants.SENSOR_AZIMUTH_ANGLE_NOISE ** 2)
-        self.x_hat += self.kalman_gain @ (
-            self.y - self.sysd.C @ self.x_hat - self.sysd.D @ self.u
-        )
+        # self.x_hat += self.kalman_gain @ (
+        #     self.y - self.sysd.C @ self.x_hat - self.sysd.D @ self.u
+        # )
+        self.correct_observer()
 
         # update_controller
         error = self.r - self.x_hat
@@ -171,7 +173,8 @@ class DiffSwerve(fct.System):
         self.u = np.clip(u + uff, self.u_min, self.u_max)
 
         # predict_observer
-        self.x_hat = self.sysd.A @ self.x_hat + self.sysd.B @ self.u
+        # self.x_hat = self.sysd.A @ self.x_hat + self.sysd.B @ self.u
+        self.predict_observer()
 
 
 def main():
