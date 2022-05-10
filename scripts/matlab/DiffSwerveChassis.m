@@ -1,78 +1,71 @@
-classdef DiffSwerveChassis
-    %DIFFSWERVE Summary of this class goes here
+classdef DiffSwerveChassis < matlab.System
+    %DIFFSWERVECHASSIS Summary of this class goes here
     %   Detailed explanation goes here
     
     properties
-        M_inv
-        J_w
-        Kt
-        Kv
-        R
-        sysc
-        sysd
-        lqr_K
-        Kff
+        modules
+        M_inv  % chassis inverse kinematics
+        M  % chassis forward kinematics
+        num_modules
+        module_locations  % module placement in meters. Ex: [0, 0; 1, 1; 2, 2; 3, 3]
     end
     
     methods
-        function obj = DiffSwerveChassis()
-            %DIFFSWERVE Construct an instance of this class
+        function obj = DiffSwerveChassis(module_locations)
+            %DIFFSWERVECHASSIS Construct an instance of this class
             %   Detailed explanation goes here
-            
-            M_inv = [
-                14, 6;
-                -10, 6
-            ];
-            J_w = 0.015;
-            
-            Kt = 0.01825;
-            Kv = 56.0;
-            R = 0.0467 / 2;
-            
-            A = -Kt / (Kv * R * J_w) * M_inv * M_inv;
-            A = [1, 0; A];
-            A_column_0 = zeros([3, 1]);
-            A = [A_column_0, A];
-            
-            B = [0, 0;
-                M_inv * Kt / (R * J_w)];
-            
-            C = eye(3);
-            D = zeros([3, 2]);
-            
-            Ts = 0.005;
-            
-            sysc = ss(A, B, C, D);
-            sysd = c2d(sysc, Ts);
+            num_modules = size(module_locations, 1);
+            modules(1:num_modules) = DiffSwerveModule;
 
-            Q = [1.0, 0, 0;
-                 0, 10.0, 0;
-                 0, 0, 10.0];
-            
-            R = [12, 0;
-                 0, 12];
+            obj.modules = modules;
 
-            Q = eye(3) / Q^2;
-            R = eye(2) / R^2;
-
-            lqr_K = lqr(sysd, Q, R);
-            Kff = pinv(sysd.B);
+            M_inv = zeros(num_modules * 2, 3);
+            for index = 0:num_modules - 1
+                M_inv(index * 2 + 1, :) = [1, 0, -module_locations(index + 1, 2)];
+                M_inv(index * 2 + 2, :) = [0, 1, +module_locations(index + 1, 1)];
+            end
+            M = pinv(M_inv);
 
             obj.M_inv = M_inv;
-            obj.J_w = J_w;
-            obj.Kt = Kt;
-            obj.Kv = Kv;
-            obj.R = R;
-            obj.sysc = sysc;
-            obj.sysd = sysd;
-            obj.lqr_K = lqr_K;
-            obj.Kff = Kff;
+            obj.M = M;
+            obj.num_modules = num_modules;
+            obj.module_locations = module_locations;
+
         end
         
-        function outputArg = method1(obj,inputArg)
-            %METHOD1 Summary of this method goes here
-            %   Detailed explanation goes here
-            outputArg = obj.Property1 + inputArg;
+        function chassisState = forwardKinematics(obj, moduleStates)
+            %FORWARDKINEMATICS run forward kinematics for swerve chasssis
+            %   moduleStates is an n by 3 matrix where n in the number of
+            %   modules. column 1 is azimuth, 2 is azimuth velocity, 3 is
+            %   wheel velocity
+            
+            module_state_matrix = zeros(obj.num_modules * 2, 1);
+            for index = 0:obj.num_modules - 1
+                azimuth = moduleStates(1);
+                % index 2 is azimuth velocity
+                wheel_velocity = moduleStates(3);
+                module_state_matrix(index * 2 + 1) = wheel_velocity * cos(azimuth);
+                module_state_matrix(index * 2 + 2) = wheel_velocity * sin(azimuth);
+            end
+            chassisState = obj.M * module_state_matrix;
+        end
+
+        function moduleStates = inverseKinematics(obj, chassisState)
+            %INVERSEKINEMATICS run inverse kinematics for swerve chassis
+            %   chassisState is a 1 by 3 matrix where 1 is vx, 2 is vy, 3
+            %   is vt. Units are meters per second and radians per second
+            vector_states = obj.M_inv * chassisState';
+            moduleStates = zeros(obj.num_modules, 3);
+
+            for index = 0:obj.num_modules - 1
+                vx = vector_states(index * 2 + 1);
+                vy = vector_states(index * 2 + 2);
+                wheel_speed = hypot(vx, vy);
+                azimuth = atan2(vy, vx);
+                moduleStates(index + 1, 1) = azimuth;
+                % azimuth velocity is not calculated
+                moduleStates(index + 1, 3) = wheel_speed;
+            end
         end
     end
 end
