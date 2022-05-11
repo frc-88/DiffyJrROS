@@ -15,10 +15,10 @@ public class Constants {
         public static Pose2d robotPose;
         public static final double WIDTH = 0.30861;
         public static final double LENGTH = 0.30861;
-        public static final double FRONT_LEFT_ENCODER_OFFSET = Math.toRadians(136.93);
-        public static final double BACK_LEFT_ENCODER_OFFSET = Math.toRadians(-108.635);
-        public static final double BACK_RIGHT_ENCODER_OFFSET = Math.toRadians(-46.68);
-        public static final double FRONT_RIGHT_ENCODER_OFFSET = Math.toRadians(-141.85);
+        public static final double FRONT_LEFT_ENCODER_OFFSET = Math.toRadians(-38.760);
+        public static final double BACK_LEFT_ENCODER_OFFSET = Math.toRadians(-105.469);
+        public static final double BACK_RIGHT_ENCODER_OFFSET = Math.toRadians(-48.164);
+        public static final double FRONT_RIGHT_ENCODER_OFFSET = Math.toRadians(-151.348);
         public static final Translation2d FRONT_LEFT_POSITION = new Translation2d(WIDTH / 2.0, LENGTH / 2.0);
         public static final Translation2d BACK_LEFT_POSITION = new Translation2d(-WIDTH / 2.0, LENGTH / 2.0);
         public static final Translation2d BACK_RIGHT_POSITION = new Translation2d(-WIDTH / 2.0, -LENGTH / 2.0);
