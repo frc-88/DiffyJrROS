@@ -15,7 +15,7 @@ public class Constants {
         public static Pose2d robotPose;
         public static final double WIDTH = 0.30861;
         public static final double LENGTH = 0.30861;
-        public static final double FRONT_LEFT_ENCODER_OFFSET = Math.toRadians(-38.760);
+        public static final double FRONT_LEFT_ENCODER_OFFSET = Math.toRadians(141.240);
         public static final double BACK_LEFT_ENCODER_OFFSET = Math.toRadians(-105.469);
         public static final double BACK_RIGHT_ENCODER_OFFSET = Math.toRadians(-48.164);
         public static final double FRONT_RIGHT_ENCODER_OFFSET = Math.toRadians(-151.348);
