@@ -58,6 +58,9 @@ public class CoprocessorSerial extends CoprocessorBase implements TunnelInterfac
             Pose2d waypoint_pose = parsePose2d(result);
             waypoints.put(waypoint_name, waypoint_pose);
         }
+        else if (category.equals("ping")) {
+            data_stream.writePacket("ping", result.getDouble());
+        }
     }
 
     private VelocityCommand parseVelocityCommand(PacketResult result) {

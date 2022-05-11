@@ -87,7 +87,7 @@ public class TunnelUtil {
         dbuf.putInt(number);
         return dbuf.array();
     }
-    public static byte[] toFloatBytes(double number)
+    public static byte[] toDoubleBytes(double number)
     {
         ByteBuffer dbuf = ByteBuffer.allocate(8);
         dbuf.order(ByteOrder.LITTLE_ENDIAN);

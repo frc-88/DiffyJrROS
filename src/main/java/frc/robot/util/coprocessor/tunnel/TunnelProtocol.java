@@ -59,7 +59,7 @@ public class TunnelProtocol {
                 write_buffer_index = TunnelUtil.copyArray(write_buffer, write_buffer_index, TunnelUtil.toInt32Bytes((boolean)object ? 1 : 0));
             }
             else if (object instanceof Double) {
-                write_buffer_index = TunnelUtil.copyArray(write_buffer, write_buffer_index, TunnelUtil.toFloatBytes((double)object));
+                write_buffer_index = TunnelUtil.copyArray(write_buffer, write_buffer_index, TunnelUtil.toDoubleBytes((double)object));
             }
             else if (object instanceof String) {
                 short length = (short)((String)object).length();

@@ -36,11 +36,11 @@ public class DiffyJrSerial extends CoprocessorSerial {
             targetTimer.reset();
         }
     }
-    public void update() {
-        super.update();
+    // public void update() {
+    //     super.update();
 
-        writeImu(imu.getBase());
-    }
+    //     writeImu(imu.getBase());
+    // }
 
 
     public void updateSlow() {
