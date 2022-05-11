@@ -10,8 +10,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import frc.robot.util.coprocessortable.ChassisInterface;
-import frc.robot.util.coprocessortable.VelocityCommand;
+import frc.robot.util.coprocessor.ChassisInterface;
+import frc.robot.util.coprocessor.VelocityCommand;
 
 
 public class DiffSwerveChassis implements ChassisInterface {
@@ -110,6 +110,13 @@ public class DiffSwerveChassis implements ChassisInterface {
         System.out.println("Model created!");
     }
 
+    public void setCoast(boolean coast)
+    {
+        for (DiffSwerveModule module : modules) {
+            module.setCoast(coast);
+        }
+    }
+
     public void setEnabled(boolean is_enabled)
     {
         for (DiffSwerveModule module : modules) {
@@ -149,6 +156,10 @@ public class DiffSwerveChassis implements ChassisInterface {
     
     public void resetImu() {
         imu.reset();
+    }
+
+    public NavX getImu() {
+        return imu;
     }
 
     public ChassisSpeeds getChassisVelocity() {

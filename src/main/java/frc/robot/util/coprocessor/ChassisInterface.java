@@ -1,4 +1,4 @@
-package frc.robot.util.coprocessortable;
+package frc.robot.util.coprocessor;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;

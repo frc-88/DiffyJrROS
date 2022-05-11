@@ -93,4 +93,8 @@ public class NavX {
     public void reset() {
         this.base.reset();
     }
+
+    public AHRS getBase() {
+        return this.base;
+    }
 }

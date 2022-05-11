@@ -6,17 +6,14 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.util.coprocessor.tunnel.CoprocessorBase;
 
-public class PassthroughRosCommand extends CommandBase {
-  private final DriveSubsystem m_drive;
-  private final CoprocessorBase m_coprocessor;
-  /** Creates a new PassthroughRosCommand. */
-  public PassthroughRosCommand(DriveSubsystem drive, CoprocessorBase coprocessor) {
+public class CoastDriveMotors extends CommandBase {
+  DriveSubsystem m_drive;
+  /** Creates a new CoastDriveMotors. */
+  public CoastDriveMotors(DriveSubsystem drive) {
     m_drive = drive;
-    m_coprocessor = coprocessor;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(drive);
+    addRequirements(m_drive);
   }
 
   // Called when the command is initially scheduled.
@@ -26,21 +23,24 @@ public class PassthroughRosCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (m_coprocessor.isCommandActive()) {
-      m_drive.drive(m_coprocessor.getCommand());
-    }
-    else {
-      m_drive.stop();
-    }
+    m_drive.stop();
+    m_drive.setCoast(true);
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    m_drive.setCoast(false);
+  }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
     return false;
+  }
+
+  @Override
+  public boolean runsWhenDisabled() {
+      return true;
   }
 }

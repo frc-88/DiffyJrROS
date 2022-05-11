@@ -65,6 +65,16 @@ public class DiffSwerveModule {
         this.moduleLocation = moduleLocation;
     }
 
+    public void setCoast(boolean coast) {
+        if (coast) {
+            hiMotor.setNeutralMode(NeutralMode.Coast);
+            loMotor.setNeutralMode(NeutralMode.Coast);
+        }
+        else {
+            hiMotor.setNeutralMode(NeutralMode.Brake);
+            loMotor.setNeutralMode(NeutralMode.Brake);
+        }
+    }
 
     public void setEnabled(boolean enabled) {
         is_enabled = enabled;
@@ -85,6 +95,9 @@ public class DiffSwerveModule {
         motor.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 20, Constants.DifferentialSwerveModule.TIMEOUT);
         motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, Constants.DifferentialSwerveModule.TIMEOUT);
         motor.configForwardSoftLimitEnable(false);
+        motor.configNeutralDeadband(Constants.DifferentialSwerveModule.NEUTRAL_DEADBAND_PERCENT, Constants.DifferentialSwerveModule.TIMEOUT);
+        motor.configOpenloopRamp(0, Constants.DifferentialSwerveModule.TIMEOUT);
+        motor.configClosedloopRamp(0, Constants.DifferentialSwerveModule.TIMEOUT);
         motor.configSupplyCurrentLimit(
             new SupplyCurrentLimitConfiguration(
                 Constants.DifferentialSwerveModule.ENABLE_CURRENT_LIMIT,

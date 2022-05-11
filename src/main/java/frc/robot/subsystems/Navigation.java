@@ -10,15 +10,15 @@ import java.util.Set;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.coprocessor.VelocityCommand;
+import frc.robot.util.coprocessor.tunnel.CoprocessorBase;
 import frc.robot.util.roswaypoints.GoalStatus;
 import frc.robot.util.roswaypoints.WaypointMap;
 import frc.robot.util.roswaypoints.WaypointsPlan;
-import frc.robot.util.coprocessortable.CoprocessorTable;
-import frc.robot.util.coprocessortable.VelocityCommand;
 
 public class Navigation extends SubsystemBase {
   private final WaypointMap m_waypointMap;
-  private final CoprocessorTable m_coprocessor;
+  private final CoprocessorBase m_coprocessor;
   public static final String CENTER_WAYPOINT_NAME = "center";
 
   public static enum RosAutoState {
@@ -34,7 +34,7 @@ public class Navigation extends SubsystemBase {
   private long m_is_finished_timeout = 0;
 
   /** Creates a new NavigationSubsystem. */
-  public Navigation(CoprocessorTable coprocessor) {
+  public Navigation(CoprocessorBase coprocessor) {
     m_coprocessor = coprocessor;
     m_waypointMap = new WaypointMap(m_coprocessor);
   }
@@ -44,7 +44,7 @@ public class Navigation extends SubsystemBase {
 
   }
 
-  public CoprocessorTable getCoprocessorTable() {
+  public CoprocessorBase getCoprocessorBase() {
     return m_coprocessor;
   }
 
@@ -53,10 +53,6 @@ public class Navigation extends SubsystemBase {
   }
   public boolean doesWaypointExist(String waypointName) {
     return m_waypointMap.doesWaypointExist(waypointName);
-  }
-
-  public boolean isConnected() {
-    return m_coprocessor.isConnected();
   }
 
   public WaypointsPlan makeEmptyWaypointPlan() {

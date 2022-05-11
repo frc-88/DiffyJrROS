@@ -10,7 +10,7 @@ import frc.robot.util.diffswerve.Constants;
 import frc.robot.util.diffswerve.Helpers;
 import frc.robot.util.controllers.NetworkTablesJoystick;
 import frc.robot.util.controllers.XboxController;
-import frc.robot.util.coprocessortable.VelocityCommand;
+import frc.robot.util.coprocessor.VelocityCommand;
 
 public class SwerveJoystick extends SubsystemBase {
   public enum SwerveControllerType {
