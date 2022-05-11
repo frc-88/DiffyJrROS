@@ -45,13 +45,20 @@ public class SerialStream implements DataStreamInterface {
         }
         byte[] data = serial.read(length);
 
+        // Move stop index the length of the new data
+        int buffer_stop = unparsed_index + data.length;
+        if (buffer_stop > buffer.length) {
+            System.out.println("Buffer overrun! Resetting");
+            buffer_stop = 0;
+            unparsed_index = 0;
+            serial.flush();
+            return;
+        }
+
         // Append newly arrived bytes to buffer
         for (int index = 0; index < data.length; index++) {
             buffer[unparsed_index + index] = data[index];
         }
-
-        // Move stop index the length of the new data
-        int buffer_stop = unparsed_index + data.length;
 
         // Attempt to parse the entire buffer.
         // last_parsed_index marks the last packet parsed. If no packets were parsed, this is 0
@@ -65,7 +72,7 @@ public class SerialStream implements DataStreamInterface {
         }
         // shift the buffer stop index by the amount we parsed
         unparsed_index = buffer_stop - last_parsed_index;
-        if (unparsed_index >= buffer_size) {
+        if (unparsed_index >= buffer_size || unparsed_index < 0) {
             // if we somehow parsed more than the allowed amount, reset
             unparsed_index = 0;
         }
