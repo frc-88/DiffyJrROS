@@ -130,15 +130,15 @@ public class CoprocessorSerial extends CoprocessorBase implements TunnelInterfac
 
     protected void writeImu(AHRS imu) {
         data_stream.writePacket("imu",
-            imu.getRawAccelX(),
-            imu.getRawAccelY(),
-            imu.getRawAccelZ(),
-            imu.getRawGyroX(),
-            imu.getRawGyroY(),
-            imu.getRawGyroZ(),
-            imu.getRoll(),
-            imu.getPitch(),
-            imu.getYaw()
+            (double)(imu.getRawAccelX()),
+            (double)(imu.getRawAccelY()),
+            (double)(imu.getRawAccelZ()),
+            (double)(imu.getRawGyroX()),
+            (double)(imu.getRawGyroY()),
+            (double)(imu.getRawGyroZ()),
+            (double)(imu.getRoll()),
+            (double)(imu.getPitch()),
+            (double)(imu.getYaw())
         );
     }
     protected void writeImu2d(AHRS imu) {

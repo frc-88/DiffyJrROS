@@ -40,7 +40,7 @@ R_model = [
     0, 0, 0.1
 ];
 
-[kalmf,L,P] = kalman(module_ss, Q, R);
+% [kalmf,L,P] = kalman(module_ss, Q, R);
 
 
 Nbar = rscale(A, B, C, D, K);
