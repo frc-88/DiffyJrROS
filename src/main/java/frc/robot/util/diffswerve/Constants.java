@@ -34,7 +34,7 @@ public class Constants {
 
         public static final double ANGLE_kP = 3.0;
         public static final double ANGLE_kI = 0.0;
-        public static final double ANGLE_kD = 0.0;
+        public static final double ANGLE_kD = 0.05;
         public static final double kP = 1.5;
         public static final double kI = 0.0;
         public static final double kD = 0.5;

@@ -98,6 +98,7 @@ public class RobotContainer {
   public void setEnableDrive(boolean enabled) {
     m_drive.setEnabled(enabled);
     m_limelight.ledOff();
+    m_drive.setCoast(!enabled);
   }
 
   public void disabledPeriodic() {
