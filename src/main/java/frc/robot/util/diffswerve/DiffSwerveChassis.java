@@ -188,6 +188,10 @@ public class DiffSwerveChassis implements ChassisInterface {
         return Rotation2d.fromDegrees(imu.getYaw());
     }
 
+    public Rotation2d getImuHeadingRate() {
+        return Rotation2d.fromDegrees(imu.getYawRate());
+    }
+
     // Set wheel velocities to zero and hold module directions
     public void holdDirection() {
         for (DiffSwerveModule module : modules) {
@@ -214,7 +218,7 @@ public class DiffSwerveChassis implements ChassisInterface {
     }
 
     private void resetAngleSetpoint() {
-        this.angleSetpoint = getImuHeading().getRadians();
+        this.angleSetpoint = getImuHeadingRate().getRadians();
         angleController.reset(this.angleSetpoint);
     }
 
@@ -246,7 +250,7 @@ public class DiffSwerveChassis implements ChassisInterface {
         }
         else {
             // if only translation is significant, set angular velocity according to previous angle setpoint
-            double controllerAngVel = angleController.calculate(getImuHeading().getRadians(), angleSetpoint);
+            double controllerAngVel = angleController.calculate(getImuHeadingRate().getRadians(), angleSetpoint);
             ChassisSpeeds chassisSpeeds = getChassisSpeeds(vx, vy, controllerAngVel, false, new Rotation2d(angleSetpoint));
             SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(chassisSpeeds);
             SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.DriveTrain.MAX_CHASSIS_SPEED);

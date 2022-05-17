@@ -73,12 +73,12 @@ public class Constants {
         public static final double CURRENT_TRIGGER_TIME = 0.0;
 
         // Create Parameters for DiffSwerve State Space
-        public static final double INERTIA_WHEEL = 0.002;  // kg * m^2
-        public static final double INERTIA_AZIMUTH = 0.005;  // kg * m^2
+        public static final double INERTIA_WHEEL = 0.003;  // kg * m^2
+        // public static final double INERTIA_AZIMUTH = 0.005;  // kg * m^2
         
         // A weight for how aggressive each state should be ie. 0.08 radians will try to control the
         // angle more aggressively than the wheel angular velocity.
-        public static final double Q_AZIMUTH = 0.08; // radians
+        public static final double Q_AZIMUTH = 0.1; // radians
         public static final double Q_AZIMUTH_ANG_VELOCITY = 1.1; // radians per sec
         public static final double Q_WHEEL_ANG_VELOCITY = 1.0; // radians per sec
 
