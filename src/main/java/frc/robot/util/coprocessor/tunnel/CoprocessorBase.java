@@ -7,6 +7,7 @@ package frc.robot.util.coprocessor.tunnel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -21,7 +22,7 @@ import frc.robot.util.roswaypoints.Waypoint;
 public class CoprocessorBase {
     protected final long DEFAULT_MESSAGE_TIMEOUT = 1_000_000;
 
-    protected ChassisInterface chassis;
+    protected final ChassisInterface chassis;
 
     protected VelocityCommand command = new VelocityCommand();
     protected MessageTimer commandTimer = new MessageTimer(DEFAULT_MESSAGE_TIMEOUT);

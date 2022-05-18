@@ -24,8 +24,6 @@ import frc.robot.util.roswaypoints.Waypoint;
 import frc.robot.util.roswaypoints.WaypointMap;
 
 public class CoprocessorTable extends CoprocessorBase {
-    protected ChassisInterface chassis;
-
     private NetworkTableInstance instance;
     private String address;
     private int port;
