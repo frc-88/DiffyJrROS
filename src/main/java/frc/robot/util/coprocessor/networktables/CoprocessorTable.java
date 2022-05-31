@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.util.coprocessor.ChassisInterface;
 import frc.robot.util.coprocessor.MessageTimer;
-import frc.robot.util.coprocessor.VelocityCommand;
 import frc.robot.util.coprocessor.tunnel.CoprocessorBase;
 import frc.robot.util.roswaypoints.GoalStatus;
 import frc.robot.util.roswaypoints.Waypoint;
@@ -46,22 +45,16 @@ public class CoprocessorTable extends CoprocessorBase {
     private NetworkTableEntry cmdVelEntryY;
     private NetworkTableEntry cmdVelEntryT;
     private NetworkTableEntry cmdVelEntryUpdate;
-    private VelocityCommand command = new VelocityCommand();
-    private MessageTimer commandTimer = new MessageTimer(DEFAULT_MESSAGE_TIMEOUT);
 
     private NetworkTable globalPoseTable;
     private NetworkTableEntry globalPoseEntryX;
     private NetworkTableEntry globalPoseEntryY;
     private NetworkTableEntry globalPoseEntryT;
     private NetworkTableEntry globalPoseEntryUpdate;
-    private Pose2d globalPose = new Pose2d();
-    private MessageTimer globalPoseTimer = new MessageTimer(DEFAULT_MESSAGE_TIMEOUT);
 
     private NetworkTable goalStatusTable;
     private NetworkTableEntry goalStatusEntry;
     private NetworkTableEntry goalStatusUpdateEntry;
-    private MessageTimer goalStatusTimer = new MessageTimer(DEFAULT_MESSAGE_TIMEOUT);
-    protected GoalStatus goalStatus = GoalStatus.INVALID;
 
     private NetworkTable odomResetTable;
     private NetworkTableEntry odomResetEntryX;
@@ -87,7 +80,6 @@ public class CoprocessorTable extends CoprocessorBase {
     private NetworkTableEntry waypointIgnoreWallsEntry;
     private NetworkTableEntry waypointInterruptableByEntry;
     private NetworkTableEntry waypointTimeoutEntry;
-    private int numSentGoals = 0;
 
     private NetworkTable planControlTable;
     private NetworkTableEntry execPlanEntry;

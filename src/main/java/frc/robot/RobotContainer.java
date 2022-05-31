@@ -96,6 +96,7 @@ public class RobotContainer {
   }
 
   public void setEnableDrive(boolean enabled) {
+    System.out.println("Set drive motors to " + enabled);
     m_drive.setEnabled(enabled);
     m_limelight.ledOff();
     m_drive.setCoast(!enabled);

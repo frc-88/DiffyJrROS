@@ -18,6 +18,10 @@ public class MessageTimer {
         return getTime() - last_time < active_time_threshold_us;
     }
 
+    public long getLastActive() {
+        return last_time;
+    }
+
     private long getTime() {
         return RobotController.getFPGATime();
     }

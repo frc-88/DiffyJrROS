@@ -38,8 +38,14 @@ public class Constants {
         public static final double kP = 1.5;
         public static final double kI = 0.0;
         public static final double kD = 0.5;
+
+        // Constraints
         public static final double PROFILE_CONSTRAINT_VEL = 20.5;
         public static final double PROFILE_CONSTRAINT_ACCEL = 20.0;
+
+        public static final double CURVATURE_DT = 1.0 / 50.0;
+        public static final double DIRECTIONAL_CONSTRAINT_STDDEV = 1.0;
+        public static final double DIRECTIONAL_CONSTRAINT_DEADZONE = 0.98;
     }
 
     public static class DifferentialSwerveModule {

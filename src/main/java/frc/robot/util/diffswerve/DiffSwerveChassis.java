@@ -1,5 +1,8 @@
 package frc.robot.util.diffswerve;
 
+import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.distribution.AbstractRealDistribution;
+
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -30,6 +33,9 @@ public class DiffSwerveChassis implements ChassisInterface {
     private boolean angleControllerEnabled = true;
 
     public final NavX imu;
+
+    private final AbstractRealDistribution directionConstraintGauss;
+    private final double normalizeGaussConst;
 
     public DiffSwerveChassis()
     {
@@ -106,6 +112,9 @@ public class DiffSwerveChassis implements ChassisInterface {
                                 Constants.DriveTrain.PROFILE_CONSTRAINT_VEL,
                                 Constants.DriveTrain.PROFILE_CONSTRAINT_ACCEL));
         angleController.enableContinuousInput(-Math.PI / 2.0, Math.PI / 2.0);
+
+        directionConstraintGauss = new NormalDistribution(0.0, Constants.DriveTrain.DIRECTIONAL_CONSTRAINT_STDDEV);
+        normalizeGaussConst = directionConstraintGauss.density(0.0);
         
         System.out.println("Model created!");
     }
@@ -248,19 +257,51 @@ public class DiffSwerveChassis implements ChassisInterface {
         else if (!angleControllerEnabled || Math.abs(angularVelocity) > 0) {
             // if translation and rotation are significant, push setpoints as-is
             ChassisSpeeds chassisSpeeds = getChassisSpeeds(vx, vy, angularVelocity, false, getImuHeading());
-            SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(chassisSpeeds);
-            SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.DriveTrain.MAX_CHASSIS_SPEED);
-            setIdealState(swerveModuleStates);
+            setIdealState(getModuleStatesWithConstraints(chassisSpeeds));
             resetAngleSetpoint();
         }
         else {
             // if only translation is significant, set angular velocity according to previous angle setpoint
             double controllerAngVel = angleController.calculate(getAnglePidMeasurement().getRadians(), angleSetpoint);
             ChassisSpeeds chassisSpeeds = getChassisSpeeds(vx, vy, controllerAngVel, false, new Rotation2d(angleSetpoint));
-            SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(chassisSpeeds);
-            SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.DriveTrain.MAX_CHASSIS_SPEED);
-            setIdealState(swerveModuleStates);
+            setIdealState(getModuleStatesWithConstraints(chassisSpeeds));
         }
+    }
+
+    private SwerveModuleState[] getModuleStatesWithConstraints(ChassisSpeeds chassisSpeeds)
+    {
+        SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(chassisSpeeds);
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.DriveTrain.MAX_CHASSIS_SPEED);
+        double directionalConstraintCost = getDirectionalConstraintCost(swerveModuleStates);
+
+        if (directionalConstraintCost < Constants.DriveTrain.DIRECTIONAL_CONSTRAINT_DEADZONE) {
+            RadialChassisSpeeds radSpeeds = RadialChassisSpeeds.fromChassisSpeeds(chassisSpeeds, Constants.DriveTrain.CURVATURE_DT);
+            radSpeeds.velocityMetersPerSecond *= directionalConstraintCost;
+            chassisSpeeds = radSpeeds.toChassisSpeeds();
+            swerveModuleStates = kinematics.toSwerveModuleStates(chassisSpeeds);
+            SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.DriveTrain.MAX_CHASSIS_SPEED);
+        }
+        
+        return swerveModuleStates;
+    }
+
+    private double getDirectionalConstraintCost(SwerveModuleState[] swerveModuleStates) {
+        double maxError = 0.0;
+        for (int index = 0; index < this.modules.length; index++) {
+            SwerveModuleState state = modules[index].getState();
+            double moduleAngleError = Math.abs(swerveModuleStates[index].angle.getRadians() - state.angle.getRadians());
+            if (moduleAngleError > maxError) {
+                maxError = moduleAngleError;
+            }
+        }
+        double cost = directionConstraintGauss.density(maxError / (Math.PI * 0.5));
+        if (cost > 1.0) {
+            cost = 1.0;
+        }
+        if (cost < 0.0) {
+            cost = 0.0;
+        }
+        return cost;
     }
 
     public void followPose(Pose2d pose, Rotation2d heading, double vel) {
