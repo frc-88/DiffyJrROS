@@ -296,7 +296,7 @@ public class DiffSwerveModule {
 
 
     public double getModuleAngle() {
-        return Helpers.boundHalfAngle(azimuthSensor.getPosition(), true);
+        return Helpers.boundHalfAngle(azimuthSensor.getPosition());
     }
 
     // Get module velocities. Pair order: (azimuth angular velocity, wheel angular velocity)

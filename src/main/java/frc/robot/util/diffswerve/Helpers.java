@@ -90,15 +90,32 @@ public class Helpers {
      * @param radians determines if angle is radians or not.
      * @return changed angle.
      */
-    public static double boundHalfAngle(double angle, boolean radians) {
+    public static double boundHalfAngle(double angle) {
         angle %= 2.0 * Math.PI;
-        angle = radians ? angle : Units.degreesToRadians(angle);
         if (angle >= Math.PI) {
             angle -= 2.0 * Math.PI;
         }
         if (angle < -Math.PI) {
             angle += 2.0 * Math.PI;
         }
-        return radians ? angle : Units.radiansToDegrees(angle);
+        return angle;
+    }
+
+    /**
+     * sets angle between -PI/2 and PI/2.
+     *
+     * @param angle current to be changed.
+     * @param radians determines if angle is radians or not.
+     * @return changed angle.
+     */
+    public static double boundQuarterAngle(double angle) {
+        angle %= Math.PI;
+        if (angle >= Math.PI * 0.5) {
+            angle -= Math.PI;
+        }
+        if (angle < -Math.PI * 0.5) {
+            angle += Math.PI;
+        }
+        return angle;
     }
 }

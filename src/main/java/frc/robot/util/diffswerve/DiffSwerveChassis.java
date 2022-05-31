@@ -1,6 +1,7 @@
 package frc.robot.util.diffswerve;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.distribution.AbstractRealDistribution;
 
 import edu.wpi.first.math.controller.HolonomicDriveController;
@@ -35,7 +36,7 @@ public class DiffSwerveChassis implements ChassisInterface {
     public final NavX imu;
 
     private final AbstractRealDistribution directionConstraintGauss;
-    private final double normalizeGaussConst;
+    private double normalizeGaussConst = 1.0;
 
     public DiffSwerveChassis()
     {
@@ -114,7 +115,7 @@ public class DiffSwerveChassis implements ChassisInterface {
         angleController.enableContinuousInput(-Math.PI / 2.0, Math.PI / 2.0);
 
         directionConstraintGauss = new NormalDistribution(0.0, Constants.DriveTrain.DIRECTIONAL_CONSTRAINT_STDDEV);
-        normalizeGaussConst = directionConstraintGauss.density(0.0);
+        normalizeGaussConst = directionalConstraintRampFunction(0.0);
         
         System.out.println("Model created!");
     }
@@ -288,13 +289,22 @@ public class DiffSwerveChassis implements ChassisInterface {
     private double getDirectionalConstraintCost(SwerveModuleState[] swerveModuleStates) {
         double maxError = 0.0;
         for (int index = 0; index < this.modules.length; index++) {
-            SwerveModuleState state = modules[index].getState();
-            double moduleAngleError = Math.abs(swerveModuleStates[index].angle.getRadians() - state.angle.getRadians());
-            if (moduleAngleError > maxError) {
-                maxError = moduleAngleError;
+            double setpoint = swerveModuleStates[index].angle.getRadians();
+            double measurement = modules[index].getState().angle.getRadians();
+            double error = setpoint - measurement;
+            if (Math.abs(error) > Math.PI * 0.5) {
+                setpoint += Math.PI;
+                setpoint = Helpers.boundHalfAngle(setpoint);
+                error = setpoint - measurement;
             }
+            error = Math.abs(error);
+            if (error > maxError) {
+                maxError = error;
+            }
+            // System.out.println(String.format("%d\t%.4f\t%.4f", index, setpoint, measurement));
         }
-        double cost = directionConstraintGauss.density(maxError / (Math.PI * 0.5));
+
+        double cost = directionalConstraintRampFunction(Helpers.boundQuarterAngle(maxError) / (Math.PI * 0.5));
         if (cost > 1.0) {
             cost = 1.0;
         }
@@ -302,6 +312,10 @@ public class DiffSwerveChassis implements ChassisInterface {
             cost = 0.0;
         }
         return cost;
+    }
+
+    private double directionalConstraintRampFunction(double error) {
+        return directionConstraintGauss.density(error) / normalizeGaussConst;
     }
 
     public void followPose(Pose2d pose, Rotation2d heading, double vel) {
