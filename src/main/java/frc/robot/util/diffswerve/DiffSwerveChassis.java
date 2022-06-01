@@ -1,7 +1,6 @@
 package frc.robot.util.diffswerve;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
-import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.distribution.AbstractRealDistribution;
 
 import edu.wpi.first.math.controller.HolonomicDriveController;
