@@ -1,5 +1,7 @@
 package frc.robot.util.coprocessor.networktables;
 
+import java.util.ArrayList;
+
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.EntryNotification;
@@ -24,6 +26,13 @@ public class DiffyJrTable extends CoprocessorTable {
     private double targetProbability = 0.0;
     private MessageTimer targetTimer = new MessageTimer(1_000_000);
 
+    private NetworkTableEntry fieldRelativeEntry;
+    private NetworkTableEntry softResetImuEntry;
+
+    private NetworkTable moduleRootTable;
+    private NetworkTableEntry moduleNumEntry;
+    private ArrayList<NetworkTable> moduleTables = new ArrayList<>();
+
     public DiffyJrTable(DiffSwerveChassis swerve, String address, int port, double updateInterval) {
         super((ChassisInterface)swerve, address, port, updateInterval);
         this.swerve = swerve;
@@ -34,12 +43,31 @@ public class DiffyJrTable extends CoprocessorTable {
         targetEntryProbability = targetTable.getEntry("probability");
         targetEntryUpdate = targetTable.getEntry("update");
         targetEntryUpdate.addListener(this::targetCallback, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+        
+        fieldRelativeEntry = rootTable.getEntry("field_relative");
+        fieldRelativeEntry.addListener(this::fieldRelativeCallback, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+        softResetImuEntry = rootTable.getEntry("soft_reset_imu");
+        softResetImuEntry.addListener(this::softResetImuCallback, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+        moduleRootTable = rootTable.getSubTable("modules");
+        moduleNumEntry = moduleRootTable.getEntry("num");
+        for (int index = 0; index < this.swerve.getNumModules(); index++) {
+            moduleTables.add(moduleRootTable.getSubTable(String.valueOf(index)));
+        }
+        moduleNumEntry.setDouble((double)this.swerve.getNumModules());
     }
 
-    // @Override
-    // public void update() {
-    //     super.update();
-    // }
+    @Override
+    public void update() {
+        super.update();
+
+        for (int index = 0; index < this.swerve.getNumModules(); index++) {
+            moduleTables.get(index).getEntry("wheel_velocity").setDouble(this.swerve.getModule(index).getWheelVelocity());
+            moduleTables.get(index).getEntry("azimuth_velocity").setDouble(this.swerve.getModule(index).getAzimuthVelocity());
+            moduleTables.get(index).getEntry("azimuth").setDouble(this.swerve.getModule(index).getModuleAngle());
+        }
+    }
 
     public void updateSlow() {
         DiffSwerveModule[] modules = this.swerve.getModules();
@@ -56,6 +84,17 @@ public class DiffyJrTable extends CoprocessorTable {
         targetAngle = targetEntryAngle.getDouble(0.0);
         targetProbability = targetEntryProbability.getDouble(0.0);
         targetTimer.reset();
+    }
+
+    private void fieldRelativeCallback(EntryNotification notification) {
+        boolean value = notification.getEntry().getBoolean(false);
+        System.out.println("Setting field relative commands to " + value);
+        this.swerve.setFieldRelativeCommands(value);
+    }
+
+    private void softResetImuCallback(EntryNotification notification) {
+        System.out.println("Soft resetting IMU");
+        this.swerve.softResetImu();
     }
 
     public double getTargetDistance() {
