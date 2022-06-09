@@ -61,7 +61,10 @@ public class DiffyJrSerial extends CoprocessorSerial {
                 "module", index,
                 module.getWheelVelocity(),
                 module.getAzimuthVelocity(),
-                module.getModuleAngle()
+                module.getModuleAngle(),
+                module.getReferenceWheelAngularVelocity(),
+                module.getReferenceModuleAngularVelocity(),
+                module.getReferenceModuleAngle()
             );
         }
     }
