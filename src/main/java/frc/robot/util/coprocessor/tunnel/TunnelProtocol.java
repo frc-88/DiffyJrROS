@@ -11,9 +11,9 @@ public class TunnelProtocol {
     public static final char PACKET_START_1 = 0x13;
     public static final char PACKET_STOP = '\n';
     public static final char PACKET_SEP = '\t';
-    public static final int MAX_PACKET_LEN = 1024;
+    public static final int MAX_PACKET_LEN = 0xfff;
     public static final int MIN_PACKET_LEN = 13;
-    public static final int MAX_SEGMENT_LEN = 64;
+    public static final int MAX_SEGMENT_LEN = 0x3ff;
     public static final int CHECKSUM_START_INDEX = 4;
     public static final int LENGTH_START_INDEX = 2;
     public static final int LENGTH_BYTE_LENGTH = 2;
@@ -177,26 +177,25 @@ public class TunnelProtocol {
             int length_start = index;
             index += 2;
             if (index >= stop_index) {
-                index = stop_index;
                 // System.out.println("Buffer length exceeded while searching for length start");
+                index = stop_index;
                 continue;
             }
             
             short length = TunnelUtil.toShort(Arrays.copyOfRange(buffer, length_start, index));
+            if (length > MAX_PACKET_LEN) {
+                System.out.println(String.format("Buffer length exceeds max allowable length: %d\n", length));
+            }
             // System.out.println("Found packet length: " + length);
 
             index += length;
             if (index > stop_index) {
+                // System.out.println(String.format("Buffer length exceeded while searching for length stop. %d > %d", index, stop_index));
                 index = stop_index;
-                // System.out.println(String.format("Buffer length exceeded while searching for length stop. %d > %d", index, buffer.length));
-                continue;
-            }
-            if (length > MAX_PACKET_LEN) {
-                // System.out.println(String.format("Packet length exceeds max allowable packet size (%d > %d). Skipping", length, MAX_PACKET_LEN));
                 continue;
             }
             if ((char)buffer[index] != PACKET_STOP) {
-                // System.out.println("Buffer does not end with PACKET_STOP");
+                System.out.println("Buffer does not end with PACKET_STOP");
                 continue;
             }
             // do not modify index from this point onward as the for loop increments index

@@ -18,8 +18,6 @@ public class DiffyJrSerial extends CoprocessorSerial {
     private double targetProbability = 0.0;
     private MessageTimer targetTimer = new MessageTimer(DEFAULT_MESSAGE_TIMEOUT);
 
-    private boolean useFieldRelativeCommands = false;
-
     public DiffyJrSerial(DiffSwerveChassis swerve, NavX imu) {
         super((ChassisInterface)swerve);
         this.swerve = swerve;
@@ -38,13 +36,16 @@ public class DiffyJrSerial extends CoprocessorSerial {
             targetTimer.reset();
         }
         else if (category.equals("relative")) {
-            useFieldRelativeCommands = result.getInt() > 0 ? true : false;
-            
+            boolean value = result.getInt() > 0 ? true : false;
+            if (value) {
+                this.swerve.softResetImu();
+            }
+            System.out.println("Setting field relative commands to " + value);
+            this.swerve.setFieldRelativeCommands(value);
         }
     }
     // public void update() {
     //     super.update();
-
     //     writeImu(imu.getBase());
     // }
 
@@ -55,6 +56,13 @@ public class DiffyJrSerial extends CoprocessorSerial {
             DiffSwerveModule module = modules[index];
             SwerveModuleState state = module.getState();
             setJointPosition(index, state.angle.getRadians());
+
+            data_stream.writePacket(
+                "module", index,
+                module.getWheelVelocity(),
+                module.getAzimuthVelocity(),
+                module.getModuleAngle()
+            );
         }
     }
 

@@ -27,7 +27,6 @@ public class DiffyJrTable extends CoprocessorTable {
     private MessageTimer targetTimer = new MessageTimer(1_000_000);
 
     private NetworkTableEntry fieldRelativeEntry;
-    private NetworkTableEntry softResetImuEntry;
 
     private NetworkTable moduleRootTable;
     private NetworkTableEntry moduleNumEntry;
@@ -46,9 +45,6 @@ public class DiffyJrTable extends CoprocessorTable {
         
         fieldRelativeEntry = rootTable.getEntry("field_relative");
         fieldRelativeEntry.addListener(this::fieldRelativeCallback, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-
-        softResetImuEntry = rootTable.getEntry("soft_reset_imu");
-        softResetImuEntry.addListener(this::softResetImuCallback, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
 
         moduleRootTable = rootTable.getSubTable("modules");
         moduleNumEntry = moduleRootTable.getEntry("num");
@@ -88,13 +84,11 @@ public class DiffyJrTable extends CoprocessorTable {
 
     private void fieldRelativeCallback(EntryNotification notification) {
         boolean value = notification.getEntry().getBoolean(false);
+        if (value) {
+            this.swerve.softResetImu();
+        }
         System.out.println("Setting field relative commands to " + value);
         this.swerve.setFieldRelativeCommands(value);
-    }
-
-    private void softResetImuCallback(EntryNotification notification) {
-        System.out.println("Soft resetting IMU");
-        this.swerve.softResetImu();
     }
 
     public double getTargetDistance() {

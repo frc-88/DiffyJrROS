@@ -16,8 +16,7 @@ public class SerialStream implements DataStreamInterface {
     private TunnelProtocol protocol;
     private TunnelInterface tunnel_interface;
 
-    private int buffer_size = 1024;
-    private byte[] buffer = new byte[buffer_size];
+    private byte[] buffer = new byte[TunnelProtocol.MAX_PACKET_LEN];
     private int unparsed_index = 0;
     
     public SerialStream(TunnelInterface tunnel_interface, int baud) {
@@ -72,7 +71,7 @@ public class SerialStream implements DataStreamInterface {
         }
         // shift the buffer stop index by the amount we parsed
         unparsed_index = buffer_stop - last_parsed_index;
-        if (unparsed_index >= buffer_size || unparsed_index < 0) {
+        if (unparsed_index >= TunnelProtocol.MAX_PACKET_LEN || unparsed_index < 0) {
             // if we somehow parsed more than the allowed amount, reset
             unparsed_index = 0;
         }

@@ -229,8 +229,8 @@ public class DiffSwerveChassis implements ChassisInterface {
     }
 
     public Rotation2d getAnglePidMeasurement() {
-        // return getImuHeadingWithOffset();
-        return getImuHeadingRate();
+        return getImuHeadingWithOffset();
+        // return getImuHeadingRate();
     }
 
     // Set wheel velocities to zero and hold module directions

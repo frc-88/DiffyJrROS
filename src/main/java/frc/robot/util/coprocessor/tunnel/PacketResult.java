@@ -82,6 +82,10 @@ public class PacketResult {
         return getString(length);
     }
     public String getString(int length) {
+        if (length > TunnelProtocol.MAX_SEGMENT_LEN) {
+            System.out.println("String length exceeds max segment length: " + length);
+            return "";
+        }
         int next_index = this.current_index + length;
         String result = Arrays.toString(Arrays.copyOfRange(buffer, this.current_index, next_index));
         this.current_index = next_index;
