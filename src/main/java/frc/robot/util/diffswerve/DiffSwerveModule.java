@@ -300,7 +300,7 @@ public class DiffSwerveModule {
     }
 
     // Get module velocities. Pair order: (azimuth angular velocity, wheel angular velocity)
-    public Pair<Double, Double> getAngularVelocities() {
+    private Pair<Double, Double> getAngularVelocities() {
         Matrix<N2, N1> outputs = getDifferentialOutputs(getMotorRadiansPerSecond(loMotor), getMotorRadiansPerSecond(hiMotor));
         return new Pair<Double, Double>(outputs.get(0, 0), outputs.get(1, 0));
     }
@@ -309,6 +309,11 @@ public class DiffSwerveModule {
     public double getWheelVelocity() {
         return getAngularVelocities().getSecond()
                 * Constants.DifferentialSwerveModule.WHEEL_RADIUS;
+    }
+
+    // Get module azimuth velocity in radians per sec.
+    public double getAzimuthVelocity() {
+        return getAngularVelocities().getFirst();
     }
 
     public double getPredictedWheelVelocity() {

@@ -32,6 +32,9 @@ public class DiffSwerveChassis implements ChassisInterface {
     private double angleSetpoint = 0.0;
     private boolean angleControllerEnabled = true;
 
+    private boolean fieldRelativeCommands = false;
+    private Rotation2d fieldRelativeImuOffset = new Rotation2d();
+
     public final NavX imu;
 
     private final AbstractRealDistribution directionConstraintGauss;
@@ -126,6 +129,14 @@ public class DiffSwerveChassis implements ChassisInterface {
         }
     }
 
+    public void setFieldRelativeCommands(boolean isFieldRelative) {
+        fieldRelativeCommands = isFieldRelative;
+    }
+
+    public boolean getFieldRelativeCommands() {
+        return fieldRelativeCommands;
+    }
+
     public void setEnabled(boolean is_enabled)
     {
         for (DiffSwerveModule module : modules) {
@@ -165,6 +176,11 @@ public class DiffSwerveChassis implements ChassisInterface {
     
     public void resetImu() {
         imu.reset();
+        fieldRelativeImuOffset = new Rotation2d();
+    }
+
+    public void softResetImu() {
+        fieldRelativeImuOffset = getImuHeading();
     }
 
     public NavX getImu() {
@@ -189,12 +205,23 @@ public class DiffSwerveChassis implements ChassisInterface {
         return states;
     }
 
+    public DiffSwerveModule getModule(int index) {
+        return this.modules[index];
+    }
+
     public DiffSwerveModule[] getModules() {
         return this.modules;
+    }
+    public int getNumModules() {
+        return this.modules.length;
     }
 
     public Rotation2d getImuHeading() {
         return Rotation2d.fromDegrees(imu.getYaw());
+    }
+
+    public Rotation2d getImuHeadingWithOffset() {
+        return getImuHeading().minus(fieldRelativeImuOffset);
     }
 
     public Rotation2d getImuHeadingRate() {
@@ -202,14 +229,14 @@ public class DiffSwerveChassis implements ChassisInterface {
     }
 
     public Rotation2d getAnglePidMeasurement() {
-        // return getImuHeading();
+        // return getImuHeadingWithOffset();
         return getImuHeadingRate();
     }
 
     // Set wheel velocities to zero and hold module directions
     public void holdDirection() {
         for (DiffSwerveModule module : modules) {
-            module.setIdealState(new SwerveModuleState(0.0, new Rotation2d(frontLeft.getModuleAngle())));
+            module.setIdealState(new SwerveModuleState(0.0, new Rotation2d(module.getModuleAngle())));
         }
         resetAngleSetpoint();
     }
@@ -256,14 +283,14 @@ public class DiffSwerveChassis implements ChassisInterface {
         }
         else if (!angleControllerEnabled || Math.abs(angularVelocity) > 0) {
             // if translation and rotation are significant, push setpoints as-is
-            ChassisSpeeds chassisSpeeds = getChassisSpeeds(vx, vy, angularVelocity, false, getImuHeading());
+            ChassisSpeeds chassisSpeeds = getChassisSpeeds(vx, vy, angularVelocity, getFieldRelativeCommands(), getImuHeadingWithOffset());
             setIdealState(getModuleStatesWithConstraints(chassisSpeeds));
             resetAngleSetpoint();
         }
         else {
             // if only translation is significant, set angular velocity according to previous angle setpoint
             double controllerAngVel = angleController.calculate(getAnglePidMeasurement().getRadians(), angleSetpoint);
-            ChassisSpeeds chassisSpeeds = getChassisSpeeds(vx, vy, controllerAngVel, false, new Rotation2d(angleSetpoint));
+            ChassisSpeeds chassisSpeeds = getChassisSpeeds(vx, vy, controllerAngVel, getFieldRelativeCommands(), new Rotation2d(angleSetpoint));
             setIdealState(getModuleStatesWithConstraints(chassisSpeeds));
         }
     }
@@ -319,9 +346,7 @@ public class DiffSwerveChassis implements ChassisInterface {
 
     public void followPose(Pose2d pose, Rotation2d heading, double vel) {
         ChassisSpeeds adjustedSpeeds = controller.calculate(odometry.getPoseMeters(), pose, vel, heading);
-        SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(adjustedSpeeds);
-        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.DriveTrain.MAX_CHASSIS_SPEED);
-        setIdealState(swerveModuleStates);
+        setIdealState(getModuleStatesWithConstraints(adjustedSpeeds));
     }
 
     @Override
