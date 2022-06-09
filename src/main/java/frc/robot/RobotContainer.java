@@ -17,8 +17,8 @@ import frc.robot.subsystems.SwerveJoystick.SwerveControllerType;
 import frc.robot.util.roswaypoints.Waypoint;
 import frc.robot.util.roswaypoints.WaypointsPlan;
 import frc.robot.util.sensors.Limelight;
-import frc.robot.util.coprocessor.networktables.DiffyJrTable;
-// import frc.robot.util.coprocessor.serial.DiffyJrSerial;
+// import frc.robot.util.coprocessor.networktables.DiffyJrTable;
+import frc.robot.util.coprocessor.serial.DiffyJrSerial;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -35,15 +35,15 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DriveSubsystem m_drive = new DriveSubsystem();
   private final SwerveJoystick m_joystick = new SwerveJoystick(SwerveControllerType.XBOX);
-  private final DiffyJrTable m_ros_interface = new DiffyJrTable(
-    m_drive.getSwerve(),
-    Robot.isSimulation() ? Constants.COPROCESSOR_ADDRESS_SIMULATED : Constants.COPROCESSOR_ADDRESS,
-    Constants.COPROCESSOR_PORT,
-    Constants.COPROCESSOR_TABLE_UPDATE_DELAY);
-  // private final DiffyJrSerial m_ros_interface = new DiffyJrSerial(
+  // private final DiffyJrTable m_ros_interface = new DiffyJrTable(
   //   m_drive.getSwerve(),
-  //   m_drive.getImu()
-  // );
+  //   Robot.isSimulation() ? Constants.COPROCESSOR_ADDRESS_SIMULATED : Constants.COPROCESSOR_ADDRESS,
+  //   Constants.COPROCESSOR_PORT,
+  //   Constants.COPROCESSOR_TABLE_UPDATE_DELAY);
+  private final DiffyJrSerial m_ros_interface = new DiffyJrSerial(
+    m_drive.getSwerve(),
+    m_drive.getImu()
+  );
   private final Navigation m_nav = new Navigation(m_ros_interface);
   private final Limelight m_limelight = new Limelight();
 

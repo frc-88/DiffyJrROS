@@ -18,6 +18,8 @@ public class DiffyJrSerial extends CoprocessorSerial {
     private double targetProbability = 0.0;
     private MessageTimer targetTimer = new MessageTimer(DEFAULT_MESSAGE_TIMEOUT);
 
+    private boolean useFieldRelativeCommands = false;
+
     public DiffyJrSerial(DiffSwerveChassis swerve, NavX imu) {
         super((ChassisInterface)swerve);
         this.swerve = swerve;
@@ -34,6 +36,10 @@ public class DiffyJrSerial extends CoprocessorSerial {
             targetAngle = result.getDouble();
             targetProbability = result.getDouble();
             targetTimer.reset();
+        }
+        else if (category.equals("relative")) {
+            useFieldRelativeCommands = result.getInt() > 0 ? true : false;
+            
         }
     }
     // public void update() {

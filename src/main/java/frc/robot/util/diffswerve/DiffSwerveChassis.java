@@ -272,19 +272,19 @@ public class DiffSwerveChassis implements ChassisInterface {
     {
         SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(chassisSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.DriveTrain.MAX_CHASSIS_SPEED);
-        double directionalConstraintCost = getDirectionalConstraintCost(swerveModuleStates);
+        // double directionalConstraintCost = getDirectionalConstraintCost(swerveModuleStates);
 
-        if (directionalConstraintCost < Constants.DriveTrain.DIRECTIONAL_CONSTRAINT_DEADZONE) {
-            RadialChassisSpeeds radSpeeds = RadialChassisSpeeds.fromChassisSpeeds(chassisSpeeds, Constants.DriveTrain.CURVATURE_DT);
-            radSpeeds.velocityMetersPerSecond *= directionalConstraintCost;
-            chassisSpeeds = radSpeeds.toChassisSpeeds();
-            swerveModuleStates = kinematics.toSwerveModuleStates(chassisSpeeds);
-            SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.DriveTrain.MAX_CHASSIS_SPEED);
-        }
+        // if (directionalConstraintCost < Constants.DriveTrain.DIRECTIONAL_CONSTRAINT_DEADZONE) {
+        //     RadialChassisSpeeds radSpeeds = RadialChassisSpeeds.fromChassisSpeeds(chassisSpeeds, Constants.DriveTrain.CURVATURE_DT);
+        //     radSpeeds.velocityMetersPerSecond *= directionalConstraintCost;
+        //     chassisSpeeds = radSpeeds.toChassisSpeeds();
+        //     swerveModuleStates = kinematics.toSwerveModuleStates(chassisSpeeds);
+        //     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.DriveTrain.MAX_CHASSIS_SPEED);
+        // }
         
         return swerveModuleStates;
     }
-
+/*
     private double getDirectionalConstraintCost(SwerveModuleState[] swerveModuleStates) {
         double maxError = 0.0;
         for (int index = 0; index < this.modules.length; index++) {
@@ -312,7 +312,7 @@ public class DiffSwerveChassis implements ChassisInterface {
         }
         return cost;
     }
-
+*/
     private double directionalConstraintRampFunction(double error) {
         return directionConstraintGauss.density(error) / normalizeGaussConst;
     }
