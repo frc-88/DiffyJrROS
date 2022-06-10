@@ -18,7 +18,7 @@ public class Constants {
         public static final double FRONT_LEFT_ENCODER_OFFSET = Math.toRadians(141.240);
         public static final double BACK_LEFT_ENCODER_OFFSET = Math.toRadians(-105.469);
         public static final double BACK_RIGHT_ENCODER_OFFSET = Math.toRadians(-48.164);
-        public static final double FRONT_RIGHT_ENCODER_OFFSET = Math.toRadians(-151.348);
+        public static final double FRONT_RIGHT_ENCODER_OFFSET = Math.toRadians(-168.038);
         public static final Translation2d FRONT_LEFT_POSITION = new Translation2d(WIDTH / 2.0, LENGTH / 2.0);
         public static final Translation2d BACK_LEFT_POSITION = new Translation2d(-WIDTH / 2.0, LENGTH / 2.0);
         public static final Translation2d BACK_RIGHT_POSITION = new Translation2d(-WIDTH / 2.0, -LENGTH / 2.0);
