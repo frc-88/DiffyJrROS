@@ -361,10 +361,6 @@ public class DiffSwerveModule {
         return swerveControlLoop.getXHat(0);
     }
 
-    public double getReferenceWheelAngularVelocity() {
-        return swerveControlLoop.getNextR(2);
-    }
-
     private void setReference(Matrix<N3, N1> reference) {
         this.reference = reference;
     }

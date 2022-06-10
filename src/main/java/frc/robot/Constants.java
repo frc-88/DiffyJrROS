@@ -28,6 +28,6 @@ public final class Constants {
 	public static final double COPROCESSOR_TABLE_UPDATE_DELAY = 1.0 / 30.0;
 	public static final double COPROCESSOR_PERIODIC_UPDATE_DELAY = 1.0 / 30.0;
 	public static final double COPROCESSOR_PERIODIC_UPDATE_OFFSET = 0.01;
-	public static final double COPROCESSOR_SLOW_PERIODIC_UPDATE_DELAY = 1.0 / 15.0;
+	public static final double COPROCESSOR_SLOW_PERIODIC_UPDATE_DELAY = 1.0 / 5.0;
 	public static final double COPROCESSOR_SLOW_PERIODIC_UPDATE_OFFSET = 0.02;
 }

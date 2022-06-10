@@ -26,10 +26,27 @@ public class TestDiffSwerveMotors extends CommandBase {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(m_drive);
 
-    addRamp(loCommands, 5_000_000, 0.0, 12.0);
-    addRamp(hiCommands, 5_000_000, 0.0, 12.0);
-    addRamp(loCommands, 5_000_000, 12.0, 0.0);
-    addRamp(hiCommands, 5_000_000, 12.0, 0.0);
+    long segment_length = 2_000_000;
+    addRamp(loCommands, segment_length, 0.0, 12.0);
+    addRamp(hiCommands, segment_length, 0.0, 0.0);
+
+    addRamp(loCommands, segment_length, 12.0, 12.0);
+    addRamp(hiCommands, segment_length, 0.0, 12.0);
+
+    addRamp(loCommands, segment_length, 12.0, -12.0);
+    addRamp(hiCommands, segment_length, 12.0, 12.0);
+
+    addRamp(loCommands, segment_length, -12.0, -12.0);
+    addRamp(hiCommands, segment_length, 12.0, -12.0);
+
+    addRamp(loCommands, segment_length, -12.0, 12.0);
+    addRamp(hiCommands, segment_length, -12.0, -12.0);
+
+    addRamp(loCommands, segment_length, 12.0, 12.0);
+    addRamp(hiCommands, segment_length, -12.0, 12.0);
+
+    addRamp(loCommands, segment_length, 12.0, 0.0);
+    addRamp(hiCommands, segment_length, 12.0, 0.0);
   }
 
   private void addRamp(ArrayList<Double> commands, long duration, double startVoltage, double stopVoltage) {
@@ -53,10 +70,11 @@ public class TestDiffSwerveMotors extends CommandBase {
   public void initialize() {
     startTime = getTime();
     currentIndex = 0;
+    m_drive.setEnabled(false);
   }
 
   private double getVoltage(ArrayList<Double> commands, int index) {
-    if (index > commands.size()) {
+    if (index >= commands.size()) {
       return commands.get(commands.size() - 1);
     }
     else {
@@ -79,6 +97,7 @@ public class TestDiffSwerveMotors extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     m_drive.stop();
+    m_drive.setEnabled(true);
   }
 
   // Returns true when the command should end.
