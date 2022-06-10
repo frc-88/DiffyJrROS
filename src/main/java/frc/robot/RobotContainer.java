@@ -59,6 +59,7 @@ public class RobotContainer {
     m_autoCommand = configureAutoCommand();
     configurePeriodics(robot);
     m_limelight.ledOff();
+    m_drive.getSwerve().setAngleControllerEnabled(false);
   }
 
   private void configureDriveCommand() {
