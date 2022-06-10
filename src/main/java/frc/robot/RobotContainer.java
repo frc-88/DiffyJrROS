@@ -10,6 +10,7 @@ import frc.robot.commands.DriveToPowercell;
 import frc.robot.commands.DriveWithWaypointsPlan;
 import frc.robot.commands.PassthroughRosCommand;
 import frc.robot.commands.PointToCenterDriveCommand;
+import frc.robot.commands.TestDiffSwerveMotors;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Navigation;
 import frc.robot.subsystems.SwerveJoystick;
@@ -69,7 +70,8 @@ public class RobotContainer {
       m_drive, m_ros_interface, m_joystick,
       frc.robot.util.diffswerve.Constants.DriveTrain.MAX_CHASSIS_ANG_VEL * 0.75)
     );
-    userButton.whileHeld(new CoastDriveMotors(m_drive));
+    // userButton.whileHeld(new CoastDriveMotors(m_drive));
+    userButton.whileHeld(new TestDiffSwerveMotors(m_drive));
   }
 
   private CommandBase configureAutoCommand() {

@@ -294,6 +294,14 @@ public class DiffSwerveModule {
                 limVoltage / Constants.DifferentialSwerveModule.VOLTAGE);
     }
 
+    public void setHiMotorVoltage(double voltage) {
+        setFalconVoltage(hiMotor, voltage);
+    }
+
+    public void setLoMotorVoltage(double voltage) {
+        setFalconVoltage(loMotor, voltage);
+    }
+
 
     public double getModuleAngle() {
         return Helpers.boundHalfAngle(azimuthSensor.getPosition());
@@ -373,6 +381,24 @@ public class DiffSwerveModule {
 
     public double getLoNextVoltage() {
         return input.get(0, 0);
+    }
+
+
+    public double getHiMeasuredVoltage() {
+        return getMotorVoltage(hiMotor);
+    }
+
+    public double getLoMeasuredVoltage() {
+        return getMotorVoltage(loMotor);
+    }
+
+
+    public double getHiMeasuredCurrent() {
+        return getMotorCurrent(hiMotor);
+    }
+
+    public double getLoMeasuredCurrent() {
+        return getMotorCurrent(loMotor);
     }
 
     public double getHiRadiansPerSecond() {
