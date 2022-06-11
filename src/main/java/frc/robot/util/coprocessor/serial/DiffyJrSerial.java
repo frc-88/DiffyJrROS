@@ -56,6 +56,28 @@ public class DiffyJrSerial extends CoprocessorSerial {
     //     writeImu(imu.getBase());
     // }
 
+    public void updateModules() {
+        DiffSwerveModule[] modules = this.swerve.getModules();
+        for (int index = 0; index < modules.length; index++) {
+            DiffSwerveModule module = modules[index];
+            data_stream.writePacket(
+                "module", index,
+                module.getWheelVelocity(),
+                module.getAzimuthVelocity(),
+                module.getModuleAngle(),
+                module.getReferenceWheelVelocity(),
+                module.getReferenceModuleAngularVelocity(),
+                module.getReferenceModuleAngle()
+                // module.getHiNextVoltage(),
+                // module.getLoNextVoltage(),
+                // module.getHiMeasuredVoltage(),
+                // module.getLoMeasuredVoltage(),
+                // module.getHiMeasuredCurrent(),
+                // module.getLoMeasuredCurrent()
+            );
+        }
+    }
+
 
     public void updateSlow() {
         DiffSwerveModule[] modules = this.swerve.getModules();
@@ -63,19 +85,6 @@ public class DiffyJrSerial extends CoprocessorSerial {
             DiffSwerveModule module = modules[index];
             SwerveModuleState state = module.getState();
             setJointPosition(index, state.angle.getRadians());
-
-            // data_stream.writePacket(
-            //     "module", index,
-            //     module.getWheelVelocity(),
-            //     module.getAzimuthVelocity(),
-            //     module.getModuleAngle(),
-            //     module.getHiNextVoltage(),
-            //     module.getLoNextVoltage(),
-            //     module.getHiMeasuredVoltage(),
-            //     module.getLoMeasuredVoltage(),
-            //     module.getHiMeasuredCurrent(),
-            //     module.getLoMeasuredCurrent()
-            // );
         }
     }
 

@@ -22,7 +22,7 @@ public class SerialStream implements DataStreamInterface {
     private TunnelProtocol protocol;
     private TunnelInterface tunnel_interface;
 
-    private byte[] buffer = new byte[TunnelProtocol.MAX_PACKET_LEN];
+    private byte[] buffer = new byte[TunnelProtocol.MAX_PACKET_LEN << 4];
     private int unparsed_index = 0;
     private ArrayList<Handshake> pending_handshakes = new ArrayList<>();
     
