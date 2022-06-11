@@ -99,7 +99,6 @@ public class Constants {
         public static final double SENSOR_AZIMUTH_ANGLE_NOISE = 0.05; // radians
         public static final double SENSOR_AZIMUTH_ANG_VELOCITY_NOISE = 0.1; // radians per sec
         public static final double SENSOR_WHEEL_ANG_VELOCITY_NOISE = 0.1; // radians per sec
-        public static final double CONTROL_EFFORT = 10.5;
-        // public static final double CONTROL_EFFORT = VOLTAGE;
+        public static final double CONTROL_EFFORT = VOLTAGE;
     }
 }
