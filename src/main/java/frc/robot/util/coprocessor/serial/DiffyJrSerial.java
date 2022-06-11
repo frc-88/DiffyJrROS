@@ -64,18 +64,18 @@ public class DiffyJrSerial extends CoprocessorSerial {
             SwerveModuleState state = module.getState();
             setJointPosition(index, state.angle.getRadians());
 
-            data_stream.writePacket(
-                "module", index,
-                module.getWheelVelocity(),
-                module.getAzimuthVelocity(),
-                module.getModuleAngle(),
-                module.getHiNextVoltage(),
-                module.getLoNextVoltage(),
-                module.getHiMeasuredVoltage(),
-                module.getLoMeasuredVoltage(),
-                module.getHiMeasuredCurrent(),
-                module.getLoMeasuredCurrent()
-            );
+            // data_stream.writePacket(
+            //     "module", index,
+            //     module.getWheelVelocity(),
+            //     module.getAzimuthVelocity(),
+            //     module.getModuleAngle(),
+            //     module.getHiNextVoltage(),
+            //     module.getLoNextVoltage(),
+            //     module.getHiMeasuredVoltage(),
+            //     module.getLoMeasuredVoltage(),
+            //     module.getHiMeasuredCurrent(),
+            //     module.getLoMeasuredCurrent()
+            // );
         }
     }
 
