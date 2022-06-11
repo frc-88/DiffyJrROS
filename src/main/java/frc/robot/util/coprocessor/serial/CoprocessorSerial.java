@@ -6,6 +6,7 @@ package frc.robot.util.coprocessor.serial;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -15,6 +16,7 @@ import frc.robot.util.coprocessor.MessageTimer;
 import frc.robot.util.coprocessor.VelocityCommand;
 import frc.robot.util.coprocessor.tunnel.CoprocessorBase;
 import frc.robot.util.coprocessor.tunnel.DataStreamInterface;
+import frc.robot.util.coprocessor.tunnel.Handshake;
 import frc.robot.util.coprocessor.tunnel.PacketResult;
 import frc.robot.util.coprocessor.tunnel.TunnelInterface;
 import frc.robot.util.roswaypoints.GoalStatus;
@@ -43,7 +45,8 @@ public class CoprocessorSerial extends CoprocessorBase implements TunnelInterfac
             globalPoseTimer.reset();
         }
         else if (category.equals("goal_status")) {
-            goalStatus = GoalStatus.getStatus(result.getInt());
+            Pair<Integer, Boolean> status = result.getInt(); if (!status.getSecond()) { System.out.println("Failed to get goal status"); return; }
+            goalStatus = GoalStatus.getStatus(status.getFirst());
             goalStatusTimer.reset();
         }
         else if (category.equals("reset_odom")) {
@@ -54,35 +57,44 @@ public class CoprocessorSerial extends CoprocessorBase implements TunnelInterfac
             parseJoint(result);
         }
         else if (category.equals("waypoint")) {
-            String waypoint_name = result.getString();
+            Pair<String, Boolean> waypoint_name = result.getString(); if (!waypoint_name.getSecond()) { System.out.println("Failed to get waypoint name"); return; }
             Pose2d waypoint_pose = parsePose2d(result);
-            waypoints.put(waypoint_name, waypoint_pose);
+            waypoints.put(waypoint_name.getFirst(), waypoint_pose);
         }
         else if (category.equals("ping")) {
-            data_stream.writePacket("ping", result.getDouble());
+            Pair<Double, Boolean> ping = result.getDouble(); if (!ping.getSecond()) { System.out.println("Failed to get ping"); return; }
+            data_stream.writePacket("ping", ping.getFirst());
         }
+    }
+
+    public void handshakeCallback(DataStreamInterface data_stream, Handshake handshake) {
+        System.out.println(String.format("Handshake received. category: %s #%d", handshake.getCategory(), handshake.getPacketNum()));
+
     }
 
     private VelocityCommand parseVelocityCommand(PacketResult result) {
         VelocityCommand command = new VelocityCommand();
-        command.vx = result.getDouble();
-        command.vy = result.getDouble();
-        command.vt = result.getDouble();
+        Pair<Double, Boolean> vx = result.getDouble(); if (!vx.getSecond()) { System.out.println("Failed to get vx"); return new VelocityCommand(); }
+        Pair<Double, Boolean> vy = result.getDouble(); if (!vy.getSecond()) { System.out.println("Failed to get vy"); return new VelocityCommand(); }
+        Pair<Double, Boolean> vz = result.getDouble(); if (!vz.getSecond()) { System.out.println("Failed to get vz"); return new VelocityCommand(); }
+        command.vx = vx.getFirst();
+        command.vy = vy.getFirst();
+        command.vt = vz.getFirst();
         return command;
     }
 
     private Pose2d parsePose2d(PacketResult result) {
-        Pose2d pose = new Pose2d(
-            result.getDouble(),
-            result.getDouble(),
-            new Rotation2d(result.getDouble())
-        );
-        return pose;
+        Pair<Double, Boolean> x = result.getDouble(); if (!x.getSecond()) { System.out.println("Failed to get pose x"); return new Pose2d(); }
+        Pair<Double, Boolean> y = result.getDouble(); if (!y.getSecond()) { System.out.println("Failed to get pose y"); return new Pose2d(); }
+        Pair<Double, Boolean> theta = result.getDouble(); if (!theta.getSecond()) { System.out.println("Failed to get pose theta"); return new Pose2d(); }
+        return new Pose2d(x.getFirst(), y.getFirst(), new Rotation2d(theta.getFirst()));
     }
 
     private void parseJoint(PacketResult result) {
-        int index = result.getInt();
-        double position = result.getDouble();
+        Pair<Integer, Boolean> index_pair = result.getInt(); if (!index_pair.getSecond()) { System.out.println("Failed to get joint index"); return; }
+        Pair<Double, Boolean> position_pair = result.getDouble(); if (!position_pair.getSecond()) { System.out.println("Failed to get joint position"); return; }
+        int index = index_pair.getFirst();
+        double position = position_pair.getFirst();
         if (index > 255) {
             System.out.println("Maximum of 255 joints supported! Ignoring joint index " + index);
             return;

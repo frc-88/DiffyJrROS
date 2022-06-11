@@ -1,5 +1,6 @@
 package frc.robot.util.coprocessor.serial;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.util.coprocessor.ChassisInterface;
 import frc.robot.util.coprocessor.MessageTimer;
@@ -30,18 +31,24 @@ public class DiffyJrSerial extends CoprocessorSerial {
         
         String category = result.getCategory();
         if (category.equals("target")) {
-            targetDistance = result.getDouble();
-            targetAngle = result.getDouble();
-            targetProbability = result.getDouble();
+            
+            Pair<Double, Boolean> targetDistancePair = result.getDouble(); if (!targetDistancePair.getSecond()) { System.out.println("Failed to get target distance"); return; }
+            Pair<Double, Boolean> targetAnglePair = result.getDouble(); if (!targetAnglePair.getSecond()) { System.out.println("Failed to get target angle"); return; }
+            Pair<Double, Boolean> targetProbabilityPair = result.getDouble(); if (!targetProbabilityPair.getSecond()) { System.out.println("Failed to get target probability"); return; }
+
+            targetDistance = targetDistancePair.getFirst();
+            targetAngle = targetAnglePair.getFirst();
+            targetProbability = targetProbabilityPair.getFirst();
             targetTimer.reset();
         }
         else if (category.equals("relative")) {
-            boolean value = result.getInt() > 0 ? true : false;
-            if (value) {
+            Pair<Integer, Boolean> value = result.getInt(); if (!value.getSecond()) { System.out.println("Failed to get joint index"); return; }
+            boolean is_relative = value.getFirst() > 0 ? true : false;
+            if (is_relative) {
                 this.swerve.softResetImu();
             }
-            System.out.println("Setting field relative commands to " + value);
-            this.swerve.setFieldRelativeCommands(value);
+            System.out.println("Setting field relative commands to " + is_relative);
+            this.swerve.setFieldRelativeCommands(is_relative);
         }
     }
     // public void update() {
