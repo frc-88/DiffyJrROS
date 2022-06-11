@@ -185,7 +185,7 @@ public class TunnelProtocol {
             }
             
             short length = TunnelUtil.toShort(Arrays.copyOfRange(buffer, length_start, index));
-            if (length > MAX_PACKET_LEN) {
+            if (length >= MAX_PACKET_LEN || length < 0) {
                 System.out.println(String.format("Buffer length exceeds max allowable length: %d\n", length));
             }
             // System.out.println("Found packet length: " + length);
