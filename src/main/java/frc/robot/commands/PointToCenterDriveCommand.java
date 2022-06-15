@@ -7,7 +7,7 @@ package frc.robot.commands;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.SwerveJoystick;
 import frc.robot.util.coprocessor.VelocityCommand;
-import frc.robot.util.coprocessor.serial.DiffyJrSerial;
+// import frc.robot.util.coprocessor.serial.DiffyJrSerial;
 import frc.robot.util.coprocessor.networktables.DiffyJrTable;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -16,8 +16,8 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 public class PointToCenterDriveCommand extends CommandBase {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final DriveSubsystem m_drive;
-  private final DiffyJrSerial m_ros_interface;
-  // private final DiffyJrTable m_ros_interface;
+  // private final DiffyJrSerial m_ros_interface;
+  private final DiffyJrTable m_ros_interface;
   private final SwerveJoystick m_joystick;
   private double m_normalizeError = 1.0;
   private double m_maxAngVel = 1.0;
@@ -28,8 +28,8 @@ public class PointToCenterDriveCommand extends CommandBase {
    *
    * @param drive The subsystem used by this command.
    */
-  // public PointToCenterDriveCommand(DriveSubsystem drive, DiffyJrTable ros_interface, SwerveJoystick joystick, double maxAngVel) {
-  public PointToCenterDriveCommand(DriveSubsystem drive, DiffyJrSerial ros_interface, SwerveJoystick joystick, double maxAngVel) {
+  public PointToCenterDriveCommand(DriveSubsystem drive, DiffyJrTable ros_interface, SwerveJoystick joystick, double maxAngVel) {
+  // public PointToCenterDriveCommand(DriveSubsystem drive, DiffyJrSerial ros_interface, SwerveJoystick joystick, double maxAngVel) {
     m_drive = drive;
     m_ros_interface = ros_interface;
     m_joystick = joystick;
