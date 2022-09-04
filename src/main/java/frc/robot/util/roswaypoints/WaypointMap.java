@@ -33,7 +33,6 @@ public class WaypointMap {
 
     public static String parseWaypointName(String waypointName) {
         return waypointName.replaceAll("<team>", getTeamColorName());
-
     }
 
     public Pose2d getWaypoint(String waypointName) {

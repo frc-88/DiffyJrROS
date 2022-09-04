@@ -15,7 +15,9 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.util.coprocessor.ChassisInterface;
+import frc.robot.util.coprocessor.CoprocessorGameObject;
 import frc.robot.util.coprocessor.MessageTimer;
 import frc.robot.util.coprocessor.tunnel.CoprocessorBase;
 import frc.robot.util.roswaypoints.GoalStatus;
@@ -101,6 +103,9 @@ public class CoprocessorTable extends CoprocessorBase {
     protected Map<String, NetworkTableEntry> waypointYEntries = new HashMap<>();
     protected Map<String, NetworkTableEntry> waypointTEntries = new HashMap<>();
 
+    private NetworkTable objectTable;
+    protected Map<String, CoprocessorGameObject> gameObjects = new HashMap<>();
+
     public CoprocessorTable(ChassisInterface chassis, String address, int port, double updateInterval) {
         super(chassis);
         this.address = address;
@@ -180,6 +185,9 @@ public class CoprocessorTable extends CoprocessorBase {
 
         waypointsTable = rootTable.getSubTable("waypoints");
         waypointsTable.addSubTableListener((parent, name, table) -> {newWaypointCallback(name);}, true);
+
+        objectTable = rootTable.getSubTable("detections");
+        objectTable.addSubTableListener((parent, name, table) -> {newObjectCallback(name);}, true);
     }
 
     private void cmdVelCallback(EntryNotification notification) {
@@ -402,6 +410,49 @@ public class CoprocessorTable extends CoprocessorBase {
             jointCommandValues.set(index, 0.0);
             jointCommandTimers.set(index, new MessageTimer(DEFAULT_MESSAGE_TIMEOUT));
         }
+    }
 
+    private void newObjectCallback(String name) {
+        gameObjects.put(name, new CoprocessorGameObject(name));
+        NetworkTableEntry updateEntry = objectTable.getSubTable(name).getEntry("update");
+        updateEntry.addListener((notification) -> this.objectEntryCallback(name, notification), EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+        System.out.println("Registering object " + name);
+    }
+
+    void objectEntryCallback(String objectName, EntryNotification notification)
+    {
+        CoprocessorGameObject gameObject = gameObjects.get(objectName);
+        gameObject.count = (int)objectTable.getSubTable(objectName).getEntry("count").getDouble(0.0);
+        gameObject.set(
+            objectTable.getSubTable(objectName).getEntry("x").getDouble(0.0), 
+            objectTable.getSubTable(objectName).getEntry("y").getDouble(0.0), 
+            objectTable.getSubTable(objectName).getEntry("z").getDouble(0.0)
+        );
+    }
+
+    public static String getTeamColorName() {
+        if (DriverStation.getAlliance() == Alliance.Red) {
+            return "red";
+        }
+        else {
+            return "blue";
+        }
+    }
+
+    public static String parseObjectName(String objectName) {
+        return objectName.replaceAll("<team>", getTeamColorName());
+    }
+
+    public CoprocessorGameObject getNearestGameObject(String objectName)
+    {
+        objectName = parseObjectName(objectName);
+        if (!gameObjects.containsKey(objectName)) {
+            newObjectCallback(objectName);
+        }
+        if (!objectTable.containsSubTable(objectName)) {
+            System.out.println(objectName + " doesn't exist in object table!");
+            return new CoprocessorGameObject("");
+        }
+        return gameObjects.get(objectName);
     }
 }
