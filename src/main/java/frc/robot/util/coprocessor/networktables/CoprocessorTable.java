@@ -78,7 +78,6 @@ public class CoprocessorTable extends CoprocessorBase {
     private NetworkTableEntry waypointIntermediateToleranceEntry;
     private NetworkTableEntry waypointIgnoreObstaclesEntry;
     private NetworkTableEntry waypointIgnoreWallsEntry;
-    private NetworkTableEntry waypointInterruptableByEntry;
     private NetworkTableEntry waypointTimeoutEntry;
 
     private NetworkTable planControlTable;
@@ -346,7 +345,6 @@ public class CoprocessorTable extends CoprocessorBase {
         waypointIntermediateToleranceEntry = waypointSegmentTable.getEntry("intermediate_tolerance");
         waypointIgnoreObstaclesEntry = waypointSegmentTable.getEntry("ignore_obstacles");
         waypointIgnoreWallsEntry = waypointSegmentTable.getEntry("ignore_walls");
-        waypointInterruptableByEntry = waypointSegmentTable.getEntry("interruptable_by");
         waypointTimeoutEntry = waypointSegmentTable.getEntry("timeout");
 
         waypointIsContinuousEntry.setValue(waypoint.is_continuous);
@@ -354,7 +352,6 @@ public class CoprocessorTable extends CoprocessorBase {
         waypointIntermediateToleranceEntry.setValue(waypoint.intermediate_tolerance);
         waypointIgnoreObstaclesEntry.setValue(waypoint.ignore_obstacles);
         waypointIgnoreWallsEntry.setValue(waypoint.ignore_walls);
-        waypointInterruptableByEntry.setValue(waypoint.interruptableBy);
         waypointTimeoutEntry.setValue(waypoint.timeout);
     }
 

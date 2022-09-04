@@ -181,7 +181,6 @@ public class CoprocessorSerial extends CoprocessorBase implements TunnelInterfac
             waypoint.pose.getY(),
             waypoint.pose.getRotation().getRadians(),
             waypoint.intermediate_tolerance,
-            waypoint.interruptableBy,
             waypoint.timeout,
             createWaypointOptionBitmask(waypoint)
         );

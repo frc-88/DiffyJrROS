@@ -6,7 +6,6 @@ package frc.robot;
 
 import frc.robot.commands.CoastDriveMotors;
 import frc.robot.commands.DriveSwerveJoystickCommand;
-import frc.robot.commands.DriveToPowercell;
 import frc.robot.commands.DriveWithWaypointsPlan;
 import frc.robot.commands.PassthroughRosCommand;
 import frc.robot.commands.PointToCenterDriveCommand;
@@ -38,6 +37,7 @@ public class RobotContainer {
   private final SwerveJoystick m_joystick = new SwerveJoystick(SwerveControllerType.XBOX);
   private final DiffyJrTable m_ros_interface = new DiffyJrTable(
     m_drive.getSwerve(),
+    m_drive.getImu(),
     Robot.isSimulation() ? Constants.COPROCESSOR_ADDRESS_SIMULATED : Constants.COPROCESSOR_ADDRESS,
     Constants.COPROCESSOR_PORT,
     Constants.COPROCESSOR_TABLE_UPDATE_DELAY);
@@ -80,16 +80,13 @@ public class RobotContainer {
     autoPlan.addWaypoint(new Waypoint("<team>_" + "_point_a"));
     autoPlan.addWaypoint(new Waypoint("<team>_" + "_point_b"));
     autoPlan.addWaypoint(new Waypoint("<team>_" + "_end"));
-    autoPlan.addWaypoint(new Waypoint("powercell"));
 
     CommandBase auto1 = new SequentialCommandGroup(
       // new DriveDistanceMeters(m_drive, 0.5, 0.5),
       new DriveWithWaypointsPlan(m_nav, m_drive, autoPlan)
     );
-    CommandBase auto2 = new DriveToPowercell(m_nav, m_drive);
-
-    // return auto1;
-    return auto2;
+    
+    return auto1;
   }
 
   private void configurePeriodics(Robot robot) {

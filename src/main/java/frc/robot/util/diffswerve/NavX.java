@@ -54,6 +54,14 @@ public class NavX {
         this.base = new AHRS(port);
     }
 
+    public double getRoll() {
+        return this.base.getRoll();
+    }
+
+    public double getPitch() {
+        return this.base.getPitch();
+    }
+
     public double getYaw() {
         return -this.base.getYaw() + this.offset;
     }
@@ -79,15 +87,15 @@ public class NavX {
     }
 
     public double getAccelX() {
-        return this.base.getRawAccelX();
+        return this.base.getWorldLinearAccelX();
     }
 
     public double getAccelY() {
-        return this.base.getRawAccelY();
+        return this.base.getWorldLinearAccelY();
     }
 
     public double getAccelZ() {
-        return this.base.getRawAccelZ();
+        return this.base.getWorldLinearAccelZ();
     }
 
     public void reset() {
