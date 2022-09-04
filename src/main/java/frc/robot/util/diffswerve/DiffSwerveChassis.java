@@ -1,11 +1,9 @@
 package frc.robot.util.diffswerve;
 
-import org.apache.commons.math3.distribution.NormalDistribution;
-import org.apache.commons.math3.distribution.AbstractRealDistribution;
-
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -13,6 +11,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.util.coprocessor.ChassisInterface;
 import frc.robot.util.coprocessor.VelocityCommand;
 
@@ -32,13 +31,16 @@ public class DiffSwerveChassis implements ChassisInterface {
     private double angleSetpoint = 0.0;
     private boolean angleControllerEnabled = true;
 
+    private final SlewRateLimiter vxLimiter;
+    private final SlewRateLimiter vyLimiter;
+    private final SlewRateLimiter vtLimiter;
+
     private boolean fieldRelativeCommands = false;
     private Rotation2d fieldRelativeImuOffset = new Rotation2d();
 
     public final NavX imu;
 
-    private final AbstractRealDistribution directionConstraintGauss;
-    private double normalizeGaussConst = 1.0;
+    private long timer = 0;
 
     public DiffSwerveChassis()
     {
@@ -116,9 +118,10 @@ public class DiffSwerveChassis implements ChassisInterface {
                                 Constants.DriveTrain.PROFILE_CONSTRAINT_ACCEL));
         angleController.enableContinuousInput(-Math.PI / 2.0, Math.PI / 2.0);
 
-        directionConstraintGauss = new NormalDistribution(0.0, Constants.DriveTrain.DIRECTIONAL_CONSTRAINT_STDDEV);
-        normalizeGaussConst = directionalConstraintRampFunction(0.0);
-        
+        vxLimiter = new SlewRateLimiter(Constants.DriveTrain.CONSTRAINT_LINEAR_ACCEL);
+        vyLimiter = new SlewRateLimiter(Constants.DriveTrain.CONSTRAINT_LINEAR_ACCEL);
+        vtLimiter = new SlewRateLimiter(Constants.DriveTrain.CONSTRAINT_ANG_ACCEL);
+
         System.out.println("Model created!");
     }
 
@@ -239,6 +242,9 @@ public class DiffSwerveChassis implements ChassisInterface {
             module.setIdealState(new SwerveModuleState(0.0, new Rotation2d(module.getModuleAngle())));
         }
         resetAngleSetpoint();
+        vxLimiter.reset(0.0);
+        vyLimiter.reset(0.0);
+        vtLimiter.reset(0.0);
     }
 
     public void setIdealState(SwerveModuleState[] swerveModuleStates) {
@@ -297,51 +303,35 @@ public class DiffSwerveChassis implements ChassisInterface {
 
     private SwerveModuleState[] getModuleStatesWithConstraints(ChassisSpeeds chassisSpeeds)
     {
-        SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(chassisSpeeds);
-        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.DriveTrain.MAX_CHASSIS_SPEED);
-        // double directionalConstraintCost = getDirectionalConstraintCost(swerveModuleStates);
-
-        // if (directionalConstraintCost < Constants.DriveTrain.DIRECTIONAL_CONSTRAINT_DEADZONE) {
-        //     RadialChassisSpeeds radSpeeds = RadialChassisSpeeds.fromChassisSpeeds(chassisSpeeds, Constants.DriveTrain.CURVATURE_DT);
-        //     radSpeeds.velocityMetersPerSecond *= directionalConstraintCost;
-        //     chassisSpeeds = radSpeeds.toChassisSpeeds();
-        //     swerveModuleStates = kinematics.toSwerveModuleStates(chassisSpeeds);
-        //     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.DriveTrain.MAX_CHASSIS_SPEED);
-        // }
+        double batteryVoltage = RobotController.getBatteryVoltage();
         
+        double adjustedMaxSpeed = Constants.DriveTrain.MAX_CHASSIS_SPEED * 
+            batteryVoltage / 
+            Constants.DifferentialSwerveModule.CONTROL_EFFORT;
+        if (adjustedMaxSpeed > Constants.DriveTrain.MAX_CHASSIS_SPEED) {
+            adjustedMaxSpeed = Constants.DriveTrain.MAX_CHASSIS_SPEED;
+        }
+        else if (adjustedMaxSpeed < 0.0) {
+            adjustedMaxSpeed = 0.0;
+        }
+
+        ChassisSpeeds limitedChassisSpeeds = getLimitedChassisSpeeds(chassisSpeeds);
+
+        SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(limitedChassisSpeeds);
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, adjustedMaxSpeed);
+
         return swerveModuleStates;
     }
-/*
-    private double getDirectionalConstraintCost(SwerveModuleState[] swerveModuleStates) {
-        double maxError = 0.0;
-        for (int index = 0; index < this.modules.length; index++) {
-            double setpoint = swerveModuleStates[index].angle.getRadians();
-            double measurement = modules[index].getState().angle.getRadians();
-            double error = setpoint - measurement;
-            if (Math.abs(error) > Math.PI * 0.5) {
-                setpoint += Math.PI;
-                setpoint = Helpers.boundHalfAngle(setpoint);
-                error = setpoint - measurement;
-            }
-            error = Math.abs(error);
-            if (error > maxError) {
-                maxError = error;
-            }
-            // System.out.println(String.format("%d\t%.4f\t%.4f", index, setpoint, measurement));
-        }
 
-        double cost = directionalConstraintRampFunction(Helpers.boundQuarterAngle(maxError) / (Math.PI * 0.5));
-        if (cost > 1.0) {
-            cost = 1.0;
-        }
-        if (cost < 0.0) {
-            cost = 0.0;
-        }
-        return cost;
-    }
-*/
-    private double directionalConstraintRampFunction(double error) {
-        return directionConstraintGauss.density(error) / normalizeGaussConst;
+    private ChassisSpeeds getLimitedChassisSpeeds(ChassisSpeeds chassisSpeeds) {
+        // long now = RobotController.getFPGATime();
+        // System.out.println("rate: " + (1E6 / (double)(now - timer)));
+        // timer = now;
+        return new ChassisSpeeds(
+            vxLimiter.calculate(chassisSpeeds.vxMetersPerSecond),
+            vyLimiter.calculate(chassisSpeeds.vyMetersPerSecond),
+            vtLimiter.calculate(chassisSpeeds.omegaRadiansPerSecond)
+        );
     }
 
     public void followPose(Pose2d pose, Rotation2d heading, double vel) {

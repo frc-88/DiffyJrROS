@@ -6,10 +6,10 @@ import edu.wpi.first.math.util.Units;
 
 public class Constants {
 
-    public static final int TICKS_PER_UPDATE = 1;
-    public static final double METRIC_FLUSH_PERIOD = 1.0;
-    public static final double UPDATE_PERIOD = 0.02;
     public static final double EPSILON = 0.00001;
+
+    // average update rate of chassis command loop
+    public static final double kMainDt = 1.0 / 25.0;
 
     public static class DriveTrain {
         public static Pose2d robotPose;
@@ -28,7 +28,8 @@ public class Constants {
 
         public static final double MAX_CHASSIS_SPEED = 4.48;  // Maximum chassis speed (m/s)
         public static final double MAX_CHASSIS_ANG_VEL = 20.5;  // Maximum chassis rotational velocity (rad/s)
-        public static final double MAX_CHASSIS_LINEAR_ACCEL = 20.0; // Maximum chassis linear acceleration (m/s^2)
+        public static final double MAX_CHASSIS_LINEAR_ACCEL = 10.0; // Maximum chassis linear acceleration (m/s^2)
+        public static final double MAX_CHASSIS_ANG_ACCEL = 30.0; // Maximum chassis angular acceleration (m/s^2)
         public static final double MIN_CHASSIS_SPEED = 0.05;  // Minimum chassis speed that isn't zero (m/s)
         public static final double MIN_CHASSIS_ANG_VEL = 0.1;  // Minimum chassis rotational velocity that isn't zero (rad/s)
 
@@ -41,7 +42,11 @@ public class Constants {
 
         // Constraints
         public static final double PROFILE_CONSTRAINT_VEL = 20.5;
-        public static final double PROFILE_CONSTRAINT_ACCEL = 20.0;
+        public static final double PROFILE_CONSTRAINT_ACCEL = 30.0;
+
+        // Acceleration limits
+        public static final double CONSTRAINT_LINEAR_ACCEL = 10.0; // Maximum artificial linear acceleration (m/s^2)
+        public static final double CONSTRAINT_ANG_ACCEL = 30.0; // Maximum artificial angular acceleration (m/s^2)
 
         public static final double CURVATURE_DT = 1.0 / 50.0;
         public static final double DIRECTIONAL_CONSTRAINT_STDDEV = 0.5;
@@ -52,6 +57,7 @@ public class Constants {
 
         // update rate of our modules 5ms.
         public static final double kDt = 0.005;
+
 
         public static final double FALCON_FREE_SPEED =
                 Units.rotationsPerMinuteToRadiansPerSecond(6380.0);  // Radians per second
