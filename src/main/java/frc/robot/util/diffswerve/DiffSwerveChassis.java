@@ -129,7 +129,7 @@ public class DiffSwerveChassis implements ChassisInterface {
         fieldRelativeCommands = isFieldRelative;
     }
 
-    public boolean getFieldRelativeCommands() {
+    public boolean commandsAreFieldRelative() {
         return fieldRelativeCommands;
     }
 
@@ -243,24 +243,19 @@ public class DiffSwerveChassis implements ChassisInterface {
         }
     }
 
-    private ChassisSpeeds getChassisSpeeds(double vx, double vy, double angularVelocity, boolean fieldRelative,
-            Rotation2d relativeAngle) {
-        ChassisSpeeds chassisSpeeds;
-        if (fieldRelative) {
-            chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, angularVelocity, relativeAngle);
-        } else {
-            chassisSpeeds = new ChassisSpeeds(vx, vy, angularVelocity);
-        }
-        return chassisSpeeds;
-    }
-
     private void resetAngleSetpoint() {
-        this.angleSetpoint = getAnglePidMeasurement().getRadians();
-        angleController.reset(this.angleSetpoint);
+        if (angleControllerEnabled) {
+            this.angleSetpoint = getAnglePidMeasurement().getRadians();
+            angleController.reset(this.angleSetpoint);
+        }
     }
 
     public void drive(VelocityCommand command) {
         drive(command.vx, command.vy, command.vt);
+    }
+
+    public void drive(ChassisSpeeds command) {
+        drive(command.vxMetersPerSecond, command.vyMetersPerSecond, command.omegaRadiansPerSecond);
     }
 
     /**
@@ -276,15 +271,13 @@ public class DiffSwerveChassis implements ChassisInterface {
             setChassisSpeeds(new ChassisSpeeds(0.0, 0.0, 0.0));
         } else if (!angleControllerEnabled || Math.abs(angularVelocity) > 0) {
             // if translation and rotation are significant, push setpoints as-is
-            setChassisSpeeds(getChassisSpeeds(vx, vy, angularVelocity, getFieldRelativeCommands(),
-                    getImuHeadingWithOffset()));
+            setChassisSpeeds(new ChassisSpeeds(vx, vy, angularVelocity));
             resetAngleSetpoint();
         } else {
             // if only translation is significant, set angular velocity according to
             // previous angle setpoint
             double controllerAngVel = angleController.calculate(getAnglePidMeasurement().getRadians(), angleSetpoint);
-            setChassisSpeeds(getChassisSpeeds(vx, vy, controllerAngVel, getFieldRelativeCommands(),
-                    new Rotation2d(angleSetpoint)));
+            setChassisSpeeds(new ChassisSpeeds(vx, vy, controllerAngVel));
         }
     }
 
@@ -300,28 +293,17 @@ public class DiffSwerveChassis implements ChassisInterface {
     }
 
     private SwerveModuleState[] getModuleStatesWithConstraints(ChassisSpeeds chassisSpeeds) {
-        double batteryVoltage = RobotController.getBatteryVoltage();
-        double limitedBatteryVoltage = batteryLimiter.calculate(batteryVoltage);
-        if (batteryVoltage < limitedBatteryVoltage) {
-            batteryLimiter.reset(batteryVoltage);
-            limitedBatteryVoltage = batteryVoltage;
-        }
-
-        if (limitedBatteryVoltage < Constants.DriveTrain.BROWNOUT_ZONE) {
-            limitedBatteryVoltage = Constants.DriveTrain.BROWNOUT_ZONE_MAX_VOLTAGE;
-        }
-
-        double adjustedMaxSpeed = Constants.DriveTrain.MAX_CHASSIS_SPEED *
-            limitedBatteryVoltage /
-                Constants.DifferentialSwerveModule.CONTROL_EFFORT;
-        if (adjustedMaxSpeed > Constants.DriveTrain.MAX_CHASSIS_SPEED) {
-            adjustedMaxSpeed = Constants.DriveTrain.MAX_CHASSIS_SPEED;
-        } else if (adjustedMaxSpeed < 0.0) {
-            adjustedMaxSpeed = 0.0;
-        }
-
-        ChassisSpeeds limitedChassisSpeeds = getLimitedChassisSpeeds(chassisSpeeds);
+        ChassisSpeeds limitedChassisSpeeds = getAccelLimitedChassisSpeeds(chassisSpeeds);
         SwerveModuleState[] swerveModuleStates;
+
+        if (commandsAreFieldRelative()) {
+            // Apply field relative adjustment after slew limiter to avoid lagging
+            limitedChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                limitedChassisSpeeds.vxMetersPerSecond, 
+                limitedChassisSpeeds.vyMetersPerSecond, 
+                limitedChassisSpeeds.omegaRadiansPerSecond, 
+                getImuHeadingWithOffset());
+        }
 
         if (isWithinDeadband(limitedChassisSpeeds)) {
             // if within the command deadband, hold the module directions
@@ -333,35 +315,57 @@ public class DiffSwerveChassis implements ChassisInterface {
         }
         else {
             swerveModuleStates = kinematics.toSwerveModuleStates(limitedChassisSpeeds);
-            SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, adjustedMaxSpeed);
+            SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, getBatteryLimitedMaxSpeed());
         }
 
         return swerveModuleStates;
     }
 
-    private ChassisSpeeds getLimitedChassisSpeeds(ChassisSpeeds chassisSpeeds) {
-        double vx, vy, vt;
-        if (Math.abs(chassisSpeeds.omegaRadiansPerSecond) < Constants.DriveTrain.MAX_CHASSIS_ANG_VEL / 10.0) {
-            vx = Constants.DriveTrain.ENABLE_LINEAR_ACCEL_CONSTRAINT
-                        ? vxLimiter.calculate(chassisSpeeds.vxMetersPerSecond)
-                        : chassisSpeeds.vxMetersPerSecond;
-            vy = Constants.DriveTrain.ENABLE_LINEAR_ACCEL_CONSTRAINT
-                        ? vyLimiter.calculate(chassisSpeeds.vyMetersPerSecond)
-                        : chassisSpeeds.vyMetersPerSecond;
+    private double getBatteryLimitedMaxSpeed() {
+        if (Constants.DriveTrain.ENABLE_BATTERY_CONSTRAINT) {
+            double batteryVoltage = RobotController.getBatteryVoltage();
+            double limitedBatteryVoltage = batteryLimiter.calculate(batteryVoltage);
+            if (batteryVoltage < limitedBatteryVoltage) {
+                batteryLimiter.reset(batteryVoltage);
+                limitedBatteryVoltage = batteryVoltage;
+            }
+
+            if (limitedBatteryVoltage < Constants.DriveTrain.BROWNOUT_ZONE) {
+                limitedBatteryVoltage = Constants.DriveTrain.BROWNOUT_ZONE_MAX_VOLTAGE;
+            }
+
+            double adjustedMaxSpeed = Constants.DriveTrain.MAX_CHASSIS_SPEED *
+                limitedBatteryVoltage /
+                    Constants.DifferentialSwerveModule.CONTROL_EFFORT;
+            if (adjustedMaxSpeed > Constants.DriveTrain.MAX_CHASSIS_SPEED) {
+                adjustedMaxSpeed = Constants.DriveTrain.MAX_CHASSIS_SPEED;
+            } else if (adjustedMaxSpeed < 0.0) {
+                adjustedMaxSpeed = 0.0;
+            }
+            return adjustedMaxSpeed;
         }
         else {
-            vx = chassisSpeeds.vxMetersPerSecond;
-            vy = chassisSpeeds.vyMetersPerSecond;
+            return Constants.DriveTrain.MAX_CHASSIS_SPEED;
         }
-        vt = Constants.DriveTrain.ENABLE_ANG_ACCEL_CONSTRAINT
-                ? vtLimiter.calculate(chassisSpeeds.omegaRadiansPerSecond)
-                : chassisSpeeds.omegaRadiansPerSecond;
-        return new ChassisSpeeds(vx, vy, vt);
+    }
+
+    private ChassisSpeeds getAccelLimitedChassisSpeeds(ChassisSpeeds chassisSpeeds) {
+        return new ChassisSpeeds(
+            Constants.DriveTrain.ENABLE_LINEAR_ACCEL_CONSTRAINT
+                        ? vxLimiter.calculate(chassisSpeeds.vxMetersPerSecond)
+                        : chassisSpeeds.vxMetersPerSecond,
+            Constants.DriveTrain.ENABLE_LINEAR_ACCEL_CONSTRAINT
+                        ? vyLimiter.calculate(chassisSpeeds.vyMetersPerSecond)
+                        : chassisSpeeds.vyMetersPerSecond,
+            Constants.DriveTrain.ENABLE_ANG_ACCEL_CONSTRAINT
+                        ? vtLimiter.calculate(chassisSpeeds.omegaRadiansPerSecond)
+                        : chassisSpeeds.omegaRadiansPerSecond
+        );
     }
 
     public void followPose(Pose2d pose, Rotation2d heading, double vel) {
         ChassisSpeeds adjustedSpeeds = controller.calculate(odometry.getPoseMeters(), pose, vel, heading);
-        setIdealState(getModuleStatesWithConstraints(adjustedSpeeds));
+        setChassisSpeeds(adjustedSpeeds);
     }
 
     @Override

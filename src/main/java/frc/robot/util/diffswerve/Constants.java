@@ -51,6 +51,7 @@ public class Constants {
         public static final double CONSTRAINT_ANG_ACCEL = 30.0; // Maximum artificial angular acceleration (m/s^2)
         public static final boolean ENABLE_LINEAR_ACCEL_CONSTRAINT = true;
         public static final boolean ENABLE_ANG_ACCEL_CONSTRAINT = false;
+        public static final boolean ENABLE_BATTERY_CONSTRAINT = true;
 
         public static final double CURVATURE_DT = 1.0 / 50.0;
         public static final double DIRECTIONAL_CONSTRAINT_STDDEV = 0.5;
