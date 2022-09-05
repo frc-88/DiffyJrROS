@@ -33,13 +33,12 @@ public class DiffSwerveChassis implements ChassisInterface {
     private final SlewRateLimiter vxLimiter;
     private final SlewRateLimiter vyLimiter;
     private final SlewRateLimiter vtLimiter;
+    private ChassisSpeeds chassisSpeedsSetpoint = new ChassisSpeeds();
 
     private boolean fieldRelativeCommands = false;
     private Rotation2d fieldRelativeImuOffset = new Rotation2d();
 
     public final NavX imu;
-
-    private long timer = 0;
 
     public DiffSwerveChassis() {
         System.out.println("Creating diff swerve model");
@@ -147,6 +146,16 @@ public class DiffSwerveChassis implements ChassisInterface {
                 backLeft.getState(),
                 backRight.getState(),
                 frontRight.getState());
+        updateIdealState();
+    }
+
+    private void updateIdealState()
+    {
+        setIdealState(getModuleStatesWithConstraints(chassisSpeedsSetpoint));
+    }
+
+    private void setChassisSpeeds(ChassisSpeeds speeds) {
+        chassisSpeedsSetpoint = speeds;
     }
 
     public void controllerPeriodic() {
@@ -223,17 +232,6 @@ public class DiffSwerveChassis implements ChassisInterface {
         // return getImuHeadingRate();
     }
 
-    // Set wheel velocities to zero and hold module directions
-    public void holdDirection() {
-        for (DiffSwerveModule module : modules) {
-            module.setIdealState(new SwerveModuleState(0.0, new Rotation2d(module.getModuleAngle())));
-        }
-        resetAngleSetpoint();
-        vxLimiter.reset(0.0);
-        vyLimiter.reset(0.0);
-        vtLimiter.reset(0.0);
-    }
-
     public void setIdealState(SwerveModuleState[] swerveModuleStates) {
         for (int index = 0; index < swerveModuleStates.length; index++) {
             modules[index].setIdealState(swerveModuleStates[index]);
@@ -268,25 +266,32 @@ public class DiffSwerveChassis implements ChassisInterface {
      * @param angularVelocity angular velocity (rotating speed)
      */
     public void drive(double vx, double vy, double angularVelocity) {
-        if (Math.abs(vx) < Constants.DriveTrain.DEADBAND
-                && Math.abs(vy) < Constants.DriveTrain.DEADBAND
-                && Math.abs(angularVelocity) < Constants.DriveTrain.DEADBAND) {
+        if (isWithinDeadband(vx, vy, angularVelocity)) {
             // if setpoints are almost zero, set chassis to hold position
-            holdDirection();
+            setChassisSpeeds(new ChassisSpeeds(0.0, 0.0, 0.0));
         } else if (!angleControllerEnabled || Math.abs(angularVelocity) > 0) {
             // if translation and rotation are significant, push setpoints as-is
-            ChassisSpeeds chassisSpeeds = getChassisSpeeds(vx, vy, angularVelocity, getFieldRelativeCommands(),
-                    getImuHeadingWithOffset());
-            setIdealState(getModuleStatesWithConstraints(chassisSpeeds));
+            setChassisSpeeds(getChassisSpeeds(vx, vy, angularVelocity, getFieldRelativeCommands(),
+                    getImuHeadingWithOffset()));
             resetAngleSetpoint();
         } else {
             // if only translation is significant, set angular velocity according to
             // previous angle setpoint
             double controllerAngVel = angleController.calculate(getAnglePidMeasurement().getRadians(), angleSetpoint);
-            ChassisSpeeds chassisSpeeds = getChassisSpeeds(vx, vy, controllerAngVel, getFieldRelativeCommands(),
-                    new Rotation2d(angleSetpoint));
-            setIdealState(getModuleStatesWithConstraints(chassisSpeeds));
+            setChassisSpeeds(getChassisSpeeds(vx, vy, controllerAngVel, getFieldRelativeCommands(),
+                    new Rotation2d(angleSetpoint)));
         }
+    }
+
+    private boolean isWithinDeadband(double vx, double vy, double angularVelocity)
+    {
+        return Math.abs(vx) < Constants.DriveTrain.LINEAR_DEADBAND
+                && Math.abs(vy) < Constants.DriveTrain.LINEAR_DEADBAND
+                && Math.abs(angularVelocity) < Constants.DriveTrain.ANG_DEADBAND;
+    }
+
+    private boolean isWithinDeadband(ChassisSpeeds speeds) {
+        return isWithinDeadband(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond);
     }
 
     private SwerveModuleState[] getModuleStatesWithConstraints(ChassisSpeeds chassisSpeeds) {
@@ -302,9 +307,20 @@ public class DiffSwerveChassis implements ChassisInterface {
         }
 
         ChassisSpeeds limitedChassisSpeeds = getLimitedChassisSpeeds(chassisSpeeds);
+        SwerveModuleState[] swerveModuleStates;
 
-        SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(limitedChassisSpeeds);
-        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, adjustedMaxSpeed);
+        if (isWithinDeadband(limitedChassisSpeeds)) {
+            // if within the command deadband, hold the module directions
+            swerveModuleStates = new SwerveModuleState[modules.length];
+            for (int index = 0; index < modules.length; index++) {
+                swerveModuleStates[index] = new SwerveModuleState(0.0, new Rotation2d(modules[index].getModuleAngle()));
+            }
+            resetAngleSetpoint();
+        }
+        else {
+            swerveModuleStates = kinematics.toSwerveModuleStates(limitedChassisSpeeds);
+            SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, adjustedMaxSpeed);
+        }
 
         return swerveModuleStates;
     }
@@ -329,7 +345,7 @@ public class DiffSwerveChassis implements ChassisInterface {
 
     @Override
     public void stop() {
-        holdDirection();
+        setChassisSpeeds(new ChassisSpeeds(0.0, 0.0, 0.0));
     }
 
     @Override

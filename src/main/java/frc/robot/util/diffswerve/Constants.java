@@ -24,11 +24,12 @@ public class Constants {
         public static final Translation2d BACK_RIGHT_POSITION = new Translation2d(-WIDTH / 2.0, -LENGTH / 2.0);
         public static final Translation2d FRONT_RIGHT_POSITION = new Translation2d(WIDTH / 2.0, -LENGTH / 2.0);
 
-        public static final double DEADBAND = 0.01;
+        public static final double LINEAR_DEADBAND = 0.01;  // Linear command velocity deadband (m/s)
+        public static final double ANG_DEADBAND = 0.01;  // Angular command velocity deadband (rad/s)
 
         public static final double MAX_CHASSIS_SPEED = 4.48;  // Maximum chassis speed (m/s)
         public static final double MAX_CHASSIS_ANG_VEL = 20.5;  // Maximum chassis rotational velocity (rad/s)
-        public static final double MAX_CHASSIS_LINEAR_ACCEL = 10.0; // Maximum chassis linear acceleration (m/s^2)
+        public static final double MAX_CHASSIS_LINEAR_ACCEL = 8.0; // Maximum chassis linear acceleration (m/s^2)
         public static final double MAX_CHASSIS_ANG_ACCEL = 30.0; // Maximum chassis angular acceleration (m/s^2)
         public static final double MIN_CHASSIS_SPEED = 0.05;  // Minimum chassis speed that isn't zero (m/s)
         public static final double MIN_CHASSIS_ANG_VEL = 0.1;  // Minimum chassis rotational velocity that isn't zero (rad/s)
@@ -41,8 +42,8 @@ public class Constants {
         public static final double kD = 0.5;
 
         // Constraints
-        public static final double CONSTRAINT_LINEAR_VEL = 20.5;  // PID Controller max velocity (m/s)
-        public static final double CONSTRAINT_LINEAR_ACCEL = 10.0; // Maximum artificial linear acceleration (m/s^2)
+        public static final double CONSTRAINT_LINEAR_VEL = 4.5;  // PID Controller max velocity (m/s)
+        public static final double CONSTRAINT_LINEAR_ACCEL = 6.0; // Maximum artificial linear acceleration (m/s^2)
         public static final double CONSTRAINT_ANG_ACCEL = 30.0; // Maximum artificial angular acceleration (m/s^2)
         public static final boolean ENABLE_LINEAR_ACCEL_CONSTRAINT = true;
         public static final boolean ENABLE_ANG_ACCEL_CONSTRAINT = false;
