@@ -29,10 +29,14 @@ public class Constants {
 
         public static final double MAX_CHASSIS_SPEED = 4.48;  // Maximum chassis speed (m/s)
         public static final double MAX_CHASSIS_ANG_VEL = 20.5;  // Maximum chassis rotational velocity (rad/s)
-        public static final double MAX_CHASSIS_LINEAR_ACCEL = 8.0; // Maximum chassis linear acceleration (m/s^2)
+        public static final double MAX_CHASSIS_LINEAR_ACCEL = 7.0; // Maximum chassis linear acceleration (m/s^2)
         public static final double MAX_CHASSIS_ANG_ACCEL = 30.0; // Maximum chassis angular acceleration (m/s^2)
         public static final double MIN_CHASSIS_SPEED = 0.05;  // Minimum chassis speed that isn't zero (m/s)
         public static final double MIN_CHASSIS_ANG_VEL = 0.1;  // Minimum chassis rotational velocity that isn't zero (rad/s)
+
+        public static final double MAX_BATTERY_SLEW_RATE = 2.0;  // How much to dampen the max voltage limit (Volts/second)
+        public static final double BROWNOUT_ZONE = 9.0;  // Voltage below which velocities should be severely throttled
+        public static final double BROWNOUT_ZONE_MAX_VOLTAGE = 2.5;  // Voltage scale to set while in the brown out zone
 
         public static final double ANGLE_kP = 3.0;
         public static final double ANGLE_kI = 0.0;
@@ -43,7 +47,7 @@ public class Constants {
 
         // Constraints
         public static final double CONSTRAINT_LINEAR_VEL = 4.5;  // PID Controller max velocity (m/s)
-        public static final double CONSTRAINT_LINEAR_ACCEL = 6.0; // Maximum artificial linear acceleration (m/s^2)
+        public static final double CONSTRAINT_LINEAR_ACCEL = 10.0; // Maximum artificial linear acceleration (m/s^2)
         public static final double CONSTRAINT_ANG_ACCEL = 30.0; // Maximum artificial angular acceleration (m/s^2)
         public static final boolean ENABLE_LINEAR_ACCEL_CONSTRAINT = true;
         public static final boolean ENABLE_ANG_ACCEL_CONSTRAINT = false;

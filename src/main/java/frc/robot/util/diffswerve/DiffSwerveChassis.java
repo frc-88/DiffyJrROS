@@ -35,6 +35,8 @@ public class DiffSwerveChassis implements ChassisInterface {
     private final SlewRateLimiter vtLimiter;
     private ChassisSpeeds chassisSpeedsSetpoint = new ChassisSpeeds();
 
+    private final SlewRateLimiter batteryLimiter;
+
     private boolean fieldRelativeCommands = false;
     private Rotation2d fieldRelativeImuOffset = new Rotation2d();
 
@@ -110,6 +112,9 @@ public class DiffSwerveChassis implements ChassisInterface {
         vxLimiter = new SlewRateLimiter(Constants.DriveTrain.CONSTRAINT_LINEAR_ACCEL);
         vyLimiter = new SlewRateLimiter(Constants.DriveTrain.CONSTRAINT_LINEAR_ACCEL);
         vtLimiter = new SlewRateLimiter(Constants.DriveTrain.CONSTRAINT_ANG_ACCEL);
+
+        batteryLimiter = new SlewRateLimiter(Constants.DriveTrain.MAX_BATTERY_SLEW_RATE);
+        batteryLimiter.reset(RobotController.getBatteryVoltage());
 
         System.out.println("Model created!");
     }
@@ -296,9 +301,18 @@ public class DiffSwerveChassis implements ChassisInterface {
 
     private SwerveModuleState[] getModuleStatesWithConstraints(ChassisSpeeds chassisSpeeds) {
         double batteryVoltage = RobotController.getBatteryVoltage();
+        double limitedBatteryVoltage = batteryLimiter.calculate(batteryVoltage);
+        if (batteryVoltage < limitedBatteryVoltage) {
+            batteryLimiter.reset(batteryVoltage);
+            limitedBatteryVoltage = batteryVoltage;
+        }
+
+        if (limitedBatteryVoltage < Constants.DriveTrain.BROWNOUT_ZONE) {
+            limitedBatteryVoltage = Constants.DriveTrain.BROWNOUT_ZONE_MAX_VOLTAGE;
+        }
 
         double adjustedMaxSpeed = Constants.DriveTrain.MAX_CHASSIS_SPEED *
-                batteryVoltage /
+            limitedBatteryVoltage /
                 Constants.DifferentialSwerveModule.CONTROL_EFFORT;
         if (adjustedMaxSpeed > Constants.DriveTrain.MAX_CHASSIS_SPEED) {
             adjustedMaxSpeed = Constants.DriveTrain.MAX_CHASSIS_SPEED;
@@ -326,16 +340,23 @@ public class DiffSwerveChassis implements ChassisInterface {
     }
 
     private ChassisSpeeds getLimitedChassisSpeeds(ChassisSpeeds chassisSpeeds) {
-        return new ChassisSpeeds(
-                Constants.DriveTrain.ENABLE_LINEAR_ACCEL_CONSTRAINT
+        double vx, vy, vt;
+        if (Math.abs(chassisSpeeds.omegaRadiansPerSecond) < Constants.DriveTrain.MAX_CHASSIS_ANG_VEL / 10.0) {
+            vx = Constants.DriveTrain.ENABLE_LINEAR_ACCEL_CONSTRAINT
                         ? vxLimiter.calculate(chassisSpeeds.vxMetersPerSecond)
-                        : chassisSpeeds.vxMetersPerSecond,
-                Constants.DriveTrain.ENABLE_LINEAR_ACCEL_CONSTRAINT
+                        : chassisSpeeds.vxMetersPerSecond;
+            vy = Constants.DriveTrain.ENABLE_LINEAR_ACCEL_CONSTRAINT
                         ? vyLimiter.calculate(chassisSpeeds.vyMetersPerSecond)
-                        : chassisSpeeds.vyMetersPerSecond,
-                Constants.DriveTrain.ENABLE_ANG_ACCEL_CONSTRAINT
-                        ? vtLimiter.calculate(chassisSpeeds.omegaRadiansPerSecond)
-                        : chassisSpeeds.omegaRadiansPerSecond);
+                        : chassisSpeeds.vyMetersPerSecond;
+        }
+        else {
+            vx = chassisSpeeds.vxMetersPerSecond;
+            vy = chassisSpeeds.vyMetersPerSecond;
+        }
+        vt = Constants.DriveTrain.ENABLE_ANG_ACCEL_CONSTRAINT
+                ? vtLimiter.calculate(chassisSpeeds.omegaRadiansPerSecond)
+                : chassisSpeeds.omegaRadiansPerSecond;
+        return new ChassisSpeeds(vx, vy, vt);
     }
 
     public void followPose(Pose2d pose, Rotation2d heading, double vel) {
