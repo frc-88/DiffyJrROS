@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.util.coprocessor.ChassisInterface;
 import frc.robot.util.coprocessor.VelocityCommand;
 
-
 public class DiffSwerveChassis implements ChassisInterface {
     private final DiffSwerveModule frontLeft;
     private final DiffSwerveModule backLeft;
@@ -42,80 +41,71 @@ public class DiffSwerveChassis implements ChassisInterface {
 
     private long timer = 0;
 
-    public DiffSwerveChassis()
-    {
+    public DiffSwerveChassis() {
         System.out.println("Creating diff swerve model");
         this.imu = new NavX();
 
         frontLeft = new DiffSwerveModule(
-            Constants.DriveTrain.FRONT_LEFT_POSITION,
-            RobotMap.CAN.TALONFX.FL_LO_FALCON,
-            RobotMap.CAN.TALONFX.FL_HI_FALCON,
-            RobotMap.CAN.CANIFIER,
-            RobotMap.DIO.ENCODER_FL,
-            Constants.DriveTrain.FRONT_LEFT_ENCODER_OFFSET
-        );
+                Constants.DriveTrain.FRONT_LEFT_POSITION,
+                RobotMap.CAN.TALONFX.FL_LO_FALCON,
+                RobotMap.CAN.TALONFX.FL_HI_FALCON,
+                RobotMap.CAN.CANIFIER,
+                RobotMap.DIO.ENCODER_FL,
+                Constants.DriveTrain.FRONT_LEFT_ENCODER_OFFSET);
         backLeft = new DiffSwerveModule(
-            Constants.DriveTrain.BACK_LEFT_POSITION,
-            RobotMap.CAN.TALONFX.BL_HI_FALCON,
-            RobotMap.CAN.TALONFX.BL_LO_FALCON,
-            RobotMap.CAN.CANIFIER,
-            RobotMap.DIO.ENCODER_BL,
-            Constants.DriveTrain.BACK_LEFT_ENCODER_OFFSET
-        );
+                Constants.DriveTrain.BACK_LEFT_POSITION,
+                RobotMap.CAN.TALONFX.BL_HI_FALCON,
+                RobotMap.CAN.TALONFX.BL_LO_FALCON,
+                RobotMap.CAN.CANIFIER,
+                RobotMap.DIO.ENCODER_BL,
+                Constants.DriveTrain.BACK_LEFT_ENCODER_OFFSET);
         backRight = new DiffSwerveModule(
-            Constants.DriveTrain.BACK_RIGHT_POSITION,
-            RobotMap.CAN.TALONFX.BR_LO_FALCON,
-            RobotMap.CAN.TALONFX.BR_HI_FALCON,
-            RobotMap.CAN.CANIFIER,
-            RobotMap.DIO.ENCODER_BR,
-            Constants.DriveTrain.BACK_RIGHT_ENCODER_OFFSET
-        );
+                Constants.DriveTrain.BACK_RIGHT_POSITION,
+                RobotMap.CAN.TALONFX.BR_LO_FALCON,
+                RobotMap.CAN.TALONFX.BR_HI_FALCON,
+                RobotMap.CAN.CANIFIER,
+                RobotMap.DIO.ENCODER_BR,
+                Constants.DriveTrain.BACK_RIGHT_ENCODER_OFFSET);
         frontRight = new DiffSwerveModule(
-            Constants.DriveTrain.FRONT_RIGHT_POSITION,
-            RobotMap.CAN.TALONFX.FR_LO_FALCON,
-            RobotMap.CAN.TALONFX.FR_HI_FALCON,
-            RobotMap.CAN.CANIFIER,
-            RobotMap.DIO.ENCODER_FR,
-            Constants.DriveTrain.FRONT_RIGHT_ENCODER_OFFSET
-        );
+                Constants.DriveTrain.FRONT_RIGHT_POSITION,
+                RobotMap.CAN.TALONFX.FR_LO_FALCON,
+                RobotMap.CAN.TALONFX.FR_HI_FALCON,
+                RobotMap.CAN.CANIFIER,
+                RobotMap.DIO.ENCODER_FR,
+                Constants.DriveTrain.FRONT_RIGHT_ENCODER_OFFSET);
 
-        modules = new DiffSwerveModule[] {frontLeft, backLeft, backRight, frontRight};
+        modules = new DiffSwerveModule[] { frontLeft, backLeft, backRight, frontRight };
 
         kinematics = new SwerveDriveKinematics(
-            frontLeft.getModuleLocation(),
-            backLeft.getModuleLocation(),
-            backRight.getModuleLocation(),
-            frontRight.getModuleLocation()
-        );
+                frontLeft.getModuleLocation(),
+                backLeft.getModuleLocation(),
+                backRight.getModuleLocation(),
+                frontRight.getModuleLocation());
         odometry = new SwerveDriveOdometry(kinematics, getImuHeading());
 
-
-        controller =
-                new HolonomicDriveController(
-                        new PIDController(
-                                Constants.DriveTrain.kP,
-                                Constants.DriveTrain.kI,
-                                Constants.DriveTrain.kD),
-                        new PIDController(
-                                Constants.DriveTrain.kP,
-                                Constants.DriveTrain.kI,
-                                Constants.DriveTrain.kD),
-                        new ProfiledPIDController(
-                                Constants.DriveTrain.kP,
-                                Constants.DriveTrain.kI,
-                                Constants.DriveTrain.kD,
-                                new TrapezoidProfile.Constraints(
-                                        Constants.DriveTrain.PROFILE_CONSTRAINT_VEL,
-                                        Constants.DriveTrain.PROFILE_CONSTRAINT_ACCEL)));
-        angleController =
+        controller = new HolonomicDriveController(
+                new PIDController(
+                        Constants.DriveTrain.kP,
+                        Constants.DriveTrain.kI,
+                        Constants.DriveTrain.kD),
+                new PIDController(
+                        Constants.DriveTrain.kP,
+                        Constants.DriveTrain.kI,
+                        Constants.DriveTrain.kD),
                 new ProfiledPIDController(
-                        Constants.DriveTrain.ANGLE_kP,
-                        Constants.DriveTrain.ANGLE_kI,
-                        Constants.DriveTrain.ANGLE_kD,
+                        Constants.DriveTrain.kP,
+                        Constants.DriveTrain.kI,
+                        Constants.DriveTrain.kD,
                         new TrapezoidProfile.Constraints(
-                                Constants.DriveTrain.PROFILE_CONSTRAINT_VEL,
-                                Constants.DriveTrain.PROFILE_CONSTRAINT_ACCEL));
+                                Constants.DriveTrain.CONSTRAINT_LINEAR_VEL,
+                                Constants.DriveTrain.CONSTRAINT_LINEAR_ACCEL)));
+        angleController = new ProfiledPIDController(
+                Constants.DriveTrain.ANGLE_kP,
+                Constants.DriveTrain.ANGLE_kI,
+                Constants.DriveTrain.ANGLE_kD,
+                new TrapezoidProfile.Constraints(
+                        Constants.DriveTrain.CONSTRAINT_LINEAR_VEL,
+                        Constants.DriveTrain.CONSTRAINT_LINEAR_ACCEL));
         angleController.enableContinuousInput(-Math.PI / 2.0, Math.PI / 2.0);
 
         vxLimiter = new SlewRateLimiter(Constants.DriveTrain.CONSTRAINT_LINEAR_ACCEL);
@@ -125,8 +115,7 @@ public class DiffSwerveChassis implements ChassisInterface {
         System.out.println("Model created!");
     }
 
-    public void setCoast(boolean coast)
-    {
+    public void setCoast(boolean coast) {
         for (DiffSwerveModule module : modules) {
             module.setCoast(coast);
         }
@@ -140,8 +129,7 @@ public class DiffSwerveChassis implements ChassisInterface {
         return fieldRelativeCommands;
     }
 
-    public void setEnabled(boolean is_enabled)
-    {
+    public void setEnabled(boolean is_enabled) {
         for (DiffSwerveModule module : modules) {
             module.setEnabled(is_enabled);
         }
@@ -154,12 +142,11 @@ public class DiffSwerveChassis implements ChassisInterface {
     public void periodic() {
         // Called in main periodic callback in Robot
         odometry.update(
-            getImuHeading(),
-            frontLeft.getState(),
-            backLeft.getState(),
-            backRight.getState(),
-            frontRight.getState()
-        );
+                getImuHeading(),
+                frontLeft.getState(),
+                backLeft.getState(),
+                backRight.getState(),
+                frontRight.getState());
     }
 
     public void controllerPeriodic() {
@@ -176,7 +163,7 @@ public class DiffSwerveChassis implements ChassisInterface {
     public void resetOdom(Pose2d pose) {
         odometry.resetPosition(pose, getImuHeading());
     }
-    
+
     public void resetImu() {
         imu.reset();
         fieldRelativeImuOffset = new Rotation2d();
@@ -192,11 +179,10 @@ public class DiffSwerveChassis implements ChassisInterface {
 
     public ChassisSpeeds getChassisVelocity() {
         return kinematics.toChassisSpeeds(
-            frontLeft.getState(),
-            backLeft.getState(),
-            backRight.getState(),
-            frontRight.getState()
-        );
+                frontLeft.getState(),
+                backLeft.getState(),
+                backRight.getState(),
+                frontRight.getState());
     }
 
     public SwerveModuleState[] getModuleStates() {
@@ -215,6 +201,7 @@ public class DiffSwerveChassis implements ChassisInterface {
     public DiffSwerveModule[] getModules() {
         return this.modules;
     }
+
     public int getNumModules() {
         return this.modules.length;
     }
@@ -253,12 +240,12 @@ public class DiffSwerveChassis implements ChassisInterface {
         }
     }
 
-    private ChassisSpeeds getChassisSpeeds(double vx, double vy, double angularVelocity, boolean fieldRelative, Rotation2d relativeAngle) {
+    private ChassisSpeeds getChassisSpeeds(double vx, double vy, double angularVelocity, boolean fieldRelative,
+            Rotation2d relativeAngle) {
         ChassisSpeeds chassisSpeeds;
         if (fieldRelative) {
             chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, angularVelocity, relativeAngle);
-        }
-        else {
+        } else {
             chassisSpeeds = new ChassisSpeeds(vx, vy, angularVelocity);
         }
         return chassisSpeeds;
@@ -276,8 +263,8 @@ public class DiffSwerveChassis implements ChassisInterface {
     /**
      * Method to set correct module speeds and angle based on wanted vx, vy, omega
      *
-     * @param vx velocity in x direction
-     * @param vy velocity in y direction
+     * @param vx              velocity in x direction
+     * @param vy              velocity in y direction
      * @param angularVelocity angular velocity (rotating speed)
      */
     public void drive(double vx, double vy, double angularVelocity) {
@@ -286,32 +273,31 @@ public class DiffSwerveChassis implements ChassisInterface {
                 && Math.abs(angularVelocity) < Constants.DriveTrain.DEADBAND) {
             // if setpoints are almost zero, set chassis to hold position
             holdDirection();
-        }
-        else if (!angleControllerEnabled || Math.abs(angularVelocity) > 0) {
+        } else if (!angleControllerEnabled || Math.abs(angularVelocity) > 0) {
             // if translation and rotation are significant, push setpoints as-is
-            ChassisSpeeds chassisSpeeds = getChassisSpeeds(vx, vy, angularVelocity, getFieldRelativeCommands(), getImuHeadingWithOffset());
+            ChassisSpeeds chassisSpeeds = getChassisSpeeds(vx, vy, angularVelocity, getFieldRelativeCommands(),
+                    getImuHeadingWithOffset());
             setIdealState(getModuleStatesWithConstraints(chassisSpeeds));
             resetAngleSetpoint();
-        }
-        else {
-            // if only translation is significant, set angular velocity according to previous angle setpoint
+        } else {
+            // if only translation is significant, set angular velocity according to
+            // previous angle setpoint
             double controllerAngVel = angleController.calculate(getAnglePidMeasurement().getRadians(), angleSetpoint);
-            ChassisSpeeds chassisSpeeds = getChassisSpeeds(vx, vy, controllerAngVel, getFieldRelativeCommands(), new Rotation2d(angleSetpoint));
+            ChassisSpeeds chassisSpeeds = getChassisSpeeds(vx, vy, controllerAngVel, getFieldRelativeCommands(),
+                    new Rotation2d(angleSetpoint));
             setIdealState(getModuleStatesWithConstraints(chassisSpeeds));
         }
     }
 
-    private SwerveModuleState[] getModuleStatesWithConstraints(ChassisSpeeds chassisSpeeds)
-    {
+    private SwerveModuleState[] getModuleStatesWithConstraints(ChassisSpeeds chassisSpeeds) {
         double batteryVoltage = RobotController.getBatteryVoltage();
-        
-        double adjustedMaxSpeed = Constants.DriveTrain.MAX_CHASSIS_SPEED * 
-            batteryVoltage / 
-            Constants.DifferentialSwerveModule.CONTROL_EFFORT;
+
+        double adjustedMaxSpeed = Constants.DriveTrain.MAX_CHASSIS_SPEED *
+                batteryVoltage /
+                Constants.DifferentialSwerveModule.CONTROL_EFFORT;
         if (adjustedMaxSpeed > Constants.DriveTrain.MAX_CHASSIS_SPEED) {
             adjustedMaxSpeed = Constants.DriveTrain.MAX_CHASSIS_SPEED;
-        }
-        else if (adjustedMaxSpeed < 0.0) {
+        } else if (adjustedMaxSpeed < 0.0) {
             adjustedMaxSpeed = 0.0;
         }
 
@@ -324,14 +310,16 @@ public class DiffSwerveChassis implements ChassisInterface {
     }
 
     private ChassisSpeeds getLimitedChassisSpeeds(ChassisSpeeds chassisSpeeds) {
-        // long now = RobotController.getFPGATime();
-        // System.out.println("rate: " + (1E6 / (double)(now - timer)));
-        // timer = now;
         return new ChassisSpeeds(
-            vxLimiter.calculate(chassisSpeeds.vxMetersPerSecond),
-            vyLimiter.calculate(chassisSpeeds.vyMetersPerSecond),
-            vtLimiter.calculate(chassisSpeeds.omegaRadiansPerSecond)
-        );
+                Constants.DriveTrain.ENABLE_LINEAR_ACCEL_CONSTRAINT
+                        ? vxLimiter.calculate(chassisSpeeds.vxMetersPerSecond)
+                        : chassisSpeeds.vxMetersPerSecond,
+                Constants.DriveTrain.ENABLE_LINEAR_ACCEL_CONSTRAINT
+                        ? vyLimiter.calculate(chassisSpeeds.vyMetersPerSecond)
+                        : chassisSpeeds.vyMetersPerSecond,
+                Constants.DriveTrain.ENABLE_ANG_ACCEL_CONSTRAINT
+                        ? vtLimiter.calculate(chassisSpeeds.omegaRadiansPerSecond)
+                        : chassisSpeeds.omegaRadiansPerSecond);
     }
 
     public void followPose(Pose2d pose, Rotation2d heading, double vel) {

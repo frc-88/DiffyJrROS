@@ -41,12 +41,11 @@ public class Constants {
         public static final double kD = 0.5;
 
         // Constraints
-        public static final double PROFILE_CONSTRAINT_VEL = 20.5;
-        public static final double PROFILE_CONSTRAINT_ACCEL = 30.0;
-
-        // Acceleration limits
+        public static final double CONSTRAINT_LINEAR_VEL = 20.5;  // PID Controller max velocity (m/s)
         public static final double CONSTRAINT_LINEAR_ACCEL = 10.0; // Maximum artificial linear acceleration (m/s^2)
         public static final double CONSTRAINT_ANG_ACCEL = 30.0; // Maximum artificial angular acceleration (m/s^2)
+        public static final boolean ENABLE_LINEAR_ACCEL_CONSTRAINT = true;
+        public static final boolean ENABLE_ANG_ACCEL_CONSTRAINT = false;
 
         public static final double CURVATURE_DT = 1.0 / 50.0;
         public static final double DIRECTIONAL_CONSTRAINT_STDDEV = 0.5;
