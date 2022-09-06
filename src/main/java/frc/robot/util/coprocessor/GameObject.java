@@ -8,7 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 /** Add your docs here. */
-public class CoprocessorGameObject {
+public class GameObject {
     public String name = "";
     public int count = 0;
     private double x = 0.0;
@@ -16,7 +16,7 @@ public class CoprocessorGameObject {
     private double z = 0.0;
     public MessageTimer timer = new MessageTimer(500_000);
 
-    public CoprocessorGameObject(String name)
+    public GameObject(String name)
     {
         this.name = name;
     }

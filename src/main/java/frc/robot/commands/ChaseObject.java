@@ -10,7 +10,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.util.coprocessor.CoprocessorGameObject;
+import frc.robot.util.coprocessor.GameObject;
 import frc.robot.util.coprocessor.VelocityCommand;
 import frc.robot.util.coprocessor.networktables.CoprocessorTable;
 
@@ -65,7 +65,7 @@ public class ChaseObject extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    CoprocessorGameObject gameObject = m_coprocessor.getNearestGameObject(m_objectName);
+    GameObject gameObject = m_coprocessor.getNearestGameObject(m_objectName);
     if (!gameObject.isValid()) {
       m_drive.stop();
       System.out.println(String.format("Requested game object %s is not available", m_objectName));

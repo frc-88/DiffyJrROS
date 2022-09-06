@@ -6,7 +6,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import frc.robot.util.coprocessor.tunnel.CoprocessorBase;
+import frc.robot.util.coprocessor.CoprocessorBase;
 
 public class WaypointMap {
     private CoprocessorBase m_coprocessor;

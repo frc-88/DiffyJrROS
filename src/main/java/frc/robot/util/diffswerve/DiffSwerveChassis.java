@@ -12,6 +12,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.RobotController;
+import frc.robot.util.coprocessor.BoundingBox;
 import frc.robot.util.coprocessor.ChassisInterface;
 import frc.robot.util.coprocessor.VelocityCommand;
 
@@ -41,6 +42,8 @@ public class DiffSwerveChassis implements ChassisInterface {
     private Rotation2d fieldRelativeImuOffset = new Rotation2d();
 
     public final NavX imu;
+
+    public final BoundingBox collisionBoundingBox;
 
     public DiffSwerveChassis() {
         System.out.println("Creating diff swerve model");
@@ -115,6 +118,14 @@ public class DiffSwerveChassis implements ChassisInterface {
 
         batteryLimiter = new SlewRateLimiter(Constants.DriveTrain.MAX_BATTERY_SLEW_RATE);
         batteryLimiter.reset(RobotController.getBatteryVoltage());
+
+        collisionBoundingBox = new BoundingBox(
+            Constants.BOUNDARY_WIDTH / 2.0, 
+            Constants.BOUNDARY_LENGTH / 2.0,
+            -Constants.BOUNDARY_WIDTH / 2.0,
+            -Constants.BOUNDARY_LENGTH / 2.0,
+            Constants.COLLISION_INFLATE
+        );
 
         System.out.println("Model created!");
     }
@@ -376,5 +387,10 @@ public class DiffSwerveChassis implements ChassisInterface {
     @Override
     public void resetPosition(Pose2d pose) {
         resetOdom(pose);
+    }
+
+    @Override
+    public BoundingBox getBoundingBox() {
+        return collisionBoundingBox;
     }
 }

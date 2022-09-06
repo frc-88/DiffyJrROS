@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.util.coprocessor.ChassisInterface;
 import frc.robot.util.coprocessor.MessageTimer;
 import frc.robot.util.coprocessor.VelocityCommand;
-import frc.robot.util.coprocessor.tunnel.CoprocessorBase;
+import frc.robot.util.coprocessor.CoprocessorBase;
 import frc.robot.util.coprocessor.tunnel.DataStreamInterface;
 import frc.robot.util.coprocessor.tunnel.Handshake;
 import frc.robot.util.coprocessor.tunnel.PacketResult;

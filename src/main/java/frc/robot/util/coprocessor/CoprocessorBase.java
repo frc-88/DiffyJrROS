@@ -2,20 +2,16 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.util.coprocessor.tunnel;
+package frc.robot.util.coprocessor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import frc.robot.util.coprocessor.ChassisInterface;
-import frc.robot.util.coprocessor.MessageTimer;
-import frc.robot.util.coprocessor.VelocityCommand;
 import frc.robot.util.roswaypoints.GoalStatus;
 import frc.robot.util.roswaypoints.Waypoint;
 
@@ -40,8 +36,13 @@ public class CoprocessorBase {
 
     protected Map<String, Pose2d> waypoints = new HashMap<>();
 
+    protected Map<String, GameObject> gameObjects = new HashMap<>();
+
+    protected LaserScanObstacleTracker laserObstacles = new LaserScanObstacleTracker();
+
     public CoprocessorBase(ChassisInterface chassis) {
         this.chassis = chassis;
+        laserObstacles.setBoundingBox(chassis.getBoundingBox());
     }
 
     public void update() {
@@ -138,5 +139,13 @@ public class CoprocessorBase {
 
     public void setJointPosition(int index, double position) {
         
+    }
+
+    public GameObject getNearestGameObject(String objectName) {
+        return gameObjects.get(objectName);
+    }
+
+    public LaserScanObstacleTracker getLaserScanObstacles() {
+        return laserObstacles;
     }
 }

@@ -4,9 +4,12 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.util.coprocessor.tunnel.CoprocessorBase;
+import frc.robot.util.coprocessor.CoprocessorBase;
+import frc.robot.util.coprocessor.Helpers;
+import frc.robot.util.coprocessor.VelocityCommand;
 
 public class PassthroughRosCommand extends CommandBase {
   private final DriveSubsystem m_drive;
@@ -27,7 +30,22 @@ public class PassthroughRosCommand extends CommandBase {
   @Override
   public void execute() {
     if (m_coprocessor.isCommandActive()) {
-      m_drive.drive(m_coprocessor.getCommand());
+      if (m_coprocessor.getLaserScanObstacles().isObstacleWithinBounds()) {
+        System.out.println("Obstacle detected within bounds!");
+        Pair<Double, Double> angleRange = m_coprocessor.getLaserScanObstacles().getAllowableReverseDirections();
+        VelocityCommand command = m_coprocessor.getCommand();
+        double heading = Helpers.boundHalfAngle(Math.atan2(command.vy, command.vx));
+        if (angleRange.getFirst() <= heading && heading <= angleRange.getSecond()) {
+          m_drive.drive(command);
+        }
+        else {
+          System.out.println("Velocity command doesn't move robot away from obstacle! Ignoring.");
+          m_drive.stop();
+        }
+      }
+      else {
+        m_drive.drive(m_coprocessor.getCommand());
+      }
     }
     else {
       m_drive.stop();

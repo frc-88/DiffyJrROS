@@ -11,14 +11,18 @@ public class Constants {
     // average update rate of chassis command loop
     public static final double kMainDt = 1.0 / 25.0;
 
+    public static final double BOUNDARY_WIDTH = 0.5;  // meters
+    public static final double BOUNDARY_LENGTH = 0.5;  // meters
+    public static final double COLLISION_INFLATE = 0.05;  // meters
+
     public static class DriveTrain {
         public static Pose2d robotPose;
-        public static final double WIDTH = 0.30861;
-        public static final double LENGTH = 0.30861;
-        public static final double FRONT_LEFT_ENCODER_OFFSET = Math.toRadians(140.449);  // module 0
-        public static final double BACK_LEFT_ENCODER_OFFSET = Math.toRadians(-105.205);  // module 1
-        public static final double BACK_RIGHT_ENCODER_OFFSET = Math.toRadians(-46.055);  // module 2
-        public static final double FRONT_RIGHT_ENCODER_OFFSET = Math.toRadians(-163.652);  // module 3
+        public static final double WIDTH = 0.30861;  // meters
+        public static final double LENGTH = 0.30861;  // meters
+        public static final double FRONT_LEFT_ENCODER_OFFSET = Math.toRadians(140.449);  // module 0 offset degrees
+        public static final double BACK_LEFT_ENCODER_OFFSET = Math.toRadians(-105.205);  // module 1 offset degrees
+        public static final double BACK_RIGHT_ENCODER_OFFSET = Math.toRadians(-46.055);  // module 2 offset degrees
+        public static final double FRONT_RIGHT_ENCODER_OFFSET = Math.toRadians(-163.652);  // module 3 offset degrees
         public static final Translation2d FRONT_LEFT_POSITION = new Translation2d(WIDTH / 2.0, LENGTH / 2.0);
         public static final Translation2d BACK_LEFT_POSITION = new Translation2d(-WIDTH / 2.0, LENGTH / 2.0);
         public static final Translation2d BACK_RIGHT_POSITION = new Translation2d(-WIDTH / 2.0, -LENGTH / 2.0);

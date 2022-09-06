@@ -11,7 +11,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.coprocessor.VelocityCommand;
-import frc.robot.util.coprocessor.tunnel.CoprocessorBase;
+import frc.robot.util.coprocessor.CoprocessorBase;
 import frc.robot.util.roswaypoints.GoalStatus;
 import frc.robot.util.roswaypoints.WaypointMap;
 import frc.robot.util.roswaypoints.WaypointsPlan;

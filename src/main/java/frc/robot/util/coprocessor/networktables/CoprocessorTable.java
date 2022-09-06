@@ -17,9 +17,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.util.coprocessor.ChassisInterface;
-import frc.robot.util.coprocessor.CoprocessorGameObject;
+import frc.robot.util.coprocessor.GameObject;
+import frc.robot.util.coprocessor.LaserScanObstacleTracker;
 import frc.robot.util.coprocessor.MessageTimer;
-import frc.robot.util.coprocessor.tunnel.CoprocessorBase;
+import frc.robot.util.coprocessor.CoprocessorBase;
 import frc.robot.util.roswaypoints.GoalStatus;
 import frc.robot.util.roswaypoints.Waypoint;
 import frc.robot.util.roswaypoints.WaypointMap;
@@ -104,7 +105,12 @@ public class CoprocessorTable extends CoprocessorBase {
     protected Map<String, NetworkTableEntry> waypointTEntries = new HashMap<>();
 
     private NetworkTable objectTable;
-    protected Map<String, CoprocessorGameObject> gameObjects = new HashMap<>();
+
+    private NetworkTable laserScanTable;
+    private NetworkTableEntry laserScanEntryXs;
+    private NetworkTableEntry laserScanEntryYs;
+    private double[] laserXs = new double[0];
+    private double[] laserYs = new double[0];
 
     public CoprocessorTable(ChassisInterface chassis, String address, int port, double updateInterval) {
         super(chassis);
@@ -188,6 +194,11 @@ public class CoprocessorTable extends CoprocessorBase {
 
         objectTable = rootTable.getSubTable("detections");
         objectTable.addSubTableListener((parent, name, table) -> {newObjectCallback(name);}, true);
+
+        laserScanTable = rootTable.getSubTable("laser");
+        laserScanEntryXs = laserScanTable.getEntry("xs");
+        laserScanEntryYs = laserScanTable.getEntry("ys");
+        laserScanEntryXs.addListener(this::scanCallback, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
     }
 
     private void cmdVelCallback(EntryNotification notification) {
@@ -413,7 +424,7 @@ public class CoprocessorTable extends CoprocessorBase {
     }
 
     private void newObjectCallback(String name) {
-        gameObjects.put(name, new CoprocessorGameObject(name));
+        gameObjects.put(name, new GameObject(name));
         NetworkTableEntry updateEntry = objectTable.getSubTable(name).getEntry("update");
         updateEntry.addListener((notification) -> this.objectEntryCallback(name, notification), EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
         System.out.println("Registering object " + name);
@@ -421,7 +432,7 @@ public class CoprocessorTable extends CoprocessorBase {
 
     void objectEntryCallback(String objectName, EntryNotification notification)
     {
-        CoprocessorGameObject gameObject = gameObjects.get(objectName);
+        GameObject gameObject = gameObjects.get(objectName);
         gameObject.count = (int)objectTable.getSubTable(objectName).getEntry("count").getDouble(0.0);
         gameObject.set(
             objectTable.getSubTable(objectName).getEntry("x").getDouble(0.0), 
@@ -430,20 +441,11 @@ public class CoprocessorTable extends CoprocessorBase {
         );
     }
 
-    public static String getTeamColorName() {
-        if (DriverStation.getAlliance() == Alliance.Red) {
-            return "red";
-        }
-        else {
-            return "blue";
-        }
+    public String parseObjectName(String objectName) {
+        return objectName.replaceAll("<team>", getTeamName(DriverStation.getAlliance()));
     }
 
-    public static String parseObjectName(String objectName) {
-        return objectName.replaceAll("<team>", getTeamColorName());
-    }
-
-    public CoprocessorGameObject getNearestGameObject(String objectName)
+    public GameObject getNearestGameObject(String objectName)
     {
         objectName = parseObjectName(objectName);
         if (!gameObjects.containsKey(objectName)) {
@@ -451,8 +453,16 @@ public class CoprocessorTable extends CoprocessorBase {
         }
         if (!objectTable.containsSubTable(objectName)) {
             System.out.println(objectName + " doesn't exist in object table!");
-            return new CoprocessorGameObject("");
+            return new GameObject("");
         }
         return gameObjects.get(objectName);
+    }
+
+    private void scanCallback(EntryNotification notification)
+    {
+        laserXs = laserScanEntryXs.getDoubleArray(laserXs);
+        laserYs = laserScanEntryYs.getDoubleArray(laserYs);
+
+        laserObstacles.set(laserXs, laserYs);
     }
 }

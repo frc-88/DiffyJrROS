@@ -2,7 +2,7 @@ package frc.robot.util.roswaypoints;
 
 import java.util.ArrayList;
 
-import frc.robot.util.coprocessor.tunnel.CoprocessorBase;
+import frc.robot.util.coprocessor.CoprocessorBase;
 
 public class WaypointsPlan {
     private ArrayList<Waypoint> waypoints = new ArrayList<>();
