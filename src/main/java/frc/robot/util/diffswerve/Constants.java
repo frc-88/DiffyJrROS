@@ -13,7 +13,8 @@ public class Constants {
 
     public static final double BOUNDARY_WIDTH = 0.5;  // meters
     public static final double BOUNDARY_LENGTH = 0.5;  // meters
-    public static final double COLLISION_INFLATE = 0.05;  // meters
+    public static final double MIN_COLLISION_INFLATE = 0.05;  // meters
+    public static final double MAX_COLLISION_INFLATE = 1.75;  // meters
 
     public static class DriveTrain {
         public static Pose2d robotPose;

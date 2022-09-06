@@ -43,25 +43,25 @@ public class LaserScanObstacleTracker {
         }
     }
 
-    public boolean isObstacleWithinBounds()
+    public boolean isObstacleWithinBounds(double speed)
     {
         for (PointObstacle obstacle : obstacles) {
-            if (bbox.isObstacleWithinBounds(obstacle)) {
+            if (bbox.isObstacleWithinBounds(obstacle, speed)) {
                 return true;
             }
         }
         return false;
     }
 
-    public boolean isDirectionAllowed(double heading)
+    public boolean isDirectionAllowed(double heading, double speed)
     {
         double minAngle = Double.NaN;
         double maxAngle = Double.NaN;
         for (PointObstacle obstacle : obstacles) {
-            if (bbox.isObstacleWithinBounds(obstacle)) {
+            if (bbox.isObstacleWithinBounds(obstacle, speed)) {
                 double angle = Helpers.boundHalfAngle(Math.atan2(obstacle.getY(), obstacle.getX()) + Math.PI);
-                double minObsAngle = angle - kReverseFanRadians / 2.0;
-                double maxObsAngle = angle + kReverseFanRadians / 2.0;
+                double minObsAngle = Helpers.boundHalfAngle(angle - kReverseFanRadians / 2.0);
+                double maxObsAngle = Helpers.boundHalfAngle(angle + kReverseFanRadians / 2.0);
                 if (Double.isNaN(minAngle) || minObsAngle > minAngle) {
                     minAngle = minObsAngle;
                 }

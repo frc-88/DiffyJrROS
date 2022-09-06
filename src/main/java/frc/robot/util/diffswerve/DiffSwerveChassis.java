@@ -124,7 +124,9 @@ public class DiffSwerveChassis implements ChassisInterface {
             Constants.BOUNDARY_LENGTH / 2.0,
             -Constants.BOUNDARY_WIDTH / 2.0,
             -Constants.BOUNDARY_LENGTH / 2.0,
-            Constants.COLLISION_INFLATE
+            Constants.MIN_COLLISION_INFLATE,
+            Constants.MAX_COLLISION_INFLATE,
+            Constants.DriveTrain.MAX_CHASSIS_SPEED
         );
 
         System.out.println("Model created!");
@@ -208,6 +210,14 @@ public class DiffSwerveChassis implements ChassisInterface {
                 backLeft.getState(),
                 backRight.getState(),
                 frontRight.getState());
+    }
+
+    public double getChassisSpeed() {
+        ChassisSpeeds speeds = getChassisVelocity();
+        return Math.sqrt(
+            speeds.vxMetersPerSecond * speeds.vxMetersPerSecond + 
+            speeds.vyMetersPerSecond * speeds.vyMetersPerSecond
+        );
     }
 
     public SwerveModuleState[] getModuleStates() {

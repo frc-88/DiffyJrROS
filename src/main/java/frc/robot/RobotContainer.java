@@ -51,7 +51,7 @@ public class RobotContainer {
   private final Navigation m_nav = new Navigation(m_ros_interface);
   private final Limelight m_limelight = new Limelight();
 
-  private final CommandBase m_joystickDriveCommand = new DriveSwerveJoystickCommand(m_drive, m_joystick);
+  private final CommandBase m_joystickDriveCommand = new DriveSwerveJoystickCommand(m_drive, m_ros_interface, m_joystick);
   private final CommandBase m_passthroughRosCommand = new PassthroughRosCommand(m_drive, m_ros_interface);
   private Button userButton = new Button(() -> RobotController.getUserButton());
 

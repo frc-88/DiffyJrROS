@@ -15,4 +15,12 @@ public class VelocityCommand {
         this.vy = vy;
         this.vt = vt;
     }
+
+    public double getHeading() {
+        return Math.atan2(vy, vx);
+    }
+
+    public double getSpeed() {
+        return Math.sqrt(vx * vx + vy * vy);
+    }
 }
