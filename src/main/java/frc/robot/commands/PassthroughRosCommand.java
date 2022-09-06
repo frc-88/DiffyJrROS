@@ -32,10 +32,8 @@ public class PassthroughRosCommand extends CommandBase {
     if (m_coprocessor.isCommandActive()) {
       if (m_coprocessor.getLaserScanObstacles().isObstacleWithinBounds()) {
         System.out.println("Obstacle detected within bounds!");
-        Pair<Double, Double> angleRange = m_coprocessor.getLaserScanObstacles().getAllowableReverseDirections();
         VelocityCommand command = m_coprocessor.getCommand();
-        double heading = Helpers.boundHalfAngle(Math.atan2(command.vy, command.vx));
-        if (angleRange.getFirst() <= heading && heading <= angleRange.getSecond()) {
+        if (m_coprocessor.getLaserScanObstacles().isDirectionAllowed(Math.atan2(command.vy, command.vx))) {
           m_drive.drive(command);
         }
         else {

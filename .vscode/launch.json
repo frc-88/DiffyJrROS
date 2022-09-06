@@ -6,6 +6,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "Launch LaserScanObstacleTracker",
+      "request": "launch",
+      "mainClass": "frc.robot.util.coprocessor.LaserScanObstacleTracker",
+      "projectName": "DiffyJrROS"
+    },
+    {
+      "type": "java",
       "name": "Launch TunnelProtocol",
       "request": "launch",
       "mainClass": "frc.robot.util.coprocessor.tunnel.TunnelProtocol",
