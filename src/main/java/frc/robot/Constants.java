@@ -30,4 +30,7 @@ public final class Constants {
 	public static final double COPROCESSOR_PERIODIC_UPDATE_OFFSET = 0.01;
 	public static final double COPROCESSOR_SLOW_PERIODIC_UPDATE_DELAY = 1.0 / 5.0;
 	public static final double COPROCESSOR_SLOW_PERIODIC_UPDATE_OFFSET = 0.02;
+
+	// Command configs
+	public static final boolean ENABLE_OBJECT_STOP_DISTANCE = false;
 }

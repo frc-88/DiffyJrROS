@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.util.coprocessor.CoprocessorBase;
 import frc.robot.util.coprocessor.VelocityCommand;
@@ -31,14 +32,18 @@ public class PassthroughRosCommand extends CommandBase {
     public void execute() {
         if (m_coprocessor.isCommandActive()) {
             VelocityCommand command = m_coprocessor.getCommand();
-            double speed = m_drive.getSwerve().getChassisSpeed();
-            if (m_coprocessor.getLaserScanObstacles().isObstacleWithinBounds(speed)) {
-                System.out.println("Obstacle detected within bounds!");
-                if (m_coprocessor.getLaserScanObstacles().isDirectionAllowed(command.getHeading(), speed)) {
-                    m_drive.drive(command);
+            if (Constants.ENABLE_OBJECT_STOP_DISTANCE) {
+                double speed = m_drive.getSwerve().getChassisSpeed();
+                if (m_coprocessor.getLaserScanObstacles().isObstacleWithinBounds(speed)) {
+                    System.out.println("Obstacle detected within bounds!");
+                    if (m_coprocessor.getLaserScanObstacles().isDirectionAllowed(command.getHeading(), speed)) {
+                        m_drive.drive(command);
+                    } else {
+                        System.out.println("Velocity command doesn't move robot away from obstacle! Ignoring.");
+                        m_drive.stop();
+                    }
                 } else {
-                    System.out.println("Velocity command doesn't move robot away from obstacle! Ignoring.");
-                    m_drive.stop();
+                    m_drive.drive(command);
                 }
             } else {
                 m_drive.drive(command);
