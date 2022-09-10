@@ -19,27 +19,21 @@ public class ChaseObject extends CommandBase {
   private CoprocessorTable m_coprocessor;
   private String m_objectName = "";
   private PIDController m_controller;
-  private double m_maxVelocity = 1.0;
-  private double m_maxAngularVelocity = 1.0;
+  private double m_maxVelocity = 2.0;
+  private double m_maxAngularVelocity = 6.0;
   private double m_goalDistance = Double.NaN;
   private double m_distanceThreshold = 1.0;
   private double k_distanceRamp = 2.0;
-  private double kP = 2.0;
-  private double kD = 0.0;
+  private double kP = 2.3;
+  private double kD = 0.1;
   private double kI = 0.01;
 
   /** Creates a new ChaseObject. */
   public ChaseObject(
-      DriveSubsystem drive, CoprocessorTable coprocessor,
-      String objectName,
-      double maxVelocityMetersPerSecond, double maxAngularVelocityRadiansPerSecond,
-      double distanceThresholdMeters) {
+      DriveSubsystem drive, CoprocessorTable coprocessor, String objectName) {
     m_drive = drive;
     m_coprocessor = coprocessor;
     m_objectName = objectName;
-    m_maxVelocity = maxVelocityMetersPerSecond;
-    m_maxAngularVelocity = maxAngularVelocityRadiansPerSecond;
-    m_distanceThreshold = distanceThresholdMeters;
 
     m_controller = new PIDController(kP, kI, kD);
     m_controller.setSetpoint(0.0);
@@ -47,6 +41,9 @@ public class ChaseObject extends CommandBase {
     SmartDashboard.putNumber("chase_kP", kP);
     SmartDashboard.putNumber("chase_kI", kI);
     SmartDashboard.putNumber("chase_kD", kD);
+    SmartDashboard.putNumber("chase_maxVelocity", m_maxVelocity);
+    SmartDashboard.putNumber("chase_maxAngularVelocity", m_maxAngularVelocity);
+    SmartDashboard.putNumber("chase_distanceThreshold", m_distanceThreshold);
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(drive);
@@ -58,8 +55,13 @@ public class ChaseObject extends CommandBase {
     m_controller.setP(SmartDashboard.getNumber("chase_kP", kP));
     m_controller.setI(SmartDashboard.getNumber("chase_kI", kI));
     m_controller.setD(SmartDashboard.getNumber("chase_kD", kD));
+    m_maxVelocity = SmartDashboard.getNumber("chase_maxVelocity", m_maxVelocity);
+    m_maxAngularVelocity = SmartDashboard.getNumber("chase_maxAngularVelocity", m_maxAngularVelocity);
+    m_distanceThreshold = SmartDashboard.getNumber("chase_distanceThreshold", m_distanceThreshold);
+
     m_controller.reset();
     m_goalDistance = Double.NaN;
+    System.out.println("Chasing " + m_objectName);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -97,6 +99,7 @@ public class ChaseObject extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    System.out.println("Finished chasing " + m_objectName);
     m_drive.getSwerve().stop();
   }
 
