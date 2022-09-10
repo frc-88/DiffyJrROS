@@ -1,11 +1,13 @@
 package frc.robot.util.diffswerve;
 
+import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
+import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 
 import edu.wpi.first.math.controller.LinearQuadraticRegulator;
 import edu.wpi.first.math.estimator.KalmanFilter;
@@ -82,31 +84,38 @@ public class DiffSwerveModule {
     
     private TalonFX initFalconMotor(int canID) {
         TalonFX motor = new TalonFX(canID);
-        motor.configFactoryDefault();
+        checkErrorCode(motor.configFactoryDefault());
         motor.setInverted(false);
         motor.setSensorPhase(false);
         motor.setNeutralMode(NeutralMode.Brake);
-
-        motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, Constants.DifferentialSwerveModule.TIMEOUT);
-        motor.configForwardSoftLimitEnable(false);
-        motor.configVoltageCompSaturation(Constants.DifferentialSwerveModule.VOLTAGE, Constants.DifferentialSwerveModule.TIMEOUT);
         motor.enableVoltageCompensation(true);
-        motor.setStatusFramePeriod(StatusFrame.Status_1_General, 5, Constants.DifferentialSwerveModule.TIMEOUT);
-        motor.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 20, Constants.DifferentialSwerveModule.TIMEOUT);
-        motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, Constants.DifferentialSwerveModule.TIMEOUT);
-        motor.configForwardSoftLimitEnable(false);
-        motor.configNeutralDeadband(Constants.DifferentialSwerveModule.NEUTRAL_DEADBAND_PERCENT, Constants.DifferentialSwerveModule.TIMEOUT);
-        motor.configOpenloopRamp(0, Constants.DifferentialSwerveModule.TIMEOUT);
-        motor.configClosedloopRamp(0, Constants.DifferentialSwerveModule.TIMEOUT);
-        motor.configSupplyCurrentLimit(
+
+        checkErrorCode(motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, Constants.DifferentialSwerveModule.TIMEOUT));
+        checkErrorCode(motor.configForwardSoftLimitEnable(false));
+        checkErrorCode(motor.configVoltageCompSaturation(Constants.DifferentialSwerveModule.VOLTAGE, Constants.DifferentialSwerveModule.TIMEOUT));
+        checkErrorCode(motor.setStatusFramePeriod(StatusFrame.Status_1_General, 5, Constants.DifferentialSwerveModule.TIMEOUT));
+        checkErrorCode(motor.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 20, Constants.DifferentialSwerveModule.TIMEOUT));
+        checkErrorCode(motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, Constants.DifferentialSwerveModule.TIMEOUT));
+        checkErrorCode(motor.configForwardSoftLimitEnable(false));
+        checkErrorCode(motor.configNeutralDeadband(Constants.DifferentialSwerveModule.NEUTRAL_DEADBAND_PERCENT, Constants.DifferentialSwerveModule.TIMEOUT));
+        checkErrorCode(motor.configOpenloopRamp(0, Constants.DifferentialSwerveModule.TIMEOUT));
+        checkErrorCode(motor.configClosedloopRamp(0, Constants.DifferentialSwerveModule.TIMEOUT));
+        checkErrorCode(motor.configSupplyCurrentLimit(
             new SupplyCurrentLimitConfiguration(
                 Constants.DifferentialSwerveModule.ENABLE_CURRENT_LIMIT,
                 Constants.DifferentialSwerveModule.CURRENT_LIMIT,
                 Constants.DifferentialSwerveModule.CURRENT_THRESHOLD,
                 Constants.DifferentialSwerveModule.CURRENT_TRIGGER_TIME)
-        );
+        ));
 
         return motor;
+    }
+
+    private void checkErrorCode(ErrorCode code)
+    {
+        if (code != ErrorCode.OK) {
+            throw new RuntimeException("Talon FX motor encountered an error: " + code.toString());
+        }
     }
 
     private LinearSystemLoop<N3, N2, N3> initControlLoop() {
