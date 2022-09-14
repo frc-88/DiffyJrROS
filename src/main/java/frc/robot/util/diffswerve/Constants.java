@@ -100,9 +100,9 @@ public class Constants {
         
         // A weight for how aggressive each state should be ie. 0.08 radians will try to control the
         // angle more aggressively than the wheel angular velocity.
-        public static final double Q_AZIMUTH = 0.1; // radians
+        public static final double Q_AZIMUTH = 0.0009; // radians
         public static final double Q_AZIMUTH_ANG_VELOCITY = 1.1; // radians per sec
-        public static final double Q_WHEEL_ANG_VELOCITY = 1.0; // radians per sec
+        public static final double Q_WHEEL_ANG_VELOCITY = 0.001; // radians per sec
 
         // This is for Kalman filter which isn't used for azimuth angle due to angle wrapping.
         // Model noise are assuming that our model isn't as accurate as our senlrs.

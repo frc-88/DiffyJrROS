@@ -25,9 +25,9 @@ class Constants:
         [1.0/24.0, -1.0/24.0],
         [5.0/72.0, 7.0/72.0],
     ])
-    Q_AZIMUTH = 0.08  # radians
+    Q_AZIMUTH = 0.0009  # radians
     Q_AZIMUTH_ANG_VELOCITY = 1.1  # radians per sec
-    Q_WHEEL_ANG_VELOCITY = 1.0  # radians per sec
+    Q_WHEEL_ANG_VELOCITY = 0.001  # radians per sec
 
     MODEL_AZIMUTH_ANGLE_NOISE = 0.1  # radians
     MODEL_AZIMUTH_ANG_VELOCITY_NOISE = 5.0  # radians per sec
@@ -205,8 +205,8 @@ def next_experiment(q_azimuth_sweep, q_wheel_ang_sweep, dt):
 def run_sweep_experiment():
     Constants.DEBUG_PRINTS = False
     dt = 0.005
-    q_azimuth_sweep = [0.001, 0.5, 10]
-    q_wheel_ang_sweep = [0.1, 1.0, 3]
+    q_azimuth_sweep = [0.001, 0.0015, 3]
+    q_wheel_ang_sweep = [0.00001, 0.001, 10]
 
     l0 = 0.1
     l1 = l0 + 15.0
@@ -265,8 +265,8 @@ def run_sweep_experiment():
 
 def main():
     dt = 0.005
-    Constants.Q_AZIMUTH = 0.01
-    Constants.Q_WHEEL_ANG_VELOCITY = 1.0
+    Constants.Q_AZIMUTH = 0.0009
+    Constants.Q_WHEEL_ANG_VELOCITY = 0.001
     diff_swerve = DiffSwerve(dt)
     # diff_swerve.export_cpp_coeffs("DiffSwerve", "subsystems/")
     # diff_swerve.export_java_coeffs("DiffSwerve")
@@ -289,9 +289,9 @@ def main():
     start_freq = 0.1
     stop_freq = 5.0
     angles = scipy.signal.chirp(t - l0, start_freq, t[-1], stop_freq, phi=90.0) * np.pi
-    # velocities = scipy.signal.chirp(t, start_freq, t[-1], stop_freq) * Constants.MAX_SPEED
+    velocities = scipy.signal.chirp(t, start_freq, t[-1], stop_freq) * Constants.MAX_SPEED
     # velocities = np.ones(t.shape) * Constants.MAX_SPEED
-    velocities = np.zeros(t.shape)
+    # velocities = np.zeros(t.shape)
 
     # Generate references for simulation
     for i in range(len(t)):
@@ -349,5 +349,5 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()
-    run_sweep_experiment()
+    main()
+    # run_sweep_experiment()
