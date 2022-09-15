@@ -441,11 +441,11 @@ public class DiffSwerveModule {
      * @param state is the desired swerve module state.
      */
     public void setModuleState(SwerveModuleState state) {
-        // System.out.println("state: " + state);
         setReference(
                 VecBuilder.fill(
                         state.angle.getRadians(),
-                        0.0,  // swerveControlLoop.getXHat(1)
+                        0.0,
+                        // swerveControlLoop.getXHat(1),
                         state.speedMetersPerSecond
                                 / Constants.DifferentialSwerveModule.WHEEL_RADIUS));
     }

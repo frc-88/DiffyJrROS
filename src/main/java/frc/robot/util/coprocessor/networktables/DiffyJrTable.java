@@ -84,11 +84,7 @@ public class DiffyJrTable extends CoprocessorTable {
         super.update();
 
         updateImu();
-        // for (int index = 0; index < this.swerve.getNumModules(); index++) {
-        //     moduleTables.get(index).getEntry("wheel_velocity").setDouble(this.swerve.getModule(index).getWheelVelocity());
-        //     moduleTables.get(index).getEntry("azimuth_velocity").setDouble(this.swerve.getModule(index).getAzimuthVelocity());
-        //     moduleTables.get(index).getEntry("azimuth").setDouble(this.swerve.getModule(index).getModuleAngle());
-        // }
+        updateModules();
     }
 
     public void updateSlow() {
@@ -97,6 +93,22 @@ public class DiffyJrTable extends CoprocessorTable {
             DiffSwerveModule module = modules[index];
             SwerveModuleState state = module.getState();
             setJointPosition(index, state.angle.getRadians());
+        }
+    }
+
+    private void updateModules() {
+        for (int index = 0; index < this.swerve.getNumModules(); index++) {
+            DiffSwerveModule module = this.swerve.getModule(index);
+            NetworkTable moduleTable = moduleTables.get(index);
+            moduleTable.getEntry("wheel_velocity").setDouble(module.getWheelVelocity());
+            moduleTable.getEntry("azimuth_velocity").setDouble(module.getAzimuthVelocity());
+            moduleTable.getEntry("azimuth").setDouble(module.getModuleAngle());
+            moduleTable.getEntry("hi_voltage").setDouble(module.getHiMeasuredVoltage());
+            moduleTable.getEntry("hi_voltage_ref").setDouble(module.getHiNextVoltage());
+            moduleTable.getEntry("hi_velocity").setDouble(module.getHiRadiansPerSecond());
+            moduleTable.getEntry("lo_voltage").setDouble(module.getLoMeasuredVoltage());
+            moduleTable.getEntry("lo_voltage_ref").setDouble(module.getLoNextVoltage());
+            moduleTable.getEntry("lo_velocity").setDouble(module.getLoRadiansPerSecond());
         }
     }
 
