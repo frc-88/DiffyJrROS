@@ -136,7 +136,7 @@ public class DiffyJrTable extends CoprocessorTable {
     private void fieldRelativeCallback(EntryNotification notification) {
         boolean value = notification.getEntry().getBoolean(false);
         if (value) {
-            this.swerve.softResetImu();
+            this.swerve.resetFieldOffset();
         }
         System.out.println("Setting field relative commands to " + value);
         this.swerve.setFieldRelativeCommands(value);

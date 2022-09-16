@@ -45,7 +45,7 @@ public class DiffyJrSerial extends CoprocessorSerial {
             Pair<Integer, Boolean> value = result.getInt(); if (!value.getSecond()) { System.out.println("Failed to get joint index"); return; }
             boolean is_relative = value.getFirst() > 0 ? true : false;
             if (is_relative) {
-                this.swerve.softResetImu();
+                this.swerve.resetFieldOffset();
             }
             System.out.println("Setting field relative commands to " + is_relative);
             this.swerve.setFieldRelativeCommands(is_relative);

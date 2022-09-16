@@ -56,6 +56,7 @@ public class CANifiedPWMEncoder {
 
     this.canifier = new CANifier(canifierID);
     this.channel = channel;
+    // Set update rate of sensors in milliseconds
     this.canifier.setStatusFramePeriod(CANifierStatusFrame.Status_3_PwmInputs0, 5);
     this.canifier.setStatusFramePeriod(CANifierStatusFrame.Status_4_PwmInputs1, 5);
     this.canifier.setStatusFramePeriod(CANifierStatusFrame.Status_5_PwmInputs2, 5);
