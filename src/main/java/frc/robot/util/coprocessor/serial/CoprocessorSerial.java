@@ -122,7 +122,7 @@ public class CoprocessorSerial extends CoprocessorBase implements TunnelInterfac
 
     private void writeOdom() {
         Pose2d pose = this.chassis.getOdometryPose();
-        ChassisSpeeds velocity = this.chassis.getChassisVelocity();
+        ChassisSpeeds velocity = this.chassis.getChassisSpeeds();
 
         data_stream.writePacket("odom",
             pose.getX(),

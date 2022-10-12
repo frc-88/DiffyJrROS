@@ -204,7 +204,7 @@ public class DiffSwerveChassis implements ChassisInterface {
         return imu;
     }
 
-    public ChassisSpeeds getChassisVelocity() {
+    public ChassisSpeeds getChassisSpeeds() {
         return kinematics.toChassisSpeeds(
                 frontLeft.getState(),
                 backLeft.getState(),
@@ -213,7 +213,7 @@ public class DiffSwerveChassis implements ChassisInterface {
     }
 
     public double getChassisSpeed() {
-        ChassisSpeeds speeds = getChassisVelocity();
+        ChassisSpeeds speeds = getChassisSpeeds();
         return Math.sqrt(
             speeds.vxMetersPerSecond * speeds.vxMetersPerSecond + 
             speeds.vyMetersPerSecond * speeds.vyMetersPerSecond
