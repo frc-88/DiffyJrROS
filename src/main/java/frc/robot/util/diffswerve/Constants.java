@@ -87,9 +87,9 @@ public class Constants {
         public static final double AZIMUTH_ROTATIONS_TO_RADIANS = 2.0 * Math.PI;  // radians per rotation of azimuth sensor
         public static final double VOLTAGE = 12.0;  // volts
         public static final double FEED_FORWARD = VOLTAGE / FALCON_FREE_SPEED;
-        public static final double NEUTRAL_DEADBAND_PERCENT = 0.0;
+        public static final double NEUTRAL_DEADBAND_PERCENT = 0.001;
 
-        public static final boolean ENABLE_CURRENT_LIMIT = true;
+        public static final boolean ENABLE_CURRENT_LIMIT = false;
         public static final double CURRENT_LIMIT = 60.0;  // amps
         public static final double CURRENT_THRESHOLD = 60.0;
         public static final double CURRENT_TRIGGER_TIME = 0.0;
@@ -100,9 +100,9 @@ public class Constants {
         
         // A weight for how aggressive each state should be ie. 0.08 radians will try to control the
         // angle more aggressively than the wheel angular velocity.
-        public static final double Q_AZIMUTH = 0.0009; // radians
+        public static final double Q_AZIMUTH = 0.095; // radians
         public static final double Q_AZIMUTH_ANG_VELOCITY = 1.1; // radians per sec
-        public static final double Q_WHEEL_ANG_VELOCITY = 0.001; // radians per sec
+        public static final double Q_WHEEL_ANG_VELOCITY = 1.0; // radians per sec
 
         // This is for Kalman filter which isn't used for azimuth angle due to angle wrapping.
         // Model noise are assuming that our model isn't as accurate as our senlrs.
@@ -113,8 +113,8 @@ public class Constants {
         // Noise from sensors. Falcon With Gearbox causes us to have more uncertainty so we increase
         // the noise.
         public static final double SENSOR_AZIMUTH_ANGLE_NOISE = 0.05; // radians
-        public static final double SENSOR_AZIMUTH_ANG_VELOCITY_NOISE = 0.1; // radians per sec
-        public static final double SENSOR_WHEEL_ANG_VELOCITY_NOISE = 0.1; // radians per sec
+        public static final double SENSOR_AZIMUTH_ANG_VELOCITY_NOISE = 0.01; // radians per sec
+        public static final double SENSOR_WHEEL_ANG_VELOCITY_NOISE = 0.01; // radians per sec
         public static final double CONTROL_EFFORT = VOLTAGE;
     }
 }

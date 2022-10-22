@@ -2,6 +2,7 @@ package frc.robot.util.diffswerve;
 
 import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.MotorCommutation;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
@@ -84,18 +85,18 @@ public class DiffSwerveModule {
     
     private TalonFX initFalconMotor(int canID) {
         TalonFX motor = new TalonFX(canID);
+
         checkErrorCode(motor.configFactoryDefault());
         motor.setInverted(false);
         motor.setSensorPhase(false);
         motor.setNeutralMode(NeutralMode.Brake);
-        motor.enableVoltageCompensation(true);
 
         checkErrorCode(motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, Constants.DifferentialSwerveModule.TIMEOUT));
         checkErrorCode(motor.configForwardSoftLimitEnable(false));
         checkErrorCode(motor.configVoltageCompSaturation(Constants.DifferentialSwerveModule.VOLTAGE, Constants.DifferentialSwerveModule.TIMEOUT));
+        motor.enableVoltageCompensation(true);
         checkErrorCode(motor.setStatusFramePeriod(StatusFrame.Status_1_General, 5, Constants.DifferentialSwerveModule.TIMEOUT));
         checkErrorCode(motor.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 20, Constants.DifferentialSwerveModule.TIMEOUT));
-        checkErrorCode(motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, Constants.DifferentialSwerveModule.TIMEOUT));
         checkErrorCode(motor.configForwardSoftLimitEnable(false));
         checkErrorCode(motor.configNeutralDeadband(Constants.DifferentialSwerveModule.NEUTRAL_DEADBAND_PERCENT, Constants.DifferentialSwerveModule.TIMEOUT));
         checkErrorCode(motor.configOpenloopRamp(0, Constants.DifferentialSwerveModule.TIMEOUT));
@@ -107,6 +108,8 @@ public class DiffSwerveModule {
                 Constants.DifferentialSwerveModule.CURRENT_THRESHOLD,
                 Constants.DifferentialSwerveModule.CURRENT_TRIGGER_TIME)
         ));
+        checkErrorCode(motor.configVoltageMeasurementFilter(0, Constants.DifferentialSwerveModule.TIMEOUT));
+        checkErrorCode(motor.configMotionProfileTrajectoryInterpolationEnable(false, Constants.DifferentialSwerveModule.TIMEOUT));
 
         return motor;
     }

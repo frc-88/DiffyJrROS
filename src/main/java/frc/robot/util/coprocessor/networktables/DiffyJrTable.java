@@ -103,6 +103,9 @@ public class DiffyJrTable extends CoprocessorTable {
             moduleTable.getEntry("wheel_velocity").setDouble(module.getWheelVelocity());
             moduleTable.getEntry("azimuth_velocity").setDouble(module.getAzimuthVelocity());
             moduleTable.getEntry("azimuth").setDouble(module.getModuleAngle());
+            moduleTable.getEntry("wheel_velocity_ref").setDouble(module.getReferenceWheelVelocity());
+            moduleTable.getEntry("azimuth_velocity_ref").setDouble(module.getReferenceModuleAngularVelocity());
+            moduleTable.getEntry("azimuth_ref").setDouble(module.getReferenceModuleAngle());
             moduleTable.getEntry("hi_voltage").setDouble(module.getHiMeasuredVoltage());
             moduleTable.getEntry("hi_voltage_ref").setDouble(module.getHiNextVoltage());
             moduleTable.getEntry("hi_velocity").setDouble(module.getHiRadiansPerSecond());
@@ -133,7 +136,7 @@ public class DiffyJrTable extends CoprocessorTable {
     private void fieldRelativeCallback(EntryNotification notification) {
         boolean value = notification.getEntry().getBoolean(false);
         if (value) {
-            this.swerve.softResetImu();
+            this.swerve.resetFieldOffset();
         }
         System.out.println("Setting field relative commands to " + value);
         this.swerve.setFieldRelativeCommands(value);

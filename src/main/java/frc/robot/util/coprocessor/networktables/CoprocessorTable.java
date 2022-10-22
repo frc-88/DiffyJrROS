@@ -255,7 +255,7 @@ public class CoprocessorTable extends CoprocessorBase {
         }
         
         Pose2d pose = this.chassis.getOdometryPose();
-        ChassisSpeeds velocity = this.chassis.getChassisVelocity();
+        ChassisSpeeds velocity = this.chassis.getChassisSpeeds();
         odomEntryX.setDouble(pose.getX());
         odomEntryY.setDouble(pose.getY());
         odomEntryT.setDouble(pose.getRotation().getRadians());
@@ -463,6 +463,6 @@ public class CoprocessorTable extends CoprocessorBase {
         laserXs = laserScanEntryXs.getDoubleArray(laserXs);
         laserYs = laserScanEntryYs.getDoubleArray(laserYs);
 
-        laserObstacles.set(laserXs, laserYs);
+        laserObstacles.setPoints(laserXs, laserYs);
     }
 }

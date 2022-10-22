@@ -39,7 +39,7 @@ public class DiffSwerveChassis implements ChassisInterface {
     private final SlewRateLimiter batteryLimiter;
 
     private boolean fieldRelativeCommands = false;
-    private Rotation2d fieldRelativeImuOffset = new Rotation2d();
+    private Rotation2d fieldRelativeOffset = new Rotation2d();
 
     public final NavX imu;
 
@@ -85,7 +85,9 @@ public class DiffSwerveChassis implements ChassisInterface {
                 backLeft.getModuleLocation(),
                 backRight.getModuleLocation(),
                 frontRight.getModuleLocation());
-        odometry = new SwerveDriveOdometry(kinematics, getImuHeading());
+        
+        // odometry = new DiffSwerveDriveOdometry(kinematics);
+        odometry = new SwerveDriveOdometry(kinematics, Rotation2d.fromDegrees(imu.getYaw()));
 
         controller = new HolonomicDriveController(
                 new PIDController(
@@ -159,7 +161,7 @@ public class DiffSwerveChassis implements ChassisInterface {
     public void periodic() {
         // Called in main periodic callback in Robot
         odometry.update(
-                getImuHeading(),
+                getHeading(),
                 frontLeft.getState(),
                 backLeft.getState(),
                 backRight.getState(),
@@ -188,23 +190,21 @@ public class DiffSwerveChassis implements ChassisInterface {
     }
 
     public void resetOdom(Pose2d pose) {
-        odometry.resetPosition(pose, getImuHeading());
+        odometry.resetPosition(
+            pose,
+            getHeading()
+        );
     }
 
-    public void resetImu() {
-        imu.reset();
-        fieldRelativeImuOffset = new Rotation2d();
-    }
-
-    public void softResetImu() {
-        fieldRelativeImuOffset = getImuHeading();
+    public void resetFieldOffset() {
+        fieldRelativeOffset = getHeading();
     }
 
     public NavX getImu() {
         return imu;
     }
 
-    public ChassisSpeeds getChassisVelocity() {
+    public ChassisSpeeds getChassisSpeeds() {
         return kinematics.toChassisSpeeds(
                 frontLeft.getState(),
                 backLeft.getState(),
@@ -213,7 +213,7 @@ public class DiffSwerveChassis implements ChassisInterface {
     }
 
     public double getChassisSpeed() {
-        ChassisSpeeds speeds = getChassisVelocity();
+        ChassisSpeeds speeds = getChassisSpeeds();
         return Math.sqrt(
             speeds.vxMetersPerSecond * speeds.vxMetersPerSecond + 
             speeds.vyMetersPerSecond * speeds.vyMetersPerSecond
@@ -241,21 +241,23 @@ public class DiffSwerveChassis implements ChassisInterface {
         return this.modules.length;
     }
 
-    public Rotation2d getImuHeading() {
+    public Rotation2d getHeading() {
         return Rotation2d.fromDegrees(imu.getYaw());
+        // return odometry.getPoseMeters().getRotation();
     }
 
-    public Rotation2d getImuHeadingWithOffset() {
-        return getImuHeading().minus(fieldRelativeImuOffset);
+    public Rotation2d getHeadingWithOffset() {
+        return getHeading().minus(fieldRelativeOffset);
     }
 
-    public Rotation2d getImuHeadingRate() {
+    public Rotation2d getHeadingRate() {
         return Rotation2d.fromDegrees(imu.getYawRate());
+        // return Rotation2d.fromDegrees(getChassisVelocity().omegaRadiansPerSecond);
     }
 
     public Rotation2d getAnglePidMeasurement() {
-        return getImuHeadingWithOffset();
-        // return getImuHeadingRate();
+        return getHeadingWithOffset();
+        // return getHeadingRate();
     }
 
     public void setIdealState(SwerveModuleState[] swerveModuleStates) {
@@ -323,7 +325,7 @@ public class DiffSwerveChassis implements ChassisInterface {
                 limitedChassisSpeeds.vxMetersPerSecond, 
                 limitedChassisSpeeds.vyMetersPerSecond, 
                 limitedChassisSpeeds.omegaRadiansPerSecond, 
-                getImuHeadingWithOffset());
+                getHeadingWithOffset());
         }
 
         if (isWithinDeadband(limitedChassisSpeeds)) {
