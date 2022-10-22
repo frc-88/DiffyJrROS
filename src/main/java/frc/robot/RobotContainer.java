@@ -64,41 +64,44 @@ public class RobotContainer {
     configurePeriodics(robot);
     m_limelight.ledOff();
     m_drive.getSwerve().setAngleControllerEnabled(false);
-    SmartDashboard.putString("Auto", "static");
+    SmartDashboard.putString("Auto", "chase");
   }
 
   private void configureDriveCommand() {
     // m_drive.setDefaultCommand(m_passthroughRosCommand);
     m_drive.setDefaultCommand(m_joystickDriveCommand);
     // m_joystick.getAllowRosButton().whileHeld(m_joystickDriveCommand);
-    m_joystick.getAllowRosButton().whileHeld(m_passthroughRosCommand);
-    m_joystick.getPointToCenterButton().whileHeld(new PointToCenterDriveCommand(
-      m_drive, m_ros_interface, m_joystick,
-      frc.robot.util.diffswerve.Constants.DriveTrain.MAX_CHASSIS_ANG_VEL * 0.75)
+    m_joystick.getRightTriggerButton().whileHeld(m_passthroughRosCommand);
+    // m_joystick.getLeftTriggerButton().whileHeld(new PointToCenterDriveCommand(
+    //   m_drive, m_ros_interface, m_joystick,
+    //   frc.robot.util.diffswerve.Constants.DriveTrain.MAX_CHASSIS_ANG_VEL * 0.75)
+    // );
+    m_joystick.getLeftTriggerButton().whileHeld(
+      new ChaseObject(m_drive, m_ros_interface, "cargo_<team>")
     );
     userButton.whileHeld(new CoastDriveMotors(m_drive));
     // userButton.whileHeld(new TestDiffSwerveMotors(m_drive));
   }
 
   private CommandBase configureStaticAutoCommand() {
-    WaypointsPlan autoPlan = new WaypointsPlan(m_ros_interface);
+    // WaypointsPlan autoPlan = new WaypointsPlan(m_ros_interface);
     // autoPlan.addWaypoint(new Waypoint("<team>" + "_a"));
-    autoPlan.addWaypoint(new Waypoint("<team>_1"));
-    autoPlan.addWaypoint(new Waypoint("<team>_2").makeContinuous(true));
-    autoPlan.addWaypoint(new Waypoint("<team>_3").makeContinuous(true));
-    autoPlan.addWaypoint(new Waypoint("<team>_4").makeIgnoreOrientation(false));
+    // autoPlan.addWaypoint(new Waypoint("<team>_1"));
+    // autoPlan.addWaypoint(new Waypoint("<team>_2").makeContinuous(true));
+    // autoPlan.addWaypoint(new Waypoint("<team>_3").makeContinuous(true));
+    // autoPlan.addWaypoint(new Waypoint("<team>_4").makeIgnoreOrientation(false));
 
     CommandBase staticAuto = new SequentialCommandGroup(
       // new DriveDistanceMeters(m_drive, 0.5, 0.5),
-      new DriveWithWaypointsPlan(m_nav, m_drive, autoPlan),
-      new ChaseObject(m_drive, m_ros_interface, "power_cell")
+      // new DriveWithWaypointsPlan(m_nav, m_drive, autoPlan),
+      new ChaseObject(m_drive, m_ros_interface, "cargo_<team>")
     );
     
     return staticAuto;
   }
 
   private CommandBase configureChaseAutoCommand() {
-    return new ChaseObject(m_drive, m_ros_interface, "power_cell");
+    return new ChaseObject(m_drive, m_ros_interface, "cargo_<team>");
   }
 
   private void configurePeriodics(Robot robot) {
@@ -125,7 +128,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    String autoName = SmartDashboard.getString("Auto", "static");
+    String autoName = SmartDashboard.getString("Auto", "chase");
     if (autoName.equals("static")) {
       return staticAutoCommand;
     }

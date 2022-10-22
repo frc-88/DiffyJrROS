@@ -36,7 +36,7 @@ public class SwerveJoystick extends SubsystemBase {
     }
   }
 
-  public Button getAllowRosButton() {
+  public Button getRightTriggerButton() {
     if (m_type == SwerveControllerType.NT) {
       return this.nt_gamepad.getButton("RT");
     }
@@ -45,7 +45,7 @@ public class SwerveJoystick extends SubsystemBase {
     }
   }
 
-  public Button getPointToCenterButton() {
+  public Button getLeftTriggerButton() {
     if (m_type == SwerveControllerType.NT) {
       return this.nt_gamepad.getButton("LT");
     }
