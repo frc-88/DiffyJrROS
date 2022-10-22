@@ -37,7 +37,7 @@ import edu.wpi.first.wpilibj2.command.button.Button;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DriveSubsystem m_drive = new DriveSubsystem();
-  private final SwerveJoystick m_joystick = new SwerveJoystick(SwerveControllerType.NT);
+  private final SwerveJoystick m_joystick = new SwerveJoystick(SwerveControllerType.XBOX);
   private final DiffyJrTable m_ros_interface = new DiffyJrTable(
     m_drive.getSwerve(),
     m_drive.getImu(),
@@ -68,10 +68,10 @@ public class RobotContainer {
   }
 
   private void configureDriveCommand() {
-    m_drive.setDefaultCommand(m_passthroughRosCommand);
-    // m_drive.setDefaultCommand(m_joystickDriveCommand);
-    m_joystick.getAllowRosButton().whileHeld(m_joystickDriveCommand);
-    // m_joystick.getAllowRosButton().whileHeld(m_passthroughRosCommand);
+    // m_drive.setDefaultCommand(m_passthroughRosCommand);
+    m_drive.setDefaultCommand(m_joystickDriveCommand);
+    // m_joystick.getAllowRosButton().whileHeld(m_joystickDriveCommand);
+    m_joystick.getAllowRosButton().whileHeld(m_passthroughRosCommand);
     m_joystick.getPointToCenterButton().whileHeld(new PointToCenterDriveCommand(
       m_drive, m_ros_interface, m_joystick,
       frc.robot.util.diffswerve.Constants.DriveTrain.MAX_CHASSIS_ANG_VEL * 0.75)
