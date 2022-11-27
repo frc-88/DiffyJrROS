@@ -15,15 +15,16 @@ import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Navigation;
 import frc.robot.subsystems.SwerveJoystick;
 import frc.robot.subsystems.SwerveJoystick.SwerveControllerType;
-import frc.robot.util.roswaypoints.Waypoint;
-import frc.robot.util.roswaypoints.WaypointsPlan;
 import frc.robot.util.sensors.Limelight;
 import frc.robot.util.coprocessor.networktables.DiffyJrTable;
+import frc.robot.util.coprocessor.roswaypoints.Waypoint;
+import frc.robot.util.coprocessor.roswaypoints.WaypointsPlan;
 // import frc.robot.util.coprocessor.serial.DiffyJrSerial;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
@@ -90,6 +91,7 @@ public class RobotContainer {
 
     CommandBase staticAuto = new SequentialCommandGroup(
       // new DriveDistanceMeters(m_drive, 0.5, 0.5),
+      new InstantCommand(() -> m_ros_interface.setNoGoZones(new String[] {"<!team>"})),
       new DriveWithWaypointsPlan(m_nav, m_drive, autoPlan),
       new ChaseObject(m_drive, m_ros_interface, "power_cell")
     );
@@ -110,6 +112,7 @@ public class RobotContainer {
 
   public void setEnableDrive(boolean enabled) {
     System.out.println("Set drive motors to " + enabled);
+    m_ros_interface.setNoGoZones(new String[] {"<!team>"});
     m_drive.setEnabled(enabled);
     m_limelight.ledOff();
     m_drive.setCoast(!enabled);

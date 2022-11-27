@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -15,15 +16,13 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.util.coprocessor.ChassisInterface;
 import frc.robot.util.coprocessor.GameObject;
-import frc.robot.util.coprocessor.LaserScanObstacleTracker;
+import frc.robot.util.coprocessor.Helpers;
 import frc.robot.util.coprocessor.MessageTimer;
+import frc.robot.util.coprocessor.roswaypoints.GoalStatus;
+import frc.robot.util.coprocessor.roswaypoints.Waypoint;
 import frc.robot.util.coprocessor.CoprocessorBase;
-import frc.robot.util.roswaypoints.GoalStatus;
-import frc.robot.util.roswaypoints.Waypoint;
-import frc.robot.util.roswaypoints.WaypointMap;
 
 public class CoprocessorTable extends CoprocessorBase {
     private NetworkTableInstance instance;
@@ -112,6 +111,13 @@ public class CoprocessorTable extends CoprocessorBase {
     private double[] laserXs = new double[0];
     private double[] laserYs = new double[0];
 
+    private NetworkTable zonesTable;
+    private NetworkTable zoneInfoTable;
+    private NetworkTableEntry zoneInfoIsValidEntry;
+    private NetworkTable noGoZonesTable;
+    private NetworkTableEntry zoneNoGoNamesEntry;
+    private NetworkTableEntry zoneNoGoUpdateEntry;
+
     public CoprocessorTable(ChassisInterface chassis, String address, int port, double updateInterval) {
         super(chassis);
         this.address = address;
@@ -199,6 +205,17 @@ public class CoprocessorTable extends CoprocessorBase {
         laserScanEntryXs = laserScanTable.getEntry("xs");
         laserScanEntryYs = laserScanTable.getEntry("ys");
         laserScanEntryXs.addListener(this::scanCallback, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+        zonesTable = rootTable.getSubTable("zones");
+        zoneInfoTable = zonesTable.getSubTable("info");
+        zoneInfoIsValidEntry = zoneInfoTable.getEntry("is_valid");
+        noGoZonesTable = zonesTable.getSubTable("nogo");
+        zoneNoGoNamesEntry = noGoZonesTable.getEntry("names");
+        zoneNoGoUpdateEntry = noGoZonesTable.getEntry("update");
+        zoneInfoTable.addSubTableListener((parent, name, table) -> {newZoneCallback(name);}, true);
+        zoneInfoIsValidEntry.addListener(this::zoneIsValidCallback, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+        updateNoGoZoneEntries();
     }
 
     private void cmdVelCallback(EntryNotification notification) {
@@ -282,37 +299,94 @@ public class CoprocessorTable extends CoprocessorBase {
         waypointXEntries.put(name, xEntry);
         waypointYEntries.put(name, yEntry);
         waypointTEntries.put(name, tEntry);
-        xEntry.addListener((notification) -> this.waypointXEntryCallback(name, notification), EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-        yEntry.addListener((notification) -> this.waypointYEntryCallback(name, notification), EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-        tEntry.addListener((notification) -> this.waypointTEntryCallback(name, notification), EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+        Pose2d pose = new Pose2d(
+            waypointXEntries.get(name).getDouble(0.0),
+            waypointYEntries.get(name).getDouble(0.0),
+            new Rotation2d(waypointTEntries.get(name).getDouble(0.0))
+        );
+        waypoints.put(name, pose);
+        xEntry.addListener((notification) -> this.waypointXEntryCallback(name), EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+        yEntry.addListener((notification) -> this.waypointYEntryCallback(name), EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+        tEntry.addListener((notification) -> this.waypointTEntryCallback(name), EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
     }
 
-    private void waypointXEntryCallback(String waypointName, EntryNotification notification) {
+    private void waypointXEntryCallback(String waypointName) {
         Pose2d old_pose = waypoints.get(waypointName);
+        System.out.println("waypointXEntryCallback: " + old_pose);
         Pose2d new_pose = new Pose2d(
             waypointXEntries.get(waypointName).getDouble(0.0),
             old_pose.getY(),
             old_pose.getRotation()
         );
-        waypoints.put(waypointName, new_pose);
+        putWaypoint(waypointName, new_pose);
     }
-    private void waypointYEntryCallback(String waypointName, EntryNotification notification) {
+    private void waypointYEntryCallback(String waypointName) {
         Pose2d old_pose = waypoints.get(waypointName);
         Pose2d new_pose = new Pose2d(
             old_pose.getX(),
             waypointYEntries.get(waypointName).getDouble(0.0),
             old_pose.getRotation()
         );
-        waypoints.put(waypointName, new_pose);
+        putWaypoint(waypointName, new_pose);
     }
-    private void waypointTEntryCallback(String waypointName, EntryNotification notification) {
+    private void waypointTEntryCallback(String waypointName) {
         Pose2d old_pose = waypoints.get(waypointName);
         Pose2d new_pose = new Pose2d(
             old_pose.getX(),
             old_pose.getY(),
             new Rotation2d(waypointTEntries.get(waypointName).getDouble(0.0))
         );
-        waypoints.put(waypointName, new_pose);
+        putWaypoint(waypointName, new_pose);
+    }
+
+    private void newZoneCallback(String name) {
+        NetworkTableEntry updateEntry = zoneInfoTable.getSubTable(name).getEntry("update");
+        updateEntry.addListener((notification) -> this.zoneUpdateCallback(name), EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+    }
+
+    private void zoneIsValidCallback(EntryNotification notification) {
+        zoneManager.setValid(zoneInfoIsValidEntry.getBoolean(false));
+    }
+
+    private void zoneUpdateCallback(String name) {
+        if (!zoneManager.isValid()) {
+            System.out.println("Zone manager flag is not valid. Skipping zone update event.");
+            return;
+        }
+        zoneManager.setZone(
+            name,
+            zoneInfoTable.getSubTable(name).getEntry("nearest_point_x").getDouble(0.0),
+            zoneInfoTable.getSubTable(name).getEntry("nearest_point_y").getDouble(0.0),
+            zoneInfoTable.getSubTable(name).getEntry("distance").getDouble(0.0),
+            zoneInfoTable.getSubTable(name).getEntry("is_inside").getBoolean(false),
+            zoneInfoTable.getSubTable(name).getEntry("is_nogo").getBoolean(false)
+        );
+    }
+
+    private void updateNoGoZoneEntries() {
+        Set<String> nogos = zoneManager.getNoGoNames();
+        String values[] = new String[nogos.size()];
+        int index = 0;
+        for (String nogo : nogos) {
+            values[index++] = nogo;
+        }
+        zoneNoGoNamesEntry.setStringArray(values);
+        zoneNoGoUpdateEntry.setDouble(getTime());
+    }
+
+    public void setNoGoZones(String[] names) {
+        super.setNoGoZones(names);
+        updateNoGoZoneEntries();
+    }
+
+    public void setNoGoZone(String name) {
+        super.setNoGoZone(name);
+        updateNoGoZoneEntries();
+    }
+
+    public void removeNoGoZone(String name) {
+        super.removeNoGoZone(name);
+        updateNoGoZoneEntries();
     }
 
     public void stopComms() {
@@ -344,7 +418,7 @@ public class CoprocessorTable extends CoprocessorBase {
      */
     
     public void sendGoal(Waypoint waypoint) {
-        String waypointName = WaypointMap.parseWaypointName(waypoint.waypoint_name);
+        String waypointName = Helpers.parseName(waypoint.waypoint_name);
         setCommonWaypointEntries(numSentGoals, waypoint);
         waypointNameEntry.setValue(waypointName);  // if the name is not empty, pose entries are ignored by planner
         waypointPoseXEntry.setValue(waypoint.pose.getX());
@@ -391,7 +465,7 @@ public class CoprocessorTable extends CoprocessorBase {
 
     public void sendMatchStatus(boolean is_autonomous, double match_timer, DriverStation.Alliance team_color) {
         isAutonomousEntry.setBoolean(is_autonomous);
-        teamColorEntry.setString(getTeamName(team_color));
+        teamColorEntry.setString(Helpers.getTeamColorName(team_color));
         matchTimerEntry.setDouble(match_timer);
         matchUpdateEntry.setDouble(getTime());
     }
@@ -442,7 +516,7 @@ public class CoprocessorTable extends CoprocessorBase {
     }
 
     public String parseObjectName(String objectName) {
-        return objectName.replaceAll("<team>", getTeamName(DriverStation.getAlliance()));
+        return Helpers.parseName(objectName);
     }
 
     public GameObject getNearestGameObject(String objectName)

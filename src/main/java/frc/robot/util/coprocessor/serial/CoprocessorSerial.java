@@ -14,14 +14,14 @@ import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.util.coprocessor.ChassisInterface;
 import frc.robot.util.coprocessor.MessageTimer;
 import frc.robot.util.coprocessor.VelocityCommand;
+import frc.robot.util.coprocessor.roswaypoints.GoalStatus;
+import frc.robot.util.coprocessor.roswaypoints.Waypoint;
 import frc.robot.util.coprocessor.CoprocessorBase;
+import frc.robot.util.coprocessor.Helpers;
 import frc.robot.util.coprocessor.tunnel.DataStreamInterface;
 import frc.robot.util.coprocessor.tunnel.Handshake;
 import frc.robot.util.coprocessor.tunnel.PacketResult;
 import frc.robot.util.coprocessor.tunnel.TunnelInterface;
-import frc.robot.util.roswaypoints.GoalStatus;
-import frc.robot.util.roswaypoints.Waypoint;
-import frc.robot.util.roswaypoints.WaypointMap;
 
 
 public class CoprocessorSerial extends CoprocessorBase implements TunnelInterface {
@@ -136,7 +136,7 @@ public class CoprocessorSerial extends CoprocessorBase implements TunnelInterfac
 
     public void sendMatchStatus(boolean is_autonomous, double match_timer, DriverStation.Alliance team_color) {
         data_stream.writePacket("match",
-            is_autonomous, match_timer, getTeamName(team_color)
+            is_autonomous, match_timer, Helpers.getTeamColorName(team_color)
         );
     }
 
@@ -173,7 +173,7 @@ public class CoprocessorSerial extends CoprocessorBase implements TunnelInterfac
      */
     
     public void sendGoal(Waypoint waypoint) {
-        String waypointName = WaypointMap.parseWaypointName(waypoint.waypoint_name);
+        String waypointName = Helpers.parseName(waypoint.waypoint_name);
         
         data_stream.writePacket("waypoint", 
             numSentGoals, waypointName,

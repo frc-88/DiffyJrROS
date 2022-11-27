@@ -6,14 +6,15 @@ package frc.robot.util.coprocessor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import frc.robot.util.roswaypoints.GoalStatus;
-import frc.robot.util.roswaypoints.Waypoint;
+import frc.robot.util.coprocessor.roswaypoints.GoalStatus;
+import frc.robot.util.coprocessor.roswaypoints.Waypoint;
 
 public class CoprocessorBase {
     protected final long DEFAULT_MESSAGE_TIMEOUT = 1_000_000;
@@ -40,6 +41,8 @@ public class CoprocessorBase {
 
     protected LaserScanObstacleTracker laserObstacles = new LaserScanObstacleTracker();
 
+    protected ZoneManager zoneManager = new ZoneManager();
+
     public CoprocessorBase(ChassisInterface chassis) {
         this.chassis = chassis;
         laserObstacles.setBoundingBox(chassis.getBoundingBox());
@@ -47,6 +50,18 @@ public class CoprocessorBase {
 
     public void update() {
         
+    }
+
+    public void stopComms() {
+        
+    }
+
+    public void startComms() {
+        
+    }
+
+    public boolean isConnected() {
+        return true;
     }
 
     /***
@@ -89,6 +104,10 @@ public class CoprocessorBase {
         return waypoints.get(waypointName);
     }
 
+    public void putWaypoint(String waypointName, Pose2d pose) {
+        waypoints.put(waypointName, pose);
+    }
+
     public boolean doesWaypointExist(String waypointName) {
         return waypoints.containsKey(waypointName);
     }
@@ -122,17 +141,6 @@ public class CoprocessorBase {
         
     }
 
-    protected String getTeamName(DriverStation.Alliance team_color) {
-        String team_name = "";
-        if (team_color == Alliance.Red) {
-            team_name = "red";
-        }
-        else if (team_color == Alliance.Blue) {
-            team_name = "blue";
-        }
-        return team_name;
-    }
-
     public void setPoseEstimate(Pose2d poseEstimation) {
         
     }
@@ -147,5 +155,59 @@ public class CoprocessorBase {
 
     public LaserScanObstacleTracker getLaserScanObstacles() {
         return laserObstacles;
+    }
+
+    public boolean areZonesValid() {
+        return zoneManager.isValid();
+    }
+
+    public ZoneInfo getNearestNoGoZone() {
+        return zoneManager.getNearestNoGoZone();
+    }
+
+    public ZoneInfo getNearestZone() {
+        return zoneManager.getNearestZone();
+    }
+
+    public ZoneManager getZoneManager() {
+        return zoneManager;
+    }
+
+    public void setNoGoZones(String[] names) {
+        zoneManager.setNoGoes(names);
+    }
+
+    public void setNoGoZone(String name) {
+        zoneManager.setNoGo(name);
+    }
+
+    public void removeNoGoZone(String name) {
+        zoneManager.removeNoGo(name);
+    }
+
+    /**
+     * @param heading direction of travel of the robot from the robot's perspective
+     * @param reverseFanRadians range of accepted angles for each extended beam
+     * @param distanceRangeMeters if no go zone is further than this distance, ignore it
+     * @return
+     */
+    public boolean isDirectionTowardNoGoZonesAllowed(double heading, double reverseFanRadians, double distanceRangeMeters) {
+        Set<String> names = zoneManager.getNoGoNames();
+        List<String> in_bound_names = new ArrayList<>(names);
+        in_bound_names.removeIf(name -> zoneManager.getZone(name).getDistance() > distanceRangeMeters);
+        double angles[] = new double[in_bound_names.size()];
+
+        int index = 0;
+        Pose2d robot_pose = getGlobalPose();
+        for (String name : in_bound_names) {
+            ZoneInfo zone = zoneManager.getZone(name);
+            Pose2d nearest_pose = new Pose2d(zone.getNearestX(), zone.getNearestY(), new Rotation2d());
+            Pose2d relative_nearest = nearest_pose.relativeTo(robot_pose);
+            angles[index++] = Math.atan2(
+                relative_nearest.getY(),
+                relative_nearest.getX()
+            );
+        }
+        return Helpers.isDirectionAllowed(heading, angles, reverseFanRadians);
     }
 }

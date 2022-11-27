@@ -11,7 +11,7 @@ import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Navigation;
 import frc.robot.subsystems.Navigation.RosAutoState;
 import frc.robot.util.coprocessor.VelocityCommand;
-import frc.robot.util.roswaypoints.WaypointsPlan;
+import frc.robot.util.coprocessor.roswaypoints.WaypointsPlan;
 
 public class DriveWithWaypointsPlan extends CommandBase {
   private final Navigation m_nav;

@@ -45,7 +45,7 @@ public class DriveSwerveJoystickCommand extends CommandBase {
       if (m_coprocessor.getLaserScanObstacles().isDirectionAllowed(command.getHeading(), speed)) {
         m_drive.drive(command);
       } else {
-        System.out.println("Velocity command doesn't move robot away from obstacle! Ignoring.");
+        System.out.println("Velocity command doesn't move robot away from obstacle! Stopping motors.");
         m_drive.stop();
       }
     } else {
