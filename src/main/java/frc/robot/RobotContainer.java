@@ -9,8 +9,8 @@ import frc.robot.commands.CoastDriveMotors;
 import frc.robot.commands.DriveSwerveJoystickCommand;
 import frc.robot.commands.DriveWithWaypointsPlan;
 import frc.robot.commands.PassthroughRosCommand;
-import frc.robot.commands.PointToCenterDriveCommand;
-import frc.robot.commands.TestDiffSwerveMotors;
+// import frc.robot.commands.PointToCenterDriveCommand;
+// import frc.robot.commands.TestDiffSwerveMotors;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Navigation;
 import frc.robot.subsystems.SwerveJoystick;
@@ -38,7 +38,7 @@ import edu.wpi.first.wpilibj2.command.button.Button;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DriveSubsystem m_drive = new DriveSubsystem();
-  private final SwerveJoystick m_joystick = new SwerveJoystick(SwerveControllerType.NT);
+  private final SwerveJoystick m_joystick = new SwerveJoystick(SwerveControllerType.XBOX);
   private final DiffyJrTable m_ros_interface = new DiffyJrTable(
     m_drive.getSwerve(),
     m_drive.getImu(),
@@ -65,17 +65,20 @@ public class RobotContainer {
     configurePeriodics(robot);
     m_limelight.ledOff();
     m_drive.getSwerve().setAngleControllerEnabled(false);
-    SmartDashboard.putString("Auto", "static");
+    SmartDashboard.putString("Auto", "chase");
   }
 
   private void configureDriveCommand() {
-    m_drive.setDefaultCommand(m_passthroughRosCommand);
-    // m_drive.setDefaultCommand(m_joystickDriveCommand);
-    m_joystick.getAllowRosButton().whileHeld(m_joystickDriveCommand);
-    // m_joystick.getAllowRosButton().whileHeld(m_passthroughRosCommand);
-    m_joystick.getPointToCenterButton().whileHeld(new PointToCenterDriveCommand(
-      m_drive, m_ros_interface, m_joystick,
-      frc.robot.util.diffswerve.Constants.DriveTrain.MAX_CHASSIS_ANG_VEL * 0.75)
+    // m_drive.setDefaultCommand(m_passthroughRosCommand);
+    m_drive.setDefaultCommand(m_joystickDriveCommand);
+    // m_joystick.getAllowRosButton().whileHeld(m_joystickDriveCommand);
+    m_joystick.getRightTriggerButton().whileHeld(m_passthroughRosCommand);
+    // m_joystick.getLeftTriggerButton().whileHeld(new PointToCenterDriveCommand(
+    //   m_drive, m_ros_interface, m_joystick,
+    //   frc.robot.util.diffswerve.Constants.DriveTrain.MAX_CHASSIS_ANG_VEL * 0.75)
+    // );
+    m_joystick.getLeftTriggerButton().whileHeld(
+      new ChaseObject(m_drive, m_ros_interface, "cargo_<team>")
     );
     userButton.whileHeld(new CoastDriveMotors(m_drive));
     // userButton.whileHeld(new TestDiffSwerveMotors(m_drive));
@@ -83,7 +86,7 @@ public class RobotContainer {
 
   private CommandBase configureStaticAutoCommand() {
     WaypointsPlan autoPlan = new WaypointsPlan(m_ros_interface);
-    // autoPlan.addWaypoint(new Waypoint("<team>" + "_a"));
+    autoPlan.addWaypoint(new Waypoint("<team>" + "_a"));
     autoPlan.addWaypoint(new Waypoint("<team>_1"));
     autoPlan.addWaypoint(new Waypoint("<team>_2").makeContinuous(true));
     autoPlan.addWaypoint(new Waypoint("<team>_3").makeContinuous(true));
@@ -100,7 +103,7 @@ public class RobotContainer {
   }
 
   private CommandBase configureChaseAutoCommand() {
-    return new ChaseObject(m_drive, m_ros_interface, "power_cell");
+    return new ChaseObject(m_drive, m_ros_interface, "cargo_<team>");
   }
 
   private void configurePeriodics(Robot robot) {
@@ -128,7 +131,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    String autoName = SmartDashboard.getString("Auto", "static");
+    String autoName = SmartDashboard.getString("Auto", "chase");
     if (autoName.equals("static")) {
       return staticAutoCommand;
     }
