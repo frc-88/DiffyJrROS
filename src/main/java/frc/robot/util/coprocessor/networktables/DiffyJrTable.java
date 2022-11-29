@@ -84,7 +84,6 @@ public class DiffyJrTable extends CoprocessorTable {
         super.update();
 
         updateImu();
-        updateModules();
     }
 
     public void updateSlow() {
@@ -94,8 +93,11 @@ public class DiffyJrTable extends CoprocessorTable {
             SwerveModuleState state = module.getState();
             setJointPosition(index, state.angle.getRadians());
         }
+        // updateModules();
+        setNoGoZones(new String[] {"<!team>"});
     }
 
+    /*
     private void updateModules() {
         for (int index = 0; index < this.swerve.getNumModules(); index++) {
             DiffSwerveModule module = this.swerve.getModule(index);
@@ -114,7 +116,8 @@ public class DiffyJrTable extends CoprocessorTable {
             moduleTable.getEntry("lo_velocity").setDouble(module.getLoRadiansPerSecond());
         }
     }
-
+    */
+    
     public void updateImu()
     {
         imuEntryTx.setDouble(Units.degreesToRadians(imu.getRoll()));
