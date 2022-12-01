@@ -33,4 +33,12 @@ public class WaypointMap {
     public boolean isPoseValid(Pose2d pose) {
         return !Double.isNaN(pose.getX()) && !Double.isNaN(pose.getY()) && !Double.isNaN(pose.getRotation().getRadians());
     }
+
+    public Pose2d getPoseRelativeToWaypoint(String waypointName, Pose2d relativePose) {
+        Pose2d waypoint = getWaypoint(waypointName);
+        if (!isPoseValid(waypoint)) {
+            return waypoint;
+        }
+        return relativePose.relativeTo(waypoint);
+    }
 }

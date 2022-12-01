@@ -6,6 +6,7 @@ package frc.robot.util.coprocessor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -149,8 +150,51 @@ public class CoprocessorBase {
         
     }
 
-    public GameObject getNearestGameObject(String objectName) {
-        return gameObjects.get(objectName);
+    public String parseObjectName(String objectName) {
+        return Helpers.parseName(objectName);
+    }
+
+    public GameObject getNearestGameObject(String objectName)
+    {
+        objectName = parseObjectName(objectName);
+        double min_dist = -1.0;
+        String min_obj_id = "";
+        for (String obj_id : gameObjects.keySet()) {
+            GameObject gameObject = gameObjects.get(obj_id);
+            if (gameObject.getName() == objectName) {
+                double distance = gameObject.getDistance();
+                if (min_dist < 0.0 || distance < min_dist) {
+                    min_dist = distance;
+                    min_obj_id = obj_id;
+                }
+            }
+        }
+        if (min_obj_id.length() == 0) {
+            System.out.println(objectName + " doesn't exist in object table!");
+            return new GameObject("", 0);
+        }
+        return gameObjects.get(min_obj_id);
+    }
+
+    public Set<GameObject> getGameObjects(String objectName) {
+        Set<GameObject> objects = new HashSet<>();
+        for (String obj_id : gameObjects.keySet()) {
+            GameObject gameObject = gameObjects.get(obj_id);
+            if (gameObject.getName() == objectName) {
+                objects.add(gameObject);
+            }
+        }
+        return objects;
+    }
+
+    public GameObject getFirstGameObject(String objectName) {
+        for (String obj_id : gameObjects.keySet()) {
+            GameObject gameObject = gameObjects.get(obj_id);
+            if (gameObject.getName() == objectName) {
+                return gameObject;
+            }
+        }
+        return new GameObject("", 0);
     }
 
     public LaserScanObstacleTracker getLaserScanObstacles() {

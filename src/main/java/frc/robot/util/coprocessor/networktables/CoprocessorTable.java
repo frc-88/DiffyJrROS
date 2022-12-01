@@ -498,38 +498,32 @@ public class CoprocessorTable extends CoprocessorBase {
     }
 
     private void newObjectCallback(String name) {
-        gameObjects.put(name, new GameObject(name));
         NetworkTableEntry updateEntry = objectTable.getSubTable(name).getEntry("update");
         updateEntry.addListener((notification) -> this.objectEntryCallback(name, notification), EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
         System.out.println("Registering object " + name);
     }
 
-    void objectEntryCallback(String objectName, EntryNotification notification)
+    private void objectEntryCallback(String objectName, EntryNotification notification)
     {
-        GameObject gameObject = gameObjects.get(objectName);
-        gameObject.count = (int)objectTable.getSubTable(objectName).getEntry("count").getDouble(0.0);
-        gameObject.set(
-            objectTable.getSubTable(objectName).getEntry("x").getDouble(0.0), 
-            objectTable.getSubTable(objectName).getEntry("y").getDouble(0.0), 
-            objectTable.getSubTable(objectName).getEntry("z").getDouble(0.0)
-        );
-    }
-
-    public String parseObjectName(String objectName) {
-        return Helpers.parseName(objectName);
-    }
-
-    public GameObject getNearestGameObject(String objectName)
-    {
-        objectName = parseObjectName(objectName);
-        if (!gameObjects.containsKey(objectName)) {
-            newObjectCallback(objectName);
+        NetworkTable objectSubTable = objectTable.getSubTable(objectName);
+        int count = (int)objectSubTable.getEntry("count").getDouble(0.0);
+        for (int index = 0; index < count; index++) {
+            String obj_id = objectName + "-" + index;
+            GameObject gameObject;
+            if (!gameObjects.containsKey(obj_id)) {
+                gameObject = new GameObject(objectName, index);
+                gameObjects.put(obj_id, gameObject);
+            }
+            else {
+                gameObject = gameObjects.get(obj_id);
+            }
+            gameObject.set(
+                objectSubTable.getEntry(index + "/x").getDouble(0.0),
+                objectSubTable.getEntry(index + "/y").getDouble(0.0),
+                objectSubTable.getEntry(index + "/z").getDouble(0.0),
+                objectSubTable.getEntry(index + "/yaw").getDouble(0.0)
+            );
         }
-        if (!objectTable.containsSubTable(objectName)) {
-            System.out.println(objectName + " doesn't exist in object table!");
-            return new GameObject("");
-        }
-        return gameObjects.get(objectName);
     }
 
     private void scanCallback(EntryNotification notification)

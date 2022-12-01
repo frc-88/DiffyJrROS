@@ -79,6 +79,14 @@ public class Navigation extends SubsystemBase {
     return m_waypointMap.isPoseValid(pose);
   }
 
+  public WaypointMap getWaypointMap() {
+    return m_waypointMap;
+  }
+
+  public CoprocessorBase getCoprocessor() {
+    return m_coprocessor;
+  }
+
   private long getTime() {
     return RobotController.getFPGATime();
   }
