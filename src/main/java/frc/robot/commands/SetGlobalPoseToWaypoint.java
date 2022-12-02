@@ -11,6 +11,7 @@ import frc.robot.subsystems.Navigation;
 public class SetGlobalPoseToWaypoint extends CommandBase {
   private final Navigation m_nav;
   private final String m_waypointName;
+  private boolean is_set = false;
   /** Creates a new SetGlobalPoseToWaypoint. */
   public SetGlobalPoseToWaypoint(Navigation nav, String waypointName) {
     m_nav = nav;
@@ -22,17 +23,27 @@ public class SetGlobalPoseToWaypoint extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    is_set = false;
+    
+  }
+
+
+  @Override
+  public void execute() {
     Pose2d pose = m_nav.getWaypoint(m_waypointName);
     if (m_nav.isPoseValid(pose)) {
       m_nav.setPoseEstimate(pose);
+      is_set = true;
+      System.out.println("Set pose to waypoint " + m_waypointName);
     }
     else {
       System.out.println("Warning: " + m_waypointName + " is not a valid waypoint name");
     }
   }
 
+  @Override
   public boolean isFinished() {
-    return true;
+    return is_set;
   }
 
   @Override

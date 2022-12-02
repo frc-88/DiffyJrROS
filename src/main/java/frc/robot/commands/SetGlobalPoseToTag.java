@@ -13,6 +13,7 @@ public class SetGlobalPoseToTag extends CommandBase {
   private final Navigation m_nav;
   private final String m_waypointName;
   private final String m_gameObjectName;
+  private boolean is_set = false;
   /** Creates a new SetGlobalPoseToTag. */
   public SetGlobalPoseToTag(Navigation nav, String gameObjectName, String waypointName) {
     m_nav = nav;
@@ -25,21 +26,30 @@ public class SetGlobalPoseToTag extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    is_set = false;
+  }
+
+  @Override
+  public void execute() {
     GameObject gameObjectPose = m_nav.getCoprocessor().getNearestGameObject(m_gameObjectName);
     if (!gameObjectPose.isValid()) {
       System.out.println("Warning: " + m_gameObjectName + " is not a valid game object");
+      return;
     }
     Pose2d resetPose = m_nav.getWaypointMap().getPoseRelativeToWaypoint(m_waypointName, gameObjectPose.getPose());
     if (m_nav.isPoseValid(resetPose)) {
       m_nav.setPoseEstimate(resetPose);
+      System.out.println("Set pose to game object " + gameObjectPose.getName());
+      is_set = true;
     }
     else {
       System.out.println("Warning: " + m_waypointName + " is not a valid waypoint");
     }
   }
 
+  @Override
   public boolean isFinished() {
-    return true;
+    return is_set;
   }
 
   @Override

@@ -507,22 +507,21 @@ public class CoprocessorTable extends CoprocessorBase {
     {
         NetworkTable objectSubTable = objectTable.getSubTable(objectName);
         int count = (int)objectSubTable.getEntry("count").getDouble(0.0);
+        if (!gameObjects.containsKey(objectName)) {
+            gameObjects.put(objectName, new HashMap<Integer, GameObject>());
+        }
+        else {
+            gameObjects.get(objectName).clear();
+        }
         for (int index = 0; index < count; index++) {
-            String obj_id = objectName + "-" + index;
-            GameObject gameObject;
-            if (!gameObjects.containsKey(obj_id)) {
-                gameObject = new GameObject(objectName, index);
-                gameObjects.put(obj_id, gameObject);
-            }
-            else {
-                gameObject = gameObjects.get(obj_id);
-            }
+            GameObject gameObject = new GameObject(objectName, index);
             gameObject.set(
                 objectSubTable.getEntry(index + "/x").getDouble(0.0),
                 objectSubTable.getEntry(index + "/y").getDouble(0.0),
                 objectSubTable.getEntry(index + "/z").getDouble(0.0),
                 objectSubTable.getEntry(index + "/yaw").getDouble(0.0)
             );
+            gameObjects.get(objectName).put(index, gameObject);
         }
     }
 

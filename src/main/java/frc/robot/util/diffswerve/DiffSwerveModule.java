@@ -27,8 +27,8 @@ import edu.wpi.first.math.numbers.*;
 
 
 public class DiffSwerveModule {
-    private final TalonFX hiMotor;
-    private final TalonFX loMotor;
+    private TalonFX hiMotor;
+    private TalonFX loMotor;
 
     private final CANifiedPWMEncoder azimuthSensor;
 
@@ -48,8 +48,21 @@ public class DiffSwerveModule {
             Translation2d moduleLocation,
             int loCanID, int hiCanID, int azimuthCanifierID, int azimuthPwmChannel,
             double azimuthOffsetRadians) {
-        loMotor = initFalconMotor(loCanID);
-        hiMotor = initFalconMotor(hiCanID);
+        boolean is_ready = false;
+        do {
+            try {
+                loMotor = new TalonFX(loCanID);
+                hiMotor = new TalonFX(hiCanID);
+                initFalconMotor(loMotor);
+                initFalconMotor(hiMotor);
+                is_ready = true;
+            }
+            catch (RuntimeException e) {
+                System.out.println("Failed to set Falcon CAN parameter. Trying again: " + e);
+            }
+        }
+        while (!is_ready);
+
         azimuthSensor = new CANifiedPWMEncoder(
             azimuthCanifierID, azimuthPwmChannel, azimuthOffsetRadians,
             Constants.DifferentialSwerveModule.AZIMUTH_ROTATIONS_TO_RADIANS, false
@@ -83,9 +96,7 @@ public class DiffSwerveModule {
         is_enabled = enabled;
     }
     
-    private TalonFX initFalconMotor(int canID) {
-        TalonFX motor = new TalonFX(canID);
-
+    private void initFalconMotor(TalonFX motor) {
         checkErrorCode(motor.configFactoryDefault());
         motor.setInverted(false);
         motor.setSensorPhase(false);
@@ -110,8 +121,6 @@ public class DiffSwerveModule {
         ));
         checkErrorCode(motor.configVoltageMeasurementFilter(0, Constants.DifferentialSwerveModule.TIMEOUT));
         checkErrorCode(motor.configMotionProfileTrajectoryInterpolationEnable(false, Constants.DifferentialSwerveModule.TIMEOUT));
-
-        return motor;
     }
 
     private void checkErrorCode(ErrorCode code)

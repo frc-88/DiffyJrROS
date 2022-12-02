@@ -15,7 +15,7 @@ public class GameObject {
     private double y = 0.0;
     private double z = 0.0;
     private double yaw = 0.0;
-    public MessageTimer timer = new MessageTimer(500_000);
+    public MessageTimer timer = new MessageTimer(150_000);
 
     public GameObject(String name, int index)
     {

@@ -38,7 +38,7 @@ public class CoprocessorBase {
 
     protected Map<String, Pose2d> waypoints = new HashMap<>();
 
-    protected Map<String, GameObject> gameObjects = new HashMap<>();
+    protected Map<String, Map<Integer, GameObject>> gameObjects = new HashMap<>();
 
     protected LaserScanObstacleTracker laserObstacles = new LaserScanObstacleTracker();
 
@@ -158,40 +158,48 @@ public class CoprocessorBase {
     {
         objectName = parseObjectName(objectName);
         double min_dist = -1.0;
-        String min_obj_id = "";
-        for (String obj_id : gameObjects.keySet()) {
-            GameObject gameObject = gameObjects.get(obj_id);
-            if (gameObject.getName() == objectName) {
-                double distance = gameObject.getDistance();
-                if (min_dist < 0.0 || distance < min_dist) {
-                    min_dist = distance;
-                    min_obj_id = obj_id;
+        String min_obj_name = "";
+        int min_obj_index = -1;
+        for (String name : gameObjects.keySet()) {
+            for (Integer index : gameObjects.get(name).keySet()) {
+                GameObject gameObject = gameObjects.get(name).get(index);
+                if (gameObject.getName().equals(objectName)) {
+                    double distance = gameObject.getDistance();
+                    if (min_dist < 0.0 || distance < min_dist) {
+                        min_dist = distance;
+                        min_obj_name = name;
+                        min_obj_index = index;
+                    }
                 }
             }
         }
-        if (min_obj_id.length() == 0) {
+        if (min_obj_name.length() == 0 || min_obj_index < 0) {
             System.out.println(objectName + " doesn't exist in object table!");
             return new GameObject("", 0);
         }
-        return gameObjects.get(min_obj_id);
+        return gameObjects.get(min_obj_name).get(min_obj_index);
     }
 
     public Set<GameObject> getGameObjects(String objectName) {
         Set<GameObject> objects = new HashSet<>();
-        for (String obj_id : gameObjects.keySet()) {
-            GameObject gameObject = gameObjects.get(obj_id);
-            if (gameObject.getName() == objectName) {
-                objects.add(gameObject);
+        for (String name : gameObjects.keySet()) {
+            for (Integer index : gameObjects.get(name).keySet()) {
+                GameObject gameObject = gameObjects.get(name).get(index);
+                if (gameObject.getName().equals(objectName)) {
+                    objects.add(gameObject);
+                }
             }
         }
         return objects;
     }
 
     public GameObject getFirstGameObject(String objectName) {
-        for (String obj_id : gameObjects.keySet()) {
-            GameObject gameObject = gameObjects.get(obj_id);
-            if (gameObject.getName() == objectName) {
-                return gameObject;
+        for (String name : gameObjects.keySet()) {
+            for (Integer index : gameObjects.get(name).keySet()) {
+                GameObject gameObject = gameObjects.get(name).get(index);
+                if (gameObject.getName().equals(objectName)) {
+                    return gameObject;
+                }
             }
         }
         return new GameObject("", 0);

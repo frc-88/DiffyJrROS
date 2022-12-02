@@ -9,6 +9,7 @@ import frc.robot.commands.CoastDriveMotors;
 import frc.robot.commands.DriveSwerveJoystickCommand;
 import frc.robot.commands.DriveWithWaypointsPlan;
 import frc.robot.commands.PassthroughRosCommand;
+import frc.robot.commands.SetGlobalPoseToTag;
 // import frc.robot.commands.PointToCenterDriveCommand;
 // import frc.robot.commands.TestDiffSwerveMotors;
 import frc.robot.subsystems.DriveSubsystem;
@@ -101,7 +102,8 @@ public class RobotContainer {
   }
 
   private CommandBase configureChaseAutoCommand() {
-    return new ChaseObject(m_drive, m_ros_interface, "cargo_<team>");
+    // return new ChaseObject(m_drive, m_ros_interface, "cargo_<team>");
+      return new SetGlobalPoseToTag(m_nav, "11", "red_start_2").withTimeout(1.0);
   }
 
   private void configurePeriodics(Robot robot) {

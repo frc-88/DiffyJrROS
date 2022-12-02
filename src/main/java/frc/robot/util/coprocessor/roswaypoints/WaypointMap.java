@@ -4,6 +4,7 @@ import java.util.Set;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import frc.robot.util.coprocessor.CoprocessorBase;
 import frc.robot.util.coprocessor.Helpers;
 
@@ -39,6 +40,7 @@ public class WaypointMap {
         if (!isPoseValid(waypoint)) {
             return waypoint;
         }
-        return relativePose.relativeTo(waypoint);
+        
+        return waypoint.transformBy(new Transform2d(relativePose, new Pose2d()));
     }
 }
