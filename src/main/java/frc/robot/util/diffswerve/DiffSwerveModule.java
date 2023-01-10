@@ -14,10 +14,12 @@ import edu.wpi.first.math.controller.LinearQuadraticRegulator;
 import edu.wpi.first.math.estimator.KalmanFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.LinearSystemLoop;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -43,6 +45,8 @@ public class DiffSwerveModule {
     private boolean is_enabled = false;
 
     private Translation2d moduleLocation;
+    private double wheelPosition = 0.0;
+    private double prevWheelPositionUpdateTime = 0.0;
 
     public DiffSwerveModule(
             Translation2d moduleLocation,
@@ -249,6 +253,7 @@ public class DiffSwerveModule {
                         getModuleAngle(), velocities.getFirst(), velocities.getSecond()));
         // predict step of kalman filter.
         predict();
+        updateWheelPosition(getWheelVelocity());
         if (is_enabled) {
             setFalconVoltage(hiMotor, getHiNextVoltage());
             setFalconVoltage(loMotor, getLoNextVoltage());
@@ -338,6 +343,21 @@ public class DiffSwerveModule {
     public double getWheelVelocity() {
         return getAngularVelocities().getSecond()
                 * Constants.DifferentialSwerveModule.WHEEL_RADIUS;
+    }
+
+    private void updateWheelPosition(double wheelVelocity) {
+        double currentTime = getTime();
+        double dt = currentTime - prevWheelPositionUpdateTime;
+        prevWheelPositionUpdateTime = currentTime;
+        wheelPosition += wheelVelocity * dt;
+    }
+
+    private double getTime() {
+        return RobotController.getFPGATime() * 1e-6;
+    }
+
+    public double getWheelPosition() {
+        return wheelPosition;
     }
 
     // Get module azimuth velocity in radians per sec.
@@ -446,6 +466,14 @@ public class DiffSwerveModule {
         return new SwerveModuleState(getWheelVelocity(), new Rotation2d(getModuleAngle()));
     }
 
+
+    public SwerveModulePosition getPosition() {
+        return new SwerveModulePosition(getWheelPosition(), new Rotation2d(getModuleAngle()));
+    }
+
+    public void resetPosition(SwerveModulePosition newPosition) {
+        wheelPosition = newPosition.distanceMeters;
+    }
 
     /**
      * Sets the state of the module and sends the voltages wanted to the motors.

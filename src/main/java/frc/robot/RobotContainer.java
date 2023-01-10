@@ -10,8 +10,6 @@ import frc.robot.commands.DriveSwerveJoystickCommand;
 import frc.robot.commands.DriveWithWaypointsPlan;
 import frc.robot.commands.PassthroughRosCommand;
 import frc.robot.commands.SetGlobalPoseToTag;
-// import frc.robot.commands.PointToCenterDriveCommand;
-// import frc.robot.commands.TestDiffSwerveMotors;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Navigation;
 import frc.robot.subsystems.SwerveJoystick;
@@ -20,14 +18,13 @@ import frc.robot.util.sensors.Limelight;
 import frc.robot.util.coprocessor.networktables.DiffyJrTable;
 import frc.robot.util.coprocessor.roswaypoints.Waypoint;
 import frc.robot.util.coprocessor.roswaypoints.WaypointsPlan;
-// import frc.robot.util.coprocessor.serial.DiffyJrSerial;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.button.Button;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -45,16 +42,12 @@ public class RobotContainer {
     Robot.isSimulation() ? Constants.COPROCESSOR_ADDRESS_SIMULATED : Constants.COPROCESSOR_ADDRESS,
     Constants.COPROCESSOR_PORT,
     Constants.COPROCESSOR_TABLE_UPDATE_DELAY);
-  // private final DiffyJrSerial m_ros_interface = new DiffyJrSerial(
-  //   m_drive.getSwerve(),
-  //   m_drive.getImu()
-  // );
   private final Navigation m_nav = new Navigation(m_ros_interface);
   private final Limelight m_limelight = new Limelight();
 
   private final CommandBase m_joystickDriveCommand = new DriveSwerveJoystickCommand(m_drive, m_ros_interface, m_joystick);
   private final CommandBase m_passthroughRosCommand = new PassthroughRosCommand(m_drive, m_ros_interface);
-  private Button userButton = new Button(() -> RobotController.getUserButton());
+  private Trigger userButton = new Trigger(() -> RobotController.getUserButton());
 
   private final CommandBase staticAutoCommand = configureStaticAutoCommand();
   private final CommandBase chaseAutoCommand = configureChaseAutoCommand();
@@ -71,17 +64,17 @@ public class RobotContainer {
   private void configureDriveCommand() {
     m_drive.setDefaultCommand(m_passthroughRosCommand);
     // m_drive.setDefaultCommand(m_joystickDriveCommand);
-    m_joystick.getLeftTriggerButton().whileHeld(m_joystickDriveCommand);
-    // m_joystick.getRightTriggerButton().whileHeld(m_passthroughRosCommand);
-    // m_joystick.getLeftTriggerButton().whileHeld(new PointToCenterDriveCommand(
+    m_joystick.getLeftTriggerButton().whileTrue(m_joystickDriveCommand);
+    // m_joystick.getRightTriggerButton().whileTrue(m_passthroughRosCommand);
+    // m_joystick.getLeftTriggerButton().whileTrue(new PointToCenterDriveCommand(
     //   m_drive, m_ros_interface, m_joystick,
     //   frc.robot.util.diffswerve.Constants.DriveTrain.MAX_CHASSIS_ANG_VEL * 0.75)
     // );
-    m_joystick.getLeftTriggerButton().whileHeld(
+    m_joystick.getLeftTriggerButton().whileTrue(
       new ChaseObject(m_drive, m_ros_interface, "cargo_<team>")
     );
-    userButton.whileHeld(new CoastDriveMotors(m_drive));
-    // userButton.whileHeld(new TestDiffSwerveMotors(m_drive));
+    userButton.whileTrue(new CoastDriveMotors(m_drive));
+    // userButton.whileTrue(new TestDiffSwerveMotors(m_drive));
   }
 
   private CommandBase configureStaticAutoCommand() {

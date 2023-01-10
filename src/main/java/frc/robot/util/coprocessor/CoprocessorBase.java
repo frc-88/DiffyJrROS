@@ -33,8 +33,9 @@ public class CoprocessorBase {
 
     protected int numSentGoals = 0;
 
-    protected ArrayList<Double> jointCommandValues = new ArrayList<>();
-    protected ArrayList<MessageTimer> jointCommandTimers = new ArrayList<>();
+    protected ArrayList<Double> jointStates = new ArrayList<>();
+    protected ArrayList<Double> jointCommands = new ArrayList<>();
+    protected MessageTimer jointCommandTimer = new MessageTimer(DEFAULT_MESSAGE_TIMEOUT);
 
     protected Map<String, Pose2d> waypoints = new HashMap<>();
 
@@ -50,14 +51,6 @@ public class CoprocessorBase {
     }
 
     public void update() {
-        
-    }
-
-    public void stopComms() {
-        
-    }
-
-    public void startComms() {
         
     }
 
@@ -94,18 +87,18 @@ public class CoprocessorBase {
     }
 
     public double getJointCommand(int jointIndex) {
-        return jointCommandValues.get(jointIndex);
+        return jointCommands.get(jointIndex);
     }
 
     public boolean isJointCommandActive(int jointIndex) {
-        return jointCommandTimers.get(jointIndex).isActive();
+        return jointCommandTimer.isActive();
     }
 
     public Pose2d getWaypoint(String waypointName) {
         return waypoints.get(waypointName);
     }
 
-    public void putWaypoint(String waypointName, Pose2d pose) {
+    protected void putWaypoint(String waypointName, Pose2d pose) {
         waypoints.put(waypointName, pose);
     }
 
@@ -138,16 +131,24 @@ public class CoprocessorBase {
         numSentGoals = 0;
     }
 
-    public void sendMatchStatus(boolean is_autonomous, double match_timer, DriverStation.Alliance team_color) {
+    protected void sendMatchStatus(boolean is_autonomous, double match_timer, DriverStation.Alliance team_color) {
         
     }
 
-    public void setPoseEstimate(Pose2d poseEstimation) {
+    public void sendPoseEstimate(Pose2d poseEstimation) {
         
+    }
+
+    public void sendImu(double roll, double pitch, double yaw, double angular_z, double accel_x, double accel_y) {
+
     }
 
     public void setJointPosition(int index, double position) {
-        
+        while (index >= jointStates.size()) {
+            jointStates.add(0.0);
+            jointCommands.add(0.0);
+        }
+        jointStates.set(index, position);
     }
 
     public String parseObjectName(String objectName) {

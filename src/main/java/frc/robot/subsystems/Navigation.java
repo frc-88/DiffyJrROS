@@ -72,7 +72,7 @@ public class Navigation extends SubsystemBase {
   }
 
   public void setPoseEstimate(Pose2d pose) {
-    m_coprocessor.setPoseEstimate(pose);
+    m_coprocessor.sendPoseEstimate(pose);
   }
 
   public boolean isPoseValid(Pose2d pose) {

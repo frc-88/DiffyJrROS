@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.RobotController;
@@ -40,6 +41,8 @@ public class DiffSwerveChassis implements ChassisInterface {
 
     private boolean fieldRelativeCommands = false;
     private Rotation2d fieldRelativeOffset = new Rotation2d();
+
+    private SwerveModulePosition[] modulePositions;
 
     public final NavX imu;
 
@@ -85,9 +88,14 @@ public class DiffSwerveChassis implements ChassisInterface {
                 backLeft.getModuleLocation(),
                 backRight.getModuleLocation(),
                 frontRight.getModuleLocation());
-        
-        // odometry = new DiffSwerveDriveOdometry(kinematics);
-        odometry = new SwerveDriveOdometry(kinematics, Rotation2d.fromDegrees(imu.getYaw()));
+
+        modulePositions = new SwerveModulePosition[] {
+            new SwerveModulePosition(),
+            new SwerveModulePosition(),
+            new SwerveModulePosition(),
+            new SwerveModulePosition()
+        };
+        odometry = new SwerveDriveOdometry(kinematics, Rotation2d.fromDegrees(imu.getYaw()), modulePositions);
 
         controller = new HolonomicDriveController(
                 new PIDController(
@@ -160,13 +168,16 @@ public class DiffSwerveChassis implements ChassisInterface {
 
     public void periodic() {
         // Called in main periodic callback in Robot
-        odometry.update(
-                getHeading(),
-                frontLeft.getState(),
-                backLeft.getState(),
-                backRight.getState(),
-                frontRight.getState());
+        updateModulePositions();
+        odometry.update(getHeading(), modulePositions);
         updateIdealState();
+    }
+
+    private void updateModulePositions() {
+        modulePositions[0] = frontLeft.getPosition();
+        modulePositions[1] = backLeft.getPosition();
+        modulePositions[2] = backRight.getPosition();
+        modulePositions[3] = frontRight.getPosition();
     }
 
     private void updateIdealState()
@@ -190,9 +201,15 @@ public class DiffSwerveChassis implements ChassisInterface {
     }
 
     public void resetOdom(Pose2d pose) {
+        frontLeft.resetPosition(new SwerveModulePosition());
+        backLeft.resetPosition(new SwerveModulePosition());
+        backRight.resetPosition(new SwerveModulePosition());
+        frontRight.resetPosition(new SwerveModulePosition());
+        updateModulePositions();
         odometry.resetPosition(
-            pose,
-            getHeading()
+            getHeading(),
+            modulePositions,
+            pose
         );
     }
 
