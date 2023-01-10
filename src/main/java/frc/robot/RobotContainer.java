@@ -4,25 +4,18 @@
 
 package frc.robot;
 
-import frc.robot.commands.ChaseObject;
 import frc.robot.commands.CoastDriveMotors;
 import frc.robot.commands.DriveSwerveJoystickCommand;
-import frc.robot.commands.DriveWithWaypointsPlan;
 import frc.robot.commands.PassthroughRosCommand;
-import frc.robot.commands.SetGlobalPoseToTag;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.Navigation;
 import frc.robot.subsystems.SwerveJoystick;
 import frc.robot.subsystems.SwerveJoystick.SwerveControllerType;
 import frc.robot.util.sensors.Limelight;
 import frc.robot.util.coprocessor.networktables.DiffyJrTable;
-import frc.robot.util.coprocessor.roswaypoints.Waypoint;
-import frc.robot.util.coprocessor.roswaypoints.WaypointsPlan;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -42,15 +35,11 @@ public class RobotContainer {
     Robot.isSimulation() ? Constants.COPROCESSOR_ADDRESS_SIMULATED : Constants.COPROCESSOR_ADDRESS,
     Constants.COPROCESSOR_PORT,
     Constants.COPROCESSOR_TABLE_UPDATE_DELAY);
-  private final Navigation m_nav = new Navigation(m_ros_interface);
   private final Limelight m_limelight = new Limelight();
 
   private final CommandBase m_joystickDriveCommand = new DriveSwerveJoystickCommand(m_drive, m_ros_interface, m_joystick);
   private final CommandBase m_passthroughRosCommand = new PassthroughRosCommand(m_drive, m_ros_interface);
   private Trigger userButton = new Trigger(() -> RobotController.getUserButton());
-
-  private final CommandBase staticAutoCommand = configureStaticAutoCommand();
-  private final CommandBase chaseAutoCommand = configureChaseAutoCommand();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer(Robot robot) {
@@ -70,33 +59,8 @@ public class RobotContainer {
     //   m_drive, m_ros_interface, m_joystick,
     //   frc.robot.util.diffswerve.Constants.DriveTrain.MAX_CHASSIS_ANG_VEL * 0.75)
     // );
-    m_joystick.getLeftTriggerButton().whileTrue(
-      new ChaseObject(m_drive, m_ros_interface, "cargo_<team>")
-    );
     userButton.whileTrue(new CoastDriveMotors(m_drive));
     // userButton.whileTrue(new TestDiffSwerveMotors(m_drive));
-  }
-
-  private CommandBase configureStaticAutoCommand() {
-    WaypointsPlan autoPlan = new WaypointsPlan(m_ros_interface);
-    autoPlan.addWaypoint(new Waypoint("<team>" + "_a"));
-    autoPlan.addWaypoint(new Waypoint("<team>_1"));
-    autoPlan.addWaypoint(new Waypoint("<team>_2").makeContinuous(true));
-    autoPlan.addWaypoint(new Waypoint("<team>_3").makeContinuous(true));
-    autoPlan.addWaypoint(new Waypoint("<team>_4").makeIgnoreOrientation(false));
-
-    CommandBase staticAuto = new SequentialCommandGroup(
-      // new DriveDistanceMeters(m_drive, 0.5, 0.5),
-      new DriveWithWaypointsPlan(m_nav, m_drive, autoPlan),
-      new ChaseObject(m_drive, m_ros_interface, "power_cell")
-    );
-    
-    return staticAuto;
-  }
-
-  private CommandBase configureChaseAutoCommand() {
-    // return new ChaseObject(m_drive, m_ros_interface, "cargo_<team>");
-      return new SetGlobalPoseToTag(m_nav, "11", "red_start_2").withTimeout(1.0);
   }
 
   private void configurePeriodics(Robot robot) {
@@ -123,15 +87,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    String autoName = SmartDashboard.getString("Auto", "chase");
-    if (autoName.equals("static")) {
-      return staticAutoCommand;
-    }
-    else if (autoName.equals("chase")) {
-      return chaseAutoCommand;
-    }
-    else {
-      return new WaitCommand(1);
-    }
+    return new WaitCommand(1);
   }
 }

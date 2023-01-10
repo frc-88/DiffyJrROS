@@ -6,15 +6,15 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.Navigation;
+import frc.robot.util.coprocessor.CoprocessorBase;
 
 public class SetGlobalPoseToWaypoint extends CommandBase {
-  private final Navigation m_nav;
+  private final CoprocessorBase m_coprocessor;
   private final String m_waypointName;
   private boolean is_set = false;
   /** Creates a new SetGlobalPoseToWaypoint. */
-  public SetGlobalPoseToWaypoint(Navigation nav, String waypointName) {
-    m_nav = nav;
+  public SetGlobalPoseToWaypoint(CoprocessorBase coprocessor, String waypointName) {
+    m_coprocessor = coprocessor;
     m_waypointName = waypointName;
     // addRequirements(m_nav);
     // // Use addRequirements() here to declare subsystem dependencies.
@@ -30,9 +30,9 @@ public class SetGlobalPoseToWaypoint extends CommandBase {
 
   @Override
   public void execute() {
-    Pose2d pose = m_nav.getWaypoint(m_waypointName);
-    if (m_nav.isPoseValid(pose)) {
-      m_nav.setPoseEstimate(pose);
+    Pose2d pose = m_coprocessor.getWaypoint(m_waypointName);
+    if (m_coprocessor.isPoseValid(pose)) {
+      m_coprocessor.sendPoseEstimate(pose);
       is_set = true;
       System.out.println("Set pose to waypoint " + m_waypointName);
     }

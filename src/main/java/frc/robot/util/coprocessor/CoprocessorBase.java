@@ -6,16 +6,14 @@ package frc.robot.util.coprocessor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.util.coprocessor.roswaypoints.GoalStatus;
-import frc.robot.util.coprocessor.roswaypoints.Waypoint;
 
 public class CoprocessorBase {
     protected final long DEFAULT_MESSAGE_TIMEOUT = 1_000_000;
@@ -28,9 +26,6 @@ public class CoprocessorBase {
     protected Pose2d globalPose = new Pose2d();
     protected MessageTimer globalPoseTimer = new MessageTimer(DEFAULT_MESSAGE_TIMEOUT);
 
-    protected MessageTimer goalStatusTimer = new MessageTimer(DEFAULT_MESSAGE_TIMEOUT);
-    protected GoalStatus goalStatus = GoalStatus.INVALID;
-
     protected int numSentGoals = 0;
 
     protected ArrayList<Double> jointStates = new ArrayList<>();
@@ -38,8 +33,6 @@ public class CoprocessorBase {
     protected MessageTimer jointCommandTimer = new MessageTimer(DEFAULT_MESSAGE_TIMEOUT);
 
     protected Map<String, Pose2d> waypoints = new HashMap<>();
-
-    protected Map<String, Map<Integer, GameObject>> gameObjects = new HashMap<>();
 
     protected LaserScanObstacleTracker laserObstacles = new LaserScanObstacleTracker();
 
@@ -78,14 +71,6 @@ public class CoprocessorBase {
         return globalPoseTimer.isActive();
     }
 
-    public GoalStatus getGoalStatus() {
-        return goalStatus;
-    }
-
-    public boolean isGoalStatusActive() {
-        return goalStatusTimer.isActive();
-    }
-
     public double getJointCommand(int jointIndex) {
         return jointCommands.get(jointIndex);
     }
@@ -95,7 +80,26 @@ public class CoprocessorBase {
     }
 
     public Pose2d getWaypoint(String waypointName) {
-        return waypoints.get(waypointName);
+        waypointName = Helpers.parseName(waypointName);
+        if (doesWaypointExist(waypointName)) {
+            return waypoints.get(waypointName);
+        }
+        else {
+            return new Pose2d(Double.NaN, Double.NaN, new Rotation2d(Double.NaN));
+        }
+    }
+
+    public Pose2d getPoseRelativeToWaypoint(String waypointName, Pose2d relativePose) {
+        Pose2d waypoint = getWaypoint(waypointName);
+        if (!isPoseValid(waypoint)) {
+            return waypoint;
+        }
+        
+        return waypoint.transformBy(new Transform2d(relativePose, new Pose2d()));
+    }
+
+    public boolean isPoseValid(Pose2d pose) {
+        return !Double.isNaN(pose.getX()) && !Double.isNaN(pose.getY()) && !Double.isNaN(pose.getRotation().getRadians());
     }
 
     protected void putWaypoint(String waypointName, Pose2d pose) {
@@ -153,57 +157,6 @@ public class CoprocessorBase {
 
     public String parseObjectName(String objectName) {
         return Helpers.parseName(objectName);
-    }
-
-    public GameObject getNearestGameObject(String objectName)
-    {
-        objectName = parseObjectName(objectName);
-        double min_dist = -1.0;
-        String min_obj_name = "";
-        int min_obj_index = -1;
-        for (String name : gameObjects.keySet()) {
-            for (Integer index : gameObjects.get(name).keySet()) {
-                GameObject gameObject = gameObjects.get(name).get(index);
-                if (gameObject.getName().equals(objectName)) {
-                    double distance = gameObject.getDistance();
-                    if (min_dist < 0.0 || distance < min_dist) {
-                        min_dist = distance;
-                        min_obj_name = name;
-                        min_obj_index = index;
-                    }
-                }
-            }
-        }
-        if (min_obj_name.length() == 0 || min_obj_index < 0) {
-            System.out.println(objectName + " doesn't exist in object table!");
-            return new GameObject("", 0);
-        }
-        return gameObjects.get(min_obj_name).get(min_obj_index);
-    }
-
-    public Set<GameObject> getGameObjects(String objectName) {
-        Set<GameObject> objects = new HashSet<>();
-        for (String name : gameObjects.keySet()) {
-            for (Integer index : gameObjects.get(name).keySet()) {
-                GameObject gameObject = gameObjects.get(name).get(index);
-                if (gameObject.getName().equals(objectName)) {
-                    objects.add(gameObject);
-                }
-            }
-        }
-        return objects;
-    }
-
-    public GameObject getFirstGameObject(String objectName) {
-        for (String name : gameObjects.keySet()) {
-            for (Integer index : gameObjects.get(name).keySet()) {
-                GameObject gameObject = gameObjects.get(name).get(index);
-                if (gameObject.getName().equals(objectName)) {
-                    return gameObject;
-                }
-            }
-        }
-        return new GameObject("", 0);
     }
 
     public LaserScanObstacleTracker getLaserScanObstacles() {

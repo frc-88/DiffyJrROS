@@ -1,9 +1,5 @@
 package frc.robot.util.coprocessor.networktables;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -19,7 +15,6 @@ import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PubSubOption;
-import edu.wpi.first.networktables.PubSubOptions;
 import edu.wpi.first.networktables.StringArrayPublisher;
 import edu.wpi.first.networktables.StringArraySubscriber;
 import edu.wpi.first.networktables.StringPublisher;
@@ -27,13 +22,8 @@ import edu.wpi.first.networktables.TimestampedDouble;
 import edu.wpi.first.networktables.TimestampedDoubleArray;
 import edu.wpi.first.networktables.TimestampedStringArray;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.util.coprocessor.ChassisInterface;
-import frc.robot.util.coprocessor.GameObject;
 import frc.robot.util.coprocessor.Helpers;
-import frc.robot.util.coprocessor.MessageTimer;
-import frc.robot.util.coprocessor.roswaypoints.GoalStatus;
-import frc.robot.util.coprocessor.roswaypoints.Waypoint;
 import frc.robot.util.coprocessor.CoprocessorBase;
 
 public class CoprocessorTable extends CoprocessorBase {
