@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 
 public class CoprocessorBase {
     protected final long DEFAULT_MESSAGE_TIMEOUT = 1_000_000;
@@ -112,6 +113,10 @@ public class CoprocessorBase {
 
     public Set<String> getWaypointNames() {
         return waypoints.keySet();
+    }
+
+    protected double getTime() {
+        return RobotController.getFPGATime() * 1E-6;
     }
 
     /***

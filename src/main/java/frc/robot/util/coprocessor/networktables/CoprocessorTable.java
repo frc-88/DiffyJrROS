@@ -1,5 +1,6 @@
 package frc.robot.util.coprocessor.networktables;
 
+import java.util.Objects;
 import java.util.Set;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -13,8 +14,10 @@ import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PubSubOption;
+import edu.wpi.first.networktables.StringArrayEntry;
 import edu.wpi.first.networktables.StringArrayPublisher;
 import edu.wpi.first.networktables.StringArraySubscriber;
 import edu.wpi.first.networktables.StringPublisher;
@@ -28,8 +31,6 @@ import frc.robot.util.coprocessor.CoprocessorBase;
 
 public class CoprocessorTable extends CoprocessorBase {
     private NetworkTableInstance instance;
-    private String address;
-    private int port;
     protected NetworkTable rootTable;
     private double updateInterval = 0.01;
     private DoubleSubscriber pingSub;
@@ -51,7 +52,7 @@ public class CoprocessorTable extends CoprocessorBase {
     private DoubleArraySubscriber jointCommandsSub;
 
     private NetworkTable waypointsTable;
-    private StringArraySubscriber waypointNamesSub;
+    private NetworkTableEntry waypointNamesSub;
     private DoubleArraySubscriber waypointsXSub;
     private DoubleArraySubscriber waypointsYSub;
     private DoubleArraySubscriber waypointsTSub;
@@ -63,22 +64,21 @@ public class CoprocessorTable extends CoprocessorBase {
     private NetworkTable zonesTable;
     private NetworkTable zoneInfoTable;
     private BooleanSubscriber zoneInfoIsValidSub;
-    private StringArraySubscriber zoneInfoNamesSub;
+    private NetworkTableEntry zoneInfoNamesSub;
     private DoubleArraySubscriber zoneNearestXSub;
     private DoubleArraySubscriber zoneNearestYSub;
     private DoubleArraySubscriber zoneDistanceSub;
-    private BooleanArraySubscriber zoneIsInsideSub;
-    private BooleanArraySubscriber zoneIsNogoSub;
+    private DoubleArraySubscriber zoneIsInsideSub;
+    private DoubleArraySubscriber zoneIsNogoSub;
+    private DoublePublisher zoneNoGoUpdatePub;
     private StringArrayPublisher zoneNoGoNamesPub;
 
     public CoprocessorTable(ChassisInterface chassis, String address, int port, double updateInterval) {
         super(chassis);
-        this.address = address;
-        this.port = port;
 
         instance = NetworkTableInstance.create();
-        instance.startClient4("coprocessor");
-        instance.setServer(new String[] {address}, port);
+        instance.startClient3("coprocessor");
+        instance.setServer(address, port);
         this.updateInterval = updateInterval;
 
         rootTable = instance.getTable("ROS");
@@ -102,7 +102,7 @@ public class CoprocessorTable extends CoprocessorBase {
         jointCommandsSub = jointsTable.getDoubleArrayTopic("commands").subscribe(new double []{});
 
         waypointsTable = rootTable.getSubTable("waypoints");
-        waypointNamesSub = waypointsTable.getStringArrayTopic("name").subscribe(new String []{});
+        waypointNamesSub = waypointsTable.getEntry("name");
         waypointsXSub = waypointsTable.getDoubleArrayTopic("x").subscribe(new double []{});
         waypointsYSub = waypointsTable.getDoubleArrayTopic("y").subscribe(new double []{});
         waypointsTSub = waypointsTable.getDoubleArrayTopic("t").subscribe(new double []{});
@@ -114,12 +114,13 @@ public class CoprocessorTable extends CoprocessorBase {
         zonesTable = rootTable.getSubTable("zones");
         zoneInfoTable = zonesTable.getSubTable("info");
         zoneInfoIsValidSub = zoneInfoTable.getBooleanTopic("is_valid").subscribe(false);
-        zoneInfoNamesSub = zoneInfoTable.getStringArrayTopic("names").subscribe(new String []{});
+        zoneInfoNamesSub = zoneInfoTable.getEntry("names");
         zoneNearestXSub = zoneInfoTable.getDoubleArrayTopic("nearest_x").subscribe(new double []{});
         zoneNearestYSub = zoneInfoTable.getDoubleArrayTopic("nearest_y").subscribe(new double []{});
         zoneDistanceSub = zoneInfoTable.getDoubleArrayTopic("distance").subscribe(new double []{});
-        zoneIsInsideSub = zoneInfoTable.getBooleanArrayTopic("is_inside").subscribe(new boolean []{});
-        zoneIsNogoSub = zoneInfoTable.getBooleanArrayTopic("is_nogo").subscribe(new boolean []{});
+        zoneIsInsideSub = zoneInfoTable.getDoubleArrayTopic("is_inside").subscribe(new double []{});
+        zoneIsNogoSub = zoneInfoTable.getDoubleArrayTopic("is_nogo").subscribe(new double []{});
+        zoneNoGoUpdatePub = zonesTable.getDoubleTopic("update").publish();
         zoneNoGoNamesPub = zonesTable.getStringArrayTopic("set_nogo").publish();
     }
 
@@ -133,6 +134,7 @@ public class CoprocessorTable extends CoprocessorBase {
 
     private void sendOdometry(Pose2d pose, ChassisSpeeds velocity) {
         odomPub.set(new double[] {
+            getTime(),
             pose.getX(),
             pose.getY(),
             pose.getRotation().getRadians(),
@@ -147,13 +149,14 @@ public class CoprocessorTable extends CoprocessorBase {
         if (cmd.timestamp == 0.0) {
             return;
         }
-        if (cmd.value.length != 3) {
-            System.out.println("Warning: Received command is not of length 3. Ignoring.");
+        if (cmd.value.length != 4) {
+            System.out.println("Warning: Received command is not of length 4. Ignoring.");
             return;
         }
-        command.vx = cmd.value[0];
-        command.vy = cmd.value[1];
-        command.vt = cmd.value[2];
+        // index 0 is timestamp
+        command.vx = cmd.value[1];
+        command.vy = cmd.value[2];
+        command.vt = cmd.value[3];
         commandTimer.reset();
     }
 
@@ -162,13 +165,14 @@ public class CoprocessorTable extends CoprocessorBase {
         if (pose.timestamp == 0.0) {
             return;
         }
-        if (pose.value.length != 3) {
-            System.out.println("Warning: Received global pose is not of length 3. Ignoring.");
+        if (pose.value.length != 4) {
+            System.out.println("Warning: Received global pose is not of length 4. Ignoring.");
             return;
         }
-        double x = pose.value[0];
-        double y = pose.value[1];
-        double theta = pose.value[2];
+        // index 0 is timestamp
+        double x = pose.value[1];
+        double y = pose.value[2];
+        double theta = pose.value[3];
         globalPose = new Pose2d(x, y, new Rotation2d(theta));
         globalPoseTimer.reset();
         commandTimer.reset();
@@ -176,6 +180,7 @@ public class CoprocessorTable extends CoprocessorBase {
 
     public void sendImu(double roll, double pitch, double yaw, double angular_z, double accel_x, double accel_y) {
         imuPub.set(new double[] {
+            getTime(),
             roll,
             pitch,
             yaw,
@@ -200,6 +205,9 @@ public class CoprocessorTable extends CoprocessorBase {
         if (cmds.timestamp == 0.0) {
             return;
         }
+        if (jointStates.size() == 0) {
+            return;
+        }
         if (cmds.value.length != jointStates.size()) {
             System.out.println("Warning: Received joint command that doesn't match states length. Ignoring.");
             return;
@@ -211,26 +219,27 @@ public class CoprocessorTable extends CoprocessorBase {
     }
 
     private void updateWaypoints() {
-        TimestampedStringArray names = waypointNamesSub.getAtomic();
-        if (names.timestamp == 0.0) {
+        TimestampedDoubleArray xs_value = waypointsXSub.getAtomic();
+        if (xs_value.timestamp == 0.0) {
             return;
         }
         
-        double[] xs = waypointsXSub.get();
+        String[] names = waypointNamesSub.getStringArray(new String[] {});
+        double[] xs = xs_value.value;
         double[] ys = waypointsYSub.get();
         double[] ts = waypointsTSub.get();
-        if (names.value.length != xs.length ||
-                names.value.length != ys.length ||
-                names.value.length != ts.length) {
+        if (names.length != xs.length ||
+                names.length != ys.length ||
+                names.length != ts.length) {
             System.out.println("Warning: waypoint entries have mismatched lengths. Ignoring.");
             return;
         }
 
-        for (int index = 0; index < names.value.length; index++) {
+        for (int index = 0; index < names.length; index++) {
             double wayx = xs[index];
             double wayy = ys[index];
             double wayt = ts[index];
-            putWaypoint(names.value[index], new Pose2d(wayx, wayy, new Rotation2d(wayt)));
+            putWaypoint(names[index], new Pose2d(wayx, wayy, new Rotation2d(wayt)));
         }
     }
 
@@ -239,27 +248,36 @@ public class CoprocessorTable extends CoprocessorBase {
         if (!is_valid) {
             return;
         }
-        TimestampedStringArray names = zoneInfoNamesSub.getAtomic();
-        double[] nearest_xs = zoneNearestXSub.get();
+        if (Objects.isNull(zoneInfoNamesSub) || !zoneInfoNamesSub.isValid()) {
+            System.out.println("Zone names sub is not valid!");
+            return;
+        }
+        TimestampedDoubleArray nearest_xs_value = zoneNearestXSub.getAtomic();
+        if (nearest_xs_value.timestamp == 0.0) {
+            return;
+        }
+        String[] names = zoneInfoNamesSub.getStringArray(new String[] {});
+        double[] nearest_xs = nearest_xs_value.value;
         double[] nearest_ys = zoneNearestYSub.get();
         double[] distances = zoneDistanceSub.get();
-        boolean[] is_insides = zoneIsInsideSub.get();
-        boolean[] is_nogos = zoneIsNogoSub.get();
-        if (names.value.length != nearest_xs.length ||
-                names.value.length != nearest_ys.length ||
-                names.value.length != distances.length ||
-                names.value.length != is_insides.length ||
-                names.value.length != is_nogos.length) {
+        double[] is_insides = zoneIsInsideSub.get();
+        double[] is_nogos = zoneIsNogoSub.get();
+
+        if (names.length != nearest_xs.length ||
+                names.length != nearest_ys.length ||
+                names.length != distances.length ||
+                names.length != is_insides.length ||
+                names.length != is_nogos.length) {
             System.out.println("Warning: zone entries have mismatched lengths. Ignoring.");
             return;
         }
-        for (int index = 0; index < names.value.length; index++) {
-            String name = names.value[index];
+        for (int index = 0; index < names.length; index++) {
+            String name = names[index];
             double nearest_x = nearest_xs[index];
             double nearest_y = nearest_ys[index];
             double distance = distances[index];
-            boolean is_inside = is_insides[index];
-            boolean is_nogo = is_nogos[index];
+            boolean is_inside = is_insides[index] == 1.0;
+            boolean is_nogo = is_nogos[index] == 1.0;
             zoneManager.setZone(
                 name,
                 nearest_x,
@@ -279,6 +297,7 @@ public class CoprocessorTable extends CoprocessorBase {
             values[index++] = nogo;
         }
         zoneNoGoNamesPub.set(values);
+        zoneNoGoUpdatePub.set(getTime());
     }
 
     public void setNoGoZones(String[] names) {
@@ -298,6 +317,7 @@ public class CoprocessorTable extends CoprocessorBase {
 
     public void sendPoseEstimate(Pose2d poseEstimation) {
         poseEstPub.set(new double[] {
+            getTime(),
             poseEstimation.getX(),
             poseEstimation.getY(),
             poseEstimation.getRotation().getRadians()
@@ -336,9 +356,9 @@ public class CoprocessorTable extends CoprocessorBase {
         updateGlobalPose();
         sendJointStates();
         updateJointCommands();
-        updateWaypoints();
-        updateLaserScan();
         updateZones();
+        updateLaserScan();
+        updateWaypoints();
 
         sendMatchStatus(
             DriverStation.isAutonomous(),

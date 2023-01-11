@@ -43,11 +43,13 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer(Robot robot) {
+    System.out.println("RobotContainer initializing");
     configureDriveCommand();
     configurePeriodics(robot);
     m_limelight.ledOff();
     m_drive.getSwerve().setAngleControllerEnabled(false);
     SmartDashboard.putString("Auto", "chase");
+    System.out.println("RobotContainer initialization complete");
   }
 
   private void configureDriveCommand() {
