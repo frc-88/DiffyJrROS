@@ -2,13 +2,11 @@ package frc.robot.util.diffswerve;
 
 import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.MotorCommutation;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
-import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 
 import edu.wpi.first.math.controller.LinearQuadraticRegulator;
 import edu.wpi.first.math.estimator.KalmanFilter;
@@ -252,7 +250,9 @@ public class DiffSwerveModule {
                 VecBuilder.fill(
                         getModuleAngle(), velocities.getFirst(), velocities.getSecond()));
         // predict step of kalman filter.
-        predict();
+        if (!predict()) {
+            return;
+        }
         updateWheelPosition(getWheelVelocity());
         if (is_enabled) {
             setFalconVoltage(hiMotor, getHiNextVoltage());
@@ -263,7 +263,7 @@ public class DiffSwerveModule {
 
     // use custom predict() function for as absolute encoder azimuth angle and the angular velocity
     // of the module need to be continuous.
-    private void predict() {
+    private boolean predict() {
         // creates our input of voltage to our motors of u = K(r-x)+Kf*r but need to wrap angle to be
         // continuous see computeErrorAndWrapAngle().
         
@@ -277,12 +277,19 @@ public class DiffSwerveModule {
                 .times(
                     computeErrorAndWrapAngle(
                         swerveControlLoop.getNextR(),
-                        swerveControlLoop.getXHat(),
+                        swerveControlLoop.getXHat(),  // can be NAN if measured wheel or azimuth is NaN
                         -Math.PI,
                         Math.PI))
                 .plus(feedforwardVoltages)
             );
+            if (Double.isNaN(input.get(0, 0)) || Double.isNaN(input.get(1, 0))) {
+                System.out.println("Kalman observer input is NaN! Resetting controller.");
+                swerveControlLoop.reset(VecBuilder.fill(0.0, 0.0, 0.0));
+                return false;
+            }
+
         swerveControlLoop.getObserver().predict(input, Constants.DifferentialSwerveModule.kDt);
+        return true;
     }
 
     /**

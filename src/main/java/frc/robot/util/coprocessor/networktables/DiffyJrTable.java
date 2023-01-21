@@ -40,7 +40,6 @@ public class DiffyJrTable extends CoprocessorTable {
             SwerveModuleState state = module.getState();
             setJointPosition(index, state.angle.getRadians());
         }
-        // updateModules();
         setNoGoZones(new String[] {"<!team>"});
     }
 }

@@ -22,6 +22,8 @@ public class CANifiedPWMEncoder {
   // whether encoder is flipped
   private boolean inverted = false;
 
+  private double prevAngle = 0.0;
+
   /**
    * Constructor.
    *
@@ -73,8 +75,10 @@ public class CANifiedPWMEncoder {
     this.canifier.getPWMInput(channel, dutyAndPeriod);
     if (dutyAndPeriod[1] == 0.0) {
       // Sensor is unplugged
-      return Double.NaN;
+      System.out.println(String.format("CANified PWM Channel %d is disconnected!", channel.value));
+      return prevAngle;
     }
-    return this.inverted ? -1.0 : 1.0 * this.ratio * dutyAndPeriod[0] / dutyAndPeriod[1] - this.offset;
+    prevAngle = this.inverted ? -1.0 : 1.0 * this.ratio * dutyAndPeriod[0] / dutyAndPeriod[1] - this.offset;
+    return prevAngle;
   }
 }
