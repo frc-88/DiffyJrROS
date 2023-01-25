@@ -5,7 +5,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.Button;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.util.diffswerve.Constants;
 import frc.robot.util.diffswerve.Helpers;
 import frc.robot.util.controllers.NetworkTablesJoystick;
@@ -17,7 +17,7 @@ public class SwerveJoystick extends SubsystemBase {
     XBOX,
     NT
   }
-  private final SwerveControllerType m_type;
+  private SwerveControllerType m_type;
 
   private final double JOYSTICK_DEADBAND = 0.1;
   private NetworkTablesJoystick nt_gamepad;
@@ -36,21 +36,21 @@ public class SwerveJoystick extends SubsystemBase {
     }
   }
 
-  public Button getRightTriggerButton() {
+  public Trigger getRightTriggerButton() {
     if (m_type == SwerveControllerType.NT) {
       return this.nt_gamepad.getButton("RT");
     }
     else {
-      return new Button(() -> this.xbox_gamepad.getRightTrigger() > 0.0);
+      return new Trigger(() -> this.xbox_gamepad.getRightTrigger() > 0.0);
     }
   }
 
-  public Button getLeftTriggerButton() {
+  public Trigger getLeftTriggerButton() {
     if (m_type == SwerveControllerType.NT) {
       return this.nt_gamepad.getButton("LT");
     }
     else {
-      return new Button(() -> this.xbox_gamepad.getLeftTrigger() > 0.0);
+      return new Trigger(() -> this.xbox_gamepad.getLeftTrigger() > 0.0);
     }
   }
 
@@ -79,6 +79,14 @@ public class SwerveJoystick extends SubsystemBase {
     else {
       return -this.xbox_gamepad.getRightStickX();
     }
+  }
+
+  public void setType(SwerveControllerType type) {
+    m_type = type;
+  }
+
+  public void getType(SwerveControllerType type) {
+    m_type = type;
   }
 
   @Override

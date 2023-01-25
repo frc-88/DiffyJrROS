@@ -13,7 +13,6 @@ import frc.robot.subsystems.SwerveJoystick.SwerveControllerType;
 import frc.robot.util.sensors.Limelight;
 import frc.robot.util.coprocessor.networktables.DiffyJrTable;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -48,7 +47,6 @@ public class RobotContainer {
     configurePeriodics(robot);
     m_limelight.ledOff();
     m_drive.getSwerve().setAngleControllerEnabled(false);
-    SmartDashboard.putString("Auto", "chase");
     System.out.println("RobotContainer initialization complete");
   }
 
