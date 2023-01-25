@@ -17,16 +17,14 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PubSubOption;
-import edu.wpi.first.networktables.StringArrayEntry;
 import edu.wpi.first.networktables.StringArrayPublisher;
-import edu.wpi.first.networktables.StringArraySubscriber;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.TimestampedDouble;
 import edu.wpi.first.networktables.TimestampedDoubleArray;
-import edu.wpi.first.networktables.TimestampedStringArray;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.util.coprocessor.ChassisInterface;
 import frc.robot.util.coprocessor.Helpers;
+import frc.robot.util.coprocessor.detections.Detection;
 import frc.robot.util.coprocessor.CoprocessorBase;
 
 public class CoprocessorTable extends CoprocessorBase {
@@ -72,6 +70,8 @@ public class CoprocessorTable extends CoprocessorBase {
     private DoubleArraySubscriber zoneIsNogoSub;
     private DoublePublisher zoneNoGoUpdatePub;
     private StringArrayPublisher zoneNoGoNamesPub;
+
+    private NetworkTable detectionsTable;
 
     public CoprocessorTable(ChassisInterface chassis, String address, int port, double updateInterval) {
         super(chassis);
@@ -122,6 +122,8 @@ public class CoprocessorTable extends CoprocessorBase {
         zoneIsNogoSub = zoneInfoTable.getDoubleArrayTopic("is_nogo").subscribe(new double []{});
         zoneNoGoUpdatePub = zonesTable.getDoubleTopic("update").publish();
         zoneNoGoNamesPub = zonesTable.getStringArrayTopic("set_nogo").publish();
+
+        detectionsTable = rootTable.getSubTable("detections");
     }
 
     private void updatePing() {
@@ -243,6 +245,34 @@ public class CoprocessorTable extends CoprocessorBase {
         }
     }
 
+    private void updateDetections() {
+        for (String name : detectionsTable.getSubTables()) {
+            NetworkTable detectionType = detectionsTable.getSubTable(name);
+            for (String index : detectionType.getSubTables()) {
+                int index_number;
+                try {
+                    index_number = Integer.parseInt(index);
+                }
+                catch (java.lang.NumberFormatException e) {
+                    System.out.println(String.format("Failed to parse detection %s index %s", name, index));
+                    index_number = 0;
+                }
+                Detection detection = new Detection(
+                    name,
+                    index_number,
+                    detectionType.getEntry(index + "/position/x").getDouble(0.0),
+                    detectionType.getEntry(index + "/position/y").getDouble(0.0),
+                    detectionType.getEntry(index + "/position/z").getDouble(0.0),
+                    detectionType.getEntry(index + "/orientation/w").getDouble(1.0),
+                    detectionType.getEntry(index + "/orientation/x").getDouble(0.0),
+                    detectionType.getEntry(index + "/orientation/y").getDouble(0.0),
+                    detectionType.getEntry(index + "/orientation/z").getDouble(0.0)
+                );
+                detectionManager.setDetection(name, index_number, detection);
+            }
+        }
+    }
+
     private void updateZones() {
         boolean is_valid = zoneInfoIsValidSub.get();
         if (!is_valid) {
@@ -359,6 +389,7 @@ public class CoprocessorTable extends CoprocessorBase {
         updateZones();
         updateLaserScan();
         updateWaypoints();
+        updateDetections();
 
         sendMatchStatus(
             DriverStation.isAutonomous(),

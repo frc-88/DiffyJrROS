@@ -5,6 +5,7 @@
 package frc.robot.util.coprocessor;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
+import frc.robot.util.coprocessor.detections.Detection;
+import frc.robot.util.coprocessor.detections.DetectionManager;
 
 public class CoprocessorBase {
     protected final long DEFAULT_MESSAGE_TIMEOUT = 1_000_000;
@@ -36,8 +39,8 @@ public class CoprocessorBase {
     protected Map<String, Pose2d> waypoints = new HashMap<>();
 
     protected LaserScanObstacleTracker laserObstacles = new LaserScanObstacleTracker();
-
     protected ZoneManager zoneManager = new ZoneManager();
+    protected DetectionManager detectionManager = new DetectionManager();
 
     public CoprocessorBase(ChassisInterface chassis) {
         this.chassis = chassis;
@@ -194,6 +197,25 @@ public class CoprocessorBase {
 
     public void removeNoGoZone(String name) {
         zoneManager.removeNoGo(name);
+    }
+
+    public boolean doesDetectionNameExist(String name) {
+        return detectionManager.doesNameExist(name);
+    }
+    public boolean doesDetectionExist(String name, int index) {
+        return detectionManager.doesDetectionExist(name, index);
+    }
+
+    public Detection getDetection(String name, int index) {
+        return detectionManager.getDetection(name, index);
+    }
+
+    public Collection<Detection> getAllDetectionsNamed(String name) {
+        return detectionManager.getAllDetectionsNamed(name);
+    }
+
+    public Collection<Detection> getAllDetections() {
+        return detectionManager.getAllDetections();
     }
 
     /**

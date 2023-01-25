@@ -1,7 +1,7 @@
 package frc.robot.util.controllers;
 
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj2.command.button.Button;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 public class XboxController extends Joystick {
@@ -26,16 +26,16 @@ public class XboxController extends Joystick {
 		super(port);
 	}
 
-	public Button buttonA = new JoystickButton(this, BUTTON_A);	
-	public Button buttonB = new JoystickButton(this, BUTTON_B);
-	public Button buttonX = new JoystickButton(this, BUTTON_X);
-	public Button buttonY = new JoystickButton(this, BUTTON_Y);
-	public Button buttonLeftBumper = new JoystickButton(this, BUTTON_LEFT_BUMPER);
-	public Button buttonRightBumper = new JoystickButton(this, BUTTON_RIGHT_BUMPER);
-	public Button buttonBack = new JoystickButton(this, BUTTON_BACK);
-	public Button buttonStart = new JoystickButton(this, BUTTON_START);
-	public Button buttonLeftStick = new JoystickButton(this, BUTTON_LEFT_STICK);
-	public Button buttonRightStick = new JoystickButton(this, BUTTON_RIGHT_STICK);
+	public Trigger buttonA = new JoystickButton(this, BUTTON_A);	
+	public Trigger buttonB = new JoystickButton(this, BUTTON_B);
+	public Trigger buttonX = new JoystickButton(this, BUTTON_X);
+	public Trigger buttonY = new JoystickButton(this, BUTTON_Y);
+	public Trigger buttonLeftBumper = new JoystickButton(this, BUTTON_LEFT_BUMPER);
+	public Trigger buttonRightBumper = new JoystickButton(this, BUTTON_RIGHT_BUMPER);
+	public Trigger buttonBack = new JoystickButton(this, BUTTON_BACK);
+	public Trigger buttonStart = new JoystickButton(this, BUTTON_START);
+	public Trigger buttonLeftStick = new JoystickButton(this, BUTTON_LEFT_STICK);
+	public Trigger buttonRightStick = new JoystickButton(this, BUTTON_RIGHT_STICK);
 
 	public boolean isButtonAPressed() {
 		return this.getRawButton(BUTTON_A);
