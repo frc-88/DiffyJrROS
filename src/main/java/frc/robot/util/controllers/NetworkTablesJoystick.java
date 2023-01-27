@@ -5,14 +5,14 @@ import java.util.Map;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj2.command.button.Button;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class NetworkTablesJoystick {
     private NetworkTable table;
     private NetworkTable axis_table;
     private NetworkTable button_table;
     
-    Map<String, Button> buttons = new HashMap<>();
+    Map<String, Trigger> buttons = new HashMap<>();
 
     public NetworkTablesJoystick() {
         table = NetworkTableInstance.getDefault().getTable("joystick");
@@ -33,9 +33,9 @@ public class NetworkTablesJoystick {
         return button_table.getEntry(name).getBoolean(false);
     }
 
-    public Button getButton(String name) {
+    public Trigger getButton(String name) {
         if (!buttons.containsKey(name)) {
-            buttons.put(name, new Button(() -> this.getButtonValue(name)));
+            buttons.put(name, new Trigger(() -> this.getButtonValue(name)));
         }
         return buttons.get(name);
     }

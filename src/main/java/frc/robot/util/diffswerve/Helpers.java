@@ -1,8 +1,5 @@
 package frc.robot.util.diffswerve;
 
-import edu.wpi.first.math.util.Units;
-
-/** Created by Ben Bernard on 6/4/2018. */
 public class Helpers {
 
     /** Limit motor values to the -1.0 to +1.0 range. */

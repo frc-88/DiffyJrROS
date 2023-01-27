@@ -10,7 +10,6 @@ import frc.robot.commands.PassthroughRosCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.SwerveJoystick;
 import frc.robot.subsystems.SwerveJoystick.SwerveControllerType;
-import frc.robot.util.sensors.Limelight;
 import frc.robot.util.coprocessor.networktables.DiffyJrTable;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -34,7 +33,6 @@ public class RobotContainer {
     Robot.isSimulation() ? Constants.COPROCESSOR_ADDRESS_SIMULATED : Constants.COPROCESSOR_ADDRESS,
     Constants.COPROCESSOR_PORT,
     Constants.COPROCESSOR_TABLE_UPDATE_DELAY);
-  private final Limelight m_limelight = new Limelight();
 
   private final CommandBase m_joystickDriveCommand = new DriveSwerveJoystickCommand(m_drive, m_ros_interface, m_joystick);
   private final CommandBase m_passthroughRosCommand = new PassthroughRosCommand(m_drive, m_ros_interface);
@@ -45,7 +43,6 @@ public class RobotContainer {
     System.out.println("RobotContainer initializing");
     configureDriveCommand();
     configurePeriodics(robot);
-    m_limelight.ledOff();
     m_drive.getSwerve().setAngleControllerEnabled(false);
     System.out.println("RobotContainer initialization complete");
   }
@@ -73,12 +70,11 @@ public class RobotContainer {
   public void setEnableDrive(boolean enabled) {
     System.out.println("Set drive motors to " + enabled);
     m_drive.setEnabled(enabled);
-    m_limelight.ledOff();
     m_drive.setCoast(!enabled);
   }
   
   public void disabledPeriodic() {
-    m_limelight.ledOff();
+    
   }
 
   /**
