@@ -150,9 +150,9 @@ public class CoprocessorTable extends CoprocessorBase {
         });
     }
 
-    public VelocityCommand getCommand() {
+    public boolean isCommandActive() {
         updateCmdVel();
-        return command;
+        return commandTimer.isActive();
     }
 
     private void updateCmdVel() {
@@ -189,10 +189,11 @@ public class CoprocessorTable extends CoprocessorBase {
         commandTimer.reset();
     }
 
-    public Pose2d getGlobalPose() {
+    public boolean isGlobalPoseActive() {
         updateGlobalPose();
-        return this.getGlobalPose();
+        return this.isGlobalPoseActive();
     }
+
 
     public void sendImu(double roll, double pitch, double yaw, double angular_z, double accel_x, double accel_y) {
         imuPub.set(new double[] {
@@ -238,13 +239,19 @@ public class CoprocessorTable extends CoprocessorBase {
         sendJointStates();
     }
 
-    public double getJointCommand(int jointIndex) {
+    public boolean isJointCommandActive(int jointIndex) {
         updateJointCommands();
-        return super.getJointCommand(jointIndex);
+        return this.isJointCommandActive(jointIndex);
     }
+
     public Pose2d getWaypoint(String waypointName) {
         updateWaypoints();
         return super.getWaypoint(waypointName);
+    }
+
+    public Set<String> getWaypointNames() {
+        updateWaypoints();
+        return waypoints.keySet();
     }
 
     private void updateWaypoints() {
@@ -429,22 +436,8 @@ public class CoprocessorTable extends CoprocessorBase {
     }
 
     public boolean areZonesValid() {
+        updateZones();
         return zoneManager.isValid();
-    }
-
-    public ZoneInfo getNearestNoGoZone() {
-        updateZones();
-        return zoneManager.getNearestNoGoZone();
-    }
-
-    public ZoneInfo getNearestZone() {
-        updateZones();
-        return zoneManager.getNearestZone();
-    }
-
-    public ZoneManager getZoneManager() {
-        updateZones();
-        return zoneManager;
     }
 
     public void update() {

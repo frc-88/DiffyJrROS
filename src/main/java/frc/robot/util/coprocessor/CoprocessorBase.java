@@ -93,6 +93,10 @@ public class CoprocessorBase {
         }
     }
 
+    public Set<String> getWaypointNames() {
+        return waypoints.keySet();
+    }
+
     public Pose2d getPoseRelativeToWaypoint(String waypointName, Pose2d relativePose) {
         Pose2d waypoint = getWaypoint(waypointName);
         if (!isPoseValid(waypoint)) {
@@ -114,10 +118,6 @@ public class CoprocessorBase {
         return waypoints.containsKey(waypointName);
     }
 
-    public Set<String> getWaypointNames() {
-        return waypoints.keySet();
-    }
-
     protected double getTime() {
         return RobotController.getFPGATime() * 1E-6;
     }
@@ -126,22 +126,6 @@ public class CoprocessorBase {
      * Setters for sending data to the coprocessor
      */
     
-    public void sendGoal(Waypoint waypoint) {
-        // String waypointName = WaypointMap.parseWaypointName(waypoint.waypoint_name);
-        numSentGoals++;
-    }
-
-    public void executeGoal() {
-        numSentGoals = 0;
-    }
-
-    public void cancelGoal() {
-        
-    }
-    
-    public void resetPlan() {
-        numSentGoals = 0;
-    }
 
     protected void sendMatchStatus(boolean is_autonomous, double match_timer, DriverStation.Alliance team_color) {
         
