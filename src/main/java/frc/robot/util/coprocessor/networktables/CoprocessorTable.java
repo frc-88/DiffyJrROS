@@ -191,7 +191,7 @@ public class CoprocessorTable extends CoprocessorBase {
 
     public boolean isGlobalPoseActive() {
         updateGlobalPose();
-        return this.isGlobalPoseActive();
+        return super.isGlobalPoseActive();
     }
 
 
@@ -241,7 +241,7 @@ public class CoprocessorTable extends CoprocessorBase {
 
     public boolean isJointCommandActive(int jointIndex) {
         updateJointCommands();
-        return this.isJointCommandActive(jointIndex);
+        return super.isJointCommandActive(jointIndex);
     }
 
     public Pose2d getWaypoint(String waypointName) {
