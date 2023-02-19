@@ -6,7 +6,7 @@ public class Detection {
 
     private String name;
     private int index;
-    private Pose3d pose;
+    private Pose3d pose = new Pose3d();
 
     public Detection(String name, int index, Pose3d pose) {
         this.name = name;

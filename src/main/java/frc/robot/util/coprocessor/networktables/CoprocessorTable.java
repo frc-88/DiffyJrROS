@@ -29,7 +29,7 @@ import frc.robot.util.coprocessor.CoprocessorBase;
 public class CoprocessorTable extends CoprocessorBase {
     private NetworkTableInstance instance;
     protected NetworkTable rootTable;
-    private double updateInterval = 0.01;
+    protected double updateInterval = 0.01;
     private DoubleSubscriber pingSub;
     private DoublePublisher pingReturnPub;
 

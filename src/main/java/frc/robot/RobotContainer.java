@@ -7,6 +7,7 @@ package frc.robot;
 import frc.robot.commands.CoastDriveMotors;
 import frc.robot.commands.DriveSwerveJoystickCommand;
 import frc.robot.commands.PassthroughRosCommand;
+import frc.robot.commands.SetGlobalPoseToTagGlobalPose;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.SwerveJoystick;
 import frc.robot.subsystems.SwerveJoystick.SwerveControllerType;
@@ -83,6 +84,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new WaitCommand(1);
+    return new SetGlobalPoseToTagGlobalPose(m_ros_interface);
   }
 }
