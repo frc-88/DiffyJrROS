@@ -36,6 +36,7 @@ public class DiffyJrTable extends CoprocessorTable {
     // ---
 
     public Pose2d getTagGlobalPose() {
+        updateTagGlobalPose();
         return tagGlobalPose;
     }
 
@@ -72,7 +73,6 @@ public class DiffyJrTable extends CoprocessorTable {
             imu.getAccelX() * kGravity,
             imu.getAccelY() * kGravity
         );
-        updateTagGlobalPose();
     }
 
     public void updateSlow() {

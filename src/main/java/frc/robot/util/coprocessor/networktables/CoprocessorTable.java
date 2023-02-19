@@ -1,5 +1,6 @@
 package frc.robot.util.coprocessor.networktables;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 
@@ -23,6 +24,10 @@ import edu.wpi.first.networktables.TimestampedDoubleArray;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.util.coprocessor.ChassisInterface;
 import frc.robot.util.coprocessor.Helpers;
+import frc.robot.util.coprocessor.LaserScanObstacleTracker;
+import frc.robot.util.coprocessor.VelocityCommand;
+import frc.robot.util.coprocessor.ZoneInfo;
+import frc.robot.util.coprocessor.ZoneManager;
 import frc.robot.util.coprocessor.detections.Detection;
 import frc.robot.util.coprocessor.CoprocessorBase;
 
@@ -145,6 +150,11 @@ public class CoprocessorTable extends CoprocessorBase {
         });
     }
 
+    public VelocityCommand getCommand() {
+        updateCmdVel();
+        return command;
+    }
+
     private void updateCmdVel() {
         TimestampedDoubleArray cmd = cmdVelSub.getAtomic();
         if (cmd.timestamp == 0.0) {
@@ -177,6 +187,11 @@ public class CoprocessorTable extends CoprocessorBase {
         globalPose = new Pose2d(x, y, new Rotation2d(theta));
         globalPoseTimer.reset();
         commandTimer.reset();
+    }
+
+    public Pose2d getGlobalPose() {
+        updateGlobalPose();
+        return this.getGlobalPose();
     }
 
     public void sendImu(double roll, double pitch, double yaw, double angular_z, double accel_x, double accel_y) {
@@ -218,6 +233,19 @@ public class CoprocessorTable extends CoprocessorBase {
         }
         jointCommandTimer.reset();
     }
+    public void setJointPosition(int index, double position) {
+        super.setJointPosition(index, position);
+        sendJointStates();
+    }
+
+    public double getJointCommand(int jointIndex) {
+        updateJointCommands();
+        return super.getJointCommand(jointIndex);
+    }
+    public Pose2d getWaypoint(String waypointName) {
+        updateWaypoints();
+        return super.getWaypoint(waypointName);
+    }
 
     private void updateWaypoints() {
         TimestampedDoubleArray xs_value = waypointsXSub.getAtomic();
@@ -242,6 +270,30 @@ public class CoprocessorTable extends CoprocessorBase {
             double wayt = ts[index];
             putWaypoint(names[index], new Pose2d(wayx, wayy, new Rotation2d(wayt)));
         }
+    }
+
+    public boolean doesDetectionNameExist(String name) {
+        updateDetections();
+        return super.doesDetectionNameExist(name);
+    }
+    public boolean doesDetectionExist(String name, int index) {
+        updateDetections();
+        return super.doesDetectionExist(name, index);
+    }
+
+    public Detection getDetection(String name, int index) {
+        updateDetections();
+        return super.getDetection(name, index);
+    }
+
+    public Collection<Detection> getAllDetectionsNamed(String name) {
+        updateDetections();
+        return super.getAllDetectionsNamed(name);
+    }
+
+    public Collection<Detection> getAllDetections() {
+        updateDetections();
+        return super.getAllDetections();
     }
 
     private void updateDetections() {
@@ -353,6 +405,11 @@ public class CoprocessorTable extends CoprocessorBase {
         });
     }
 
+    public LaserScanObstacleTracker getLaserScanObstacles() {
+        updateLaserScan();
+        return laserObstacles;
+    }
+
     private void updateLaserScan()
     {
         TimestampedDoubleArray xs = laserScanXSub.getAtomic();
@@ -371,6 +428,25 @@ public class CoprocessorTable extends CoprocessorBase {
         laserObstacles.setPoints(xs.value, ys.value);
     }
 
+    public boolean areZonesValid() {
+        return zoneManager.isValid();
+    }
+
+    public ZoneInfo getNearestNoGoZone() {
+        updateZones();
+        return zoneManager.getNearestNoGoZone();
+    }
+
+    public ZoneInfo getNearestZone() {
+        updateZones();
+        return zoneManager.getNearestZone();
+    }
+
+    public ZoneManager getZoneManager() {
+        updateZones();
+        return zoneManager;
+    }
+
     public void update() {
         if (!instance.isConnected()) {
             return;
@@ -381,14 +457,6 @@ public class CoprocessorTable extends CoprocessorBase {
 
         updatePing();
         sendOdometry(pose, velocity);
-        updateCmdVel();
-        updateGlobalPose();
-        sendJointStates();
-        updateJointCommands();
-        updateZones();
-        updateLaserScan();
-        updateWaypoints();
-        updateDetections();
 
         sendMatchStatus(
             DriverStation.isAutonomous(),
