@@ -22,10 +22,11 @@ public class Helpers {
     }
 
     /**
-     * Returns 0.0 if the given value is within the specified range around zero. The remaining range
+     * Returns 0.0 if the given value is within the specified range around zero. The
+     * remaining range
      * between the deadband and 1.0 is scaled from 0.0 to 1.0.
      *
-     * @param value value to clip
+     * @param value    value to clip
      * @param deadband range around zero
      */
     public static double applyDeadband(double value, double deadband) {
@@ -40,7 +41,9 @@ public class Helpers {
         }
     }
 
-    /** Normalize all wheel speeds if the magnitude of any wheel is greater than 1.0. */
+    /**
+     * Normalize all wheel speeds if the magnitude of any wheel is greater than 1.0.
+     */
     public static void normalize(double[] wheelSpeeds) {
         double maxMagnitude = Math.abs(wheelSpeeds[0]);
         for (int i = 1; i < wheelSpeeds.length; i++) {
@@ -59,7 +62,7 @@ public class Helpers {
     /**
      * Applies a transform to the input to provide better sensitivity at low speeds.
      *
-     * @param input the raw input value from a joystick
+     * @param input  the raw input value from a joystick
      * @param factor the raw sensitivity factor to apply
      * @return the adjusted control value
      */
@@ -83,7 +86,7 @@ public class Helpers {
     /**
      * sets angle between -PI and PI.
      *
-     * @param angle current to be changed.
+     * @param angle   current to be changed.
      * @param radians determines if angle is radians or not.
      * @return changed angle.
      */
@@ -101,7 +104,7 @@ public class Helpers {
     /**
      * sets angle between -PI/2 and PI/2.
      *
-     * @param angle current to be changed.
+     * @param angle   current to be changed.
      * @param radians determines if angle is radians or not.
      * @return changed angle.
      */

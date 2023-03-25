@@ -28,7 +28,7 @@ public class CANifiedPWMEncoder {
    * Constructor.
    *
    * @param canifier The CANifier that the encoder is plugged into
-   * @param channel The channel that the encoder is plugged into
+   * @param channel  The channel that the encoder is plugged into
    */
   public CANifiedPWMEncoder(int canifierID, int pwmChannel, double offset, double ratio, boolean inverted) {
     this.ratio = ratio;

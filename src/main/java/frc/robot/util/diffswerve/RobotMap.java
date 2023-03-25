@@ -3,12 +3,15 @@ package frc.robot.util.diffswerve;
 public class RobotMap {
 
     /**
-     * There should be an entry here for each CAN device, preferrably grouped by device type and
-     * then in numerical order. Note that for CAN, ids must be unique per device type, but not
-     * across types. Thus, you cannot have two SparkMax controllers with Id 0, but you can have a
+     * There should be an entry here for each CAN device, preferrably grouped by
+     * device type and
+     * then in numerical order. Note that for CAN, ids must be unique per device
+     * type, but not
+     * across types. Thus, you cannot have two SparkMax controllers with Id 0, but
+     * you can have a
      * SparkMax with Id 0 and a TalonSRX with Id 0.
      */
-    
+
     public static class CAN {
         public static class TALONFX {
             public static final int FL_HI_FALCON = 16;
@@ -25,8 +28,10 @@ public class RobotMap {
     }
 
     /**
-     * There should be an entry here for each DIO port, preferrably in numerical order. Note that
-     * for DIO only one device can connect to each port, so the numbers should be unique.
+     * There should be an entry here for each DIO port, preferrably in numerical
+     * order. Note that
+     * for DIO only one device can connect to each port, so the numbers should be
+     * unique.
      */
     public static class DIO {
         public static final int ENCODER_FL = 0;

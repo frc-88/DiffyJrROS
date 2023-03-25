@@ -12,6 +12,7 @@ public class SetGlobalPoseToWaypoint extends CommandBase {
   private final CoprocessorBase m_coprocessor;
   private final String m_waypointName;
   private boolean is_set = false;
+
   /** Creates a new SetGlobalPoseToWaypoint. */
   public SetGlobalPoseToWaypoint(CoprocessorBase coprocessor, String waypointName) {
     m_coprocessor = coprocessor;
@@ -24,9 +25,8 @@ public class SetGlobalPoseToWaypoint extends CommandBase {
   @Override
   public void initialize() {
     is_set = false;
-    
-  }
 
+  }
 
   @Override
   public void execute() {
@@ -35,8 +35,7 @@ public class SetGlobalPoseToWaypoint extends CommandBase {
       m_coprocessor.sendPoseEstimate(pose);
       is_set = true;
       System.out.println("Set pose to waypoint " + m_waypointName);
-    }
-    else {
+    } else {
       System.out.println("Warning: " + m_waypointName + " is not a valid waypoint name");
     }
   }

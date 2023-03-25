@@ -8,10 +8,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.util.coprocessor.networktables.DiffyJrTable;
 
-
 public class SetGlobalPoseToTagGlobalPose extends CommandBase {
   private final DiffyJrTable m_coprocessor;
   private boolean is_set = false;
+
   /** Creates a new SetGlobalPoseToTagGlobalPose. */
   public SetGlobalPoseToTagGlobalPose(DiffyJrTable coprocessor) {
     m_coprocessor = coprocessor;
@@ -22,9 +22,8 @@ public class SetGlobalPoseToTagGlobalPose extends CommandBase {
   @Override
   public void initialize() {
     is_set = false;
-    
-  }
 
+  }
 
   @Override
   public void execute() {
@@ -33,8 +32,7 @@ public class SetGlobalPoseToTagGlobalPose extends CommandBase {
       m_coprocessor.sendPoseEstimate(pose);
       is_set = true;
       System.out.println("Set pose to tag global pose");
-    }
-    else {
+    } else {
       System.out.println("Warning: global tag pose is not valid!");
     }
   }

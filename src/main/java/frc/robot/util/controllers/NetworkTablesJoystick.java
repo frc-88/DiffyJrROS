@@ -11,7 +11,7 @@ public class NetworkTablesJoystick {
     private NetworkTable table;
     private NetworkTable axis_table;
     private NetworkTable button_table;
-    
+
     Map<String, Trigger> buttons = new HashMap<>();
 
     public NetworkTablesJoystick() {
@@ -19,12 +19,15 @@ public class NetworkTablesJoystick {
         axis_table = table.getSubTable("axis");
         button_table = table.getSubTable("button");
     }
+
     public double getX() {
         return axis_table.getEntry("x").getDouble(0.0);
     }
+
     public double getY() {
         return axis_table.getEntry("y").getDouble(0.0);
     }
+
     public double getTheta() {
         return axis_table.getEntry("theta").getDouble(0.0);
     }

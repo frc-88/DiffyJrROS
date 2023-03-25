@@ -25,7 +25,6 @@ import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.numbers.*;
 
-
 public class DiffSwerveModule {
     private TalonFX hiMotor;
     private TalonFX loMotor;
@@ -58,22 +57,18 @@ public class DiffSwerveModule {
                 initFalconMotor(loMotor);
                 initFalconMotor(hiMotor);
                 is_ready = true;
-            }
-            catch (RuntimeException e) {
+            } catch (RuntimeException e) {
                 System.out.println("Failed to set Falcon CAN parameter. Trying again: " + e);
             }
-        }
-        while (!is_ready);
+        } while (!is_ready);
 
         azimuthSensor = new CANifiedPWMEncoder(
-            azimuthCanifierID, azimuthPwmChannel, azimuthOffsetRadians,
-            Constants.DifferentialSwerveModule.AZIMUTH_ROTATIONS_TO_RADIANS, false
-        );
+                azimuthCanifierID, azimuthPwmChannel, azimuthOffsetRadians,
+                Constants.DifferentialSwerveModule.AZIMUTH_ROTATIONS_TO_RADIANS, false);
 
         diffMatrix = Matrix.mat(Nat.N2(), Nat.N2()).fill(
-            Constants.DifferentialSwerveModule.GEAR_M11, Constants.DifferentialSwerveModule.GEAR_M12,
-            Constants.DifferentialSwerveModule.GEAR_M21, Constants.DifferentialSwerveModule.GEAR_M22
-        );
+                Constants.DifferentialSwerveModule.GEAR_M11, Constants.DifferentialSwerveModule.GEAR_M12,
+                Constants.DifferentialSwerveModule.GEAR_M21, Constants.DifferentialSwerveModule.GEAR_M22);
         inverseDiffMatrix = diffMatrix.inv();
 
         swerveControlLoop = initControlLoop();
@@ -87,8 +82,7 @@ public class DiffSwerveModule {
         if (coast) {
             hiMotor.setNeutralMode(NeutralMode.Coast);
             loMotor.setNeutralMode(NeutralMode.Coast);
-        }
-        else {
+        } else {
             hiMotor.setNeutralMode(NeutralMode.Brake);
             loMotor.setNeutralMode(NeutralMode.Brake);
         }
@@ -97,36 +91,40 @@ public class DiffSwerveModule {
     public void setEnabled(boolean enabled) {
         is_enabled = enabled;
     }
-    
+
     private void initFalconMotor(TalonFX motor) {
         checkErrorCode(motor.configFactoryDefault());
         motor.setInverted(false);
         motor.setSensorPhase(false);
         motor.setNeutralMode(NeutralMode.Brake);
 
-        checkErrorCode(motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, Constants.DifferentialSwerveModule.TIMEOUT));
+        checkErrorCode(motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0,
+                Constants.DifferentialSwerveModule.TIMEOUT));
         checkErrorCode(motor.configForwardSoftLimitEnable(false));
-        checkErrorCode(motor.configVoltageCompSaturation(Constants.DifferentialSwerveModule.VOLTAGE, Constants.DifferentialSwerveModule.TIMEOUT));
+        checkErrorCode(motor.configVoltageCompSaturation(Constants.DifferentialSwerveModule.VOLTAGE,
+                Constants.DifferentialSwerveModule.TIMEOUT));
         motor.enableVoltageCompensation(true);
-        checkErrorCode(motor.setStatusFramePeriod(StatusFrame.Status_1_General, 5, Constants.DifferentialSwerveModule.TIMEOUT));
-        checkErrorCode(motor.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 20, Constants.DifferentialSwerveModule.TIMEOUT));
+        checkErrorCode(motor.setStatusFramePeriod(StatusFrame.Status_1_General, 5,
+                Constants.DifferentialSwerveModule.TIMEOUT));
+        checkErrorCode(motor.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 20,
+                Constants.DifferentialSwerveModule.TIMEOUT));
         checkErrorCode(motor.configForwardSoftLimitEnable(false));
-        checkErrorCode(motor.configNeutralDeadband(Constants.DifferentialSwerveModule.NEUTRAL_DEADBAND_PERCENT, Constants.DifferentialSwerveModule.TIMEOUT));
+        checkErrorCode(motor.configNeutralDeadband(Constants.DifferentialSwerveModule.NEUTRAL_DEADBAND_PERCENT,
+                Constants.DifferentialSwerveModule.TIMEOUT));
         checkErrorCode(motor.configOpenloopRamp(0, Constants.DifferentialSwerveModule.TIMEOUT));
         checkErrorCode(motor.configClosedloopRamp(0, Constants.DifferentialSwerveModule.TIMEOUT));
         checkErrorCode(motor.configSupplyCurrentLimit(
-            new SupplyCurrentLimitConfiguration(
-                Constants.DifferentialSwerveModule.ENABLE_CURRENT_LIMIT,
-                Constants.DifferentialSwerveModule.CURRENT_LIMIT,
-                Constants.DifferentialSwerveModule.CURRENT_THRESHOLD,
-                Constants.DifferentialSwerveModule.CURRENT_TRIGGER_TIME)
-        ));
+                new SupplyCurrentLimitConfiguration(
+                        Constants.DifferentialSwerveModule.ENABLE_CURRENT_LIMIT,
+                        Constants.DifferentialSwerveModule.CURRENT_LIMIT,
+                        Constants.DifferentialSwerveModule.CURRENT_THRESHOLD,
+                        Constants.DifferentialSwerveModule.CURRENT_TRIGGER_TIME)));
         checkErrorCode(motor.configVoltageMeasurementFilter(0, Constants.DifferentialSwerveModule.TIMEOUT));
-        checkErrorCode(motor.configMotionProfileTrajectoryInterpolationEnable(false, Constants.DifferentialSwerveModule.TIMEOUT));
+        checkErrorCode(motor.configMotionProfileTrajectoryInterpolationEnable(false,
+                Constants.DifferentialSwerveModule.TIMEOUT));
     }
 
-    private void checkErrorCode(ErrorCode code)
-    {
+    private void checkErrorCode(ErrorCode code) {
         if (code != ErrorCode.OK) {
             throw new RuntimeException("Talon FX motor encountered an error: " + code.toString());
         }
@@ -137,53 +135,46 @@ public class DiffSwerveModule {
         // Creates a Linear System of our Differential Swerve Module.
         LinearSystem<N3, N2, N3> swerveModuleModel = createDifferentialSwerveModule(DCMotor.getFalcon500(2));
 
-        // Creates a Kalman Filter as our Observer for our module. Works since system is linear.
-        KalmanFilter<N3, N2, N3> swerveObserver =
-                new KalmanFilter<>(
-                        Nat.N3(),
-                        Nat.N3(),
-                        swerveModuleModel,
-                        Matrix.mat(Nat.N3(), Nat.N1())
-                                .fill(
-                                        Constants.DifferentialSwerveModule
-                                                .MODEL_AZIMUTH_ANGLE_NOISE,
-                                        Constants.DifferentialSwerveModule
-                                                .MODEL_AZIMUTH_ANG_VELOCITY_NOISE,
-                                        Constants.DifferentialSwerveModule
-                                                .MODEL_WHEEL_ANG_VELOCITY_NOISE),
-                        Matrix.mat(Nat.N3(), Nat.N1())
-                                .fill(
-                                        Constants.DifferentialSwerveModule
-                                                .SENSOR_AZIMUTH_ANGLE_NOISE,
-                                        Constants.DifferentialSwerveModule
-                                                .SENSOR_AZIMUTH_ANG_VELOCITY_NOISE,
-                                        Constants.DifferentialSwerveModule
-                                                .SENSOR_WHEEL_ANG_VELOCITY_NOISE),
-                        Constants.DifferentialSwerveModule.kDt);
+        // Creates a Kalman Filter as our Observer for our module. Works since system is
+        // linear.
+        KalmanFilter<N3, N2, N3> swerveObserver = new KalmanFilter<>(
+                Nat.N3(),
+                Nat.N3(),
+                swerveModuleModel,
+                Matrix.mat(Nat.N3(), Nat.N1())
+                        .fill(
+                                Constants.DifferentialSwerveModule.MODEL_AZIMUTH_ANGLE_NOISE,
+                                Constants.DifferentialSwerveModule.MODEL_AZIMUTH_ANG_VELOCITY_NOISE,
+                                Constants.DifferentialSwerveModule.MODEL_WHEEL_ANG_VELOCITY_NOISE),
+                Matrix.mat(Nat.N3(), Nat.N1())
+                        .fill(
+                                Constants.DifferentialSwerveModule.SENSOR_AZIMUTH_ANGLE_NOISE,
+                                Constants.DifferentialSwerveModule.SENSOR_AZIMUTH_ANG_VELOCITY_NOISE,
+                                Constants.DifferentialSwerveModule.SENSOR_WHEEL_ANG_VELOCITY_NOISE),
+                Constants.DifferentialSwerveModule.kDt);
         // Creates an LQR controller for our Swerve Module.
-        LinearQuadraticRegulator<N3, N2, N3> swerveController =
-                new LinearQuadraticRegulator<>(
-                        swerveModuleModel,
-                        // Q Vector/Matrix Maximum error tolerance
-                        VecBuilder.fill(
-                                Constants.DifferentialSwerveModule.Q_AZIMUTH,
-                                Constants.DifferentialSwerveModule.Q_AZIMUTH_ANG_VELOCITY,
-                                Constants.DifferentialSwerveModule.Q_WHEEL_ANG_VELOCITY),
-                        // R Vector/Matrix Maximum control effort.
-                        VecBuilder.fill(
-                                Constants.DifferentialSwerveModule.CONTROL_EFFORT,
-                                Constants.DifferentialSwerveModule.CONTROL_EFFORT),
-                        Constants.DifferentialSwerveModule.kDt);
-
-        // Creates a LinearSystemLoop that contains the Model, Controller, Observer, Max Volts,
-        // Update Rate.
-        LinearSystemLoop<N3, N2, N3> controlLoop =
-                new LinearSystemLoop<>(
-                        swerveModuleModel,
-                        swerveController,
-                        swerveObserver,
+        LinearQuadraticRegulator<N3, N2, N3> swerveController = new LinearQuadraticRegulator<>(
+                swerveModuleModel,
+                // Q Vector/Matrix Maximum error tolerance
+                VecBuilder.fill(
+                        Constants.DifferentialSwerveModule.Q_AZIMUTH,
+                        Constants.DifferentialSwerveModule.Q_AZIMUTH_ANG_VELOCITY,
+                        Constants.DifferentialSwerveModule.Q_WHEEL_ANG_VELOCITY),
+                // R Vector/Matrix Maximum control effort.
+                VecBuilder.fill(
                         Constants.DifferentialSwerveModule.CONTROL_EFFORT,
-                        Constants.DifferentialSwerveModule.kDt);
+                        Constants.DifferentialSwerveModule.CONTROL_EFFORT),
+                Constants.DifferentialSwerveModule.kDt);
+
+        // Creates a LinearSystemLoop that contains the Model, Controller, Observer, Max
+        // Volts,
+        // Update Rate.
+        LinearSystemLoop<N3, N2, N3> controlLoop = new LinearSystemLoop<>(
+                swerveModuleModel,
+                swerveController,
+                swerveObserver,
+                Constants.DifferentialSwerveModule.CONTROL_EFFORT,
+                Constants.DifferentialSwerveModule.kDt);
 
         // Initializes the vectors and matrices.
         controlLoop.reset(VecBuilder.fill(0, 0, 0));
@@ -207,26 +198,22 @@ public class DiffSwerveModule {
         Matrix<N2, N2> B_subset = inverseDiffMatrix.times(K_t / (R * J_w));
 
         var A = Matrix.mat(Nat.N3(), Nat.N3()).fill(
-            0.0, 1.0, 0.0,
-            0.0, A_subset.get(0, 0), A_subset.get(0, 1),
-            0.0, A_subset.get(1, 0), A_subset.get(1, 1)
-        );
-        
+                0.0, 1.0, 0.0,
+                0.0, A_subset.get(0, 0), A_subset.get(0, 1),
+                0.0, A_subset.get(1, 0), A_subset.get(1, 1));
+
         var B = Matrix.mat(Nat.N3(), Nat.N2()).fill(
-            0.0, 0.0,
-            B_subset.get(0, 0), B_subset.get(0, 1),
-            B_subset.get(1, 0), B_subset.get(1, 1)
-        );
+                0.0, 0.0,
+                B_subset.get(0, 0), B_subset.get(0, 1),
+                B_subset.get(1, 0), B_subset.get(1, 1));
         var C = Matrix.mat(Nat.N3(), Nat.N3()).fill(
-            1.0, 0.0, 0.0,
-            0.0, 1.0, 0.0,
-            0.0, 0.0, 1.0
-        );
+                1.0, 0.0, 0.0,
+                0.0, 1.0, 0.0,
+                0.0, 0.0, 1.0);
         var D = Matrix.mat(Nat.N3(), Nat.N2()).fill(
-            0.0, 0.0,
-            0.0, 0.0,
-            0.0, 0.0
-        );
+                0.0, 0.0,
+                0.0, 0.0,
+                0.0, 0.0);
 
         System.out.println("A: " + A);
         System.out.println("B: " + B);
@@ -237,7 +224,7 @@ public class DiffSwerveModule {
         System.out.println("K_v: " + K_v);
         System.out.println("R: " + R);
         System.out.println("Inv diff matrix: " + inverseDiffMatrix);
-        
+
         return new LinearSystem<>(A, B, C, D);
     }
 
@@ -260,47 +247,50 @@ public class DiffSwerveModule {
         }
     }
 
-
-    // use custom predict() function for as absolute encoder azimuth angle and the angular velocity
+    // use custom predict() function for as absolute encoder azimuth angle and the
+    // angular velocity
     // of the module need to be continuous.
     private boolean predict() {
-        // creates our input of voltage to our motors of u = K(r-x)+Kf*r but need to wrap angle to be
+        // creates our input of voltage to our motors of u = K(r-x)+Kf*r but need to
+        // wrap angle to be
         // continuous see computeErrorAndWrapAngle().
-        
+
         Matrix<N2, N1> inputVelocities = getDifferentialInputs(reference.get(1, 0), reference.get(2, 0));
         Matrix<N2, N1> feedforwardVoltages = inputVelocities.times(Constants.DifferentialSwerveModule.FEED_FORWARD);
 
         input = swerveControlLoop.clampInput(
-            swerveControlLoop
-                .getController()
-                .getK()
-                .times(
-                    computeErrorAndWrapAngle(
-                        swerveControlLoop.getNextR(),
-                        swerveControlLoop.getXHat(),  // can be NAN if measured wheel or azimuth is NaN
-                        -Math.PI,
-                        Math.PI))
-                .plus(feedforwardVoltages)
-            );
-            if (Double.isNaN(input.get(0, 0)) || Double.isNaN(input.get(1, 0))) {
-                System.out.println("Kalman observer input is NaN! Resetting controller.");
-                swerveControlLoop.reset(VecBuilder.fill(0.0, 0.0, 0.0));
-                return false;
-            }
+                swerveControlLoop
+                        .getController()
+                        .getK()
+                        .times(
+                                computeErrorAndWrapAngle(
+                                        swerveControlLoop.getNextR(),
+                                        swerveControlLoop.getXHat(), // can be NAN if measured wheel or azimuth is NaN
+                                        -Math.PI,
+                                        Math.PI))
+                        .plus(feedforwardVoltages));
+        if (Double.isNaN(input.get(0, 0)) || Double.isNaN(input.get(1, 0))) {
+            System.out.println("Kalman observer input is NaN! Resetting controller.");
+            swerveControlLoop.reset(VecBuilder.fill(0.0, 0.0, 0.0));
+            return false;
+        }
 
         swerveControlLoop.getObserver().predict(input, Constants.DifferentialSwerveModule.kDt);
         return true;
     }
 
     /**
-     * wraps angle so that absolute encoder can be continues. (i.e) No issues when switching between
+     * wraps angle so that absolute encoder can be continues. (i.e) No issues when
+     * switching between
      * -PI and PI as they are the same point but different values.
      *
-     * @param reference is the Matrix that contains the reference wanted such as [Math.PI, 0, 100].
-     * @param xHat is the predicted states of our system. [Azimuth Angle, Azimuth Angular Velocity,
-     *     Wheel Angular Velocity].
-     * @param minAngle is the minimum angle in our case -PI.
-     * @param maxAngle is the maximum angle in our case PI.
+     * @param reference is the Matrix that contains the reference wanted such as
+     *                  [Math.PI, 0, 100].
+     * @param xHat      is the predicted states of our system. [Azimuth Angle,
+     *                  Azimuth Angular Velocity,
+     *                  Wheel Angular Velocity].
+     * @param minAngle  is the minimum angle in our case -PI.
+     * @param maxAngle  is the maximum angle in our case PI.
      */
     private Matrix<N3, N1> computeErrorAndWrapAngle(
             Matrix<N3, N1> reference, Matrix<N3, N1> xHat, double minAngle, double maxAngle) {
@@ -310,18 +300,15 @@ public class DiffSwerveModule {
         return VecBuilder.fill(positionError, error.get(1, 0), error.get(2, 0));
     }
 
-
     public Translation2d getModuleLocation() {
         return moduleLocation;
     }
 
-
     private void setFalconVoltage(TalonFX motor, double voltage) {
-        double limVoltage =
-                Helpers.limit(
-                        voltage,
-                        -Constants.DifferentialSwerveModule.VOLTAGE,
-                        Constants.DifferentialSwerveModule.VOLTAGE);
+        double limVoltage = Helpers.limit(
+                voltage,
+                -Constants.DifferentialSwerveModule.VOLTAGE,
+                Constants.DifferentialSwerveModule.VOLTAGE);
         motor.set(
                 TalonFXControlMode.PercentOutput,
                 limVoltage / Constants.DifferentialSwerveModule.VOLTAGE);
@@ -335,14 +322,15 @@ public class DiffSwerveModule {
         setFalconVoltage(loMotor, voltage);
     }
 
-
     public double getModuleAngle() {
         return Helpers.boundHalfAngle(azimuthSensor.getPosition());
     }
 
-    // Get module velocities. Pair order: (azimuth angular velocity, wheel angular velocity)
+    // Get module velocities. Pair order: (azimuth angular velocity, wheel angular
+    // velocity)
     private Pair<Double, Double> getAngularVelocities() {
-        Matrix<N2, N1> outputs = getDifferentialOutputs(getMotorRadiansPerSecond(loMotor), getMotorRadiansPerSecond(hiMotor));
+        Matrix<N2, N1> outputs = getDifferentialOutputs(getMotorRadiansPerSecond(loMotor),
+                getMotorRadiansPerSecond(hiMotor));
         return new Pair<Double, Double>(outputs.get(0, 0), outputs.get(1, 0));
     }
 
@@ -376,12 +364,14 @@ public class DiffSwerveModule {
         return getPredictedWheelAngularVelocity() * Constants.DifferentialSwerveModule.WHEEL_RADIUS;
     }
 
-    // Converts differential inputs (lo and hi motor rotational velocity -> azimuth angular velocity, wheel angular velocity)
+    // Converts differential inputs (lo and hi motor rotational velocity -> azimuth
+    // angular velocity, wheel angular velocity)
     public Matrix<N2, N1> getDifferentialOutputs(double angularVelocityLoMotor, double angularVelocityHiMotor) {
         return diffMatrix.times(VecBuilder.fill(angularVelocityLoMotor, angularVelocityHiMotor));
     }
 
-    // Converts differential inputs (azimuth angular velocity, wheel angular velocity -> lo and hi motor rotational velocity)
+    // Converts differential inputs (azimuth angular velocity, wheel angular
+    // velocity -> lo and hi motor rotational velocity)
     public Matrix<N2, N1> getDifferentialInputs(double angularVelocityAzimuth, double angularVelocityWheel) {
         return inverseDiffMatrix.times(VecBuilder.fill(angularVelocityAzimuth, angularVelocityWheel));
     }
@@ -396,7 +386,6 @@ public class DiffSwerveModule {
         return motor.getMotorOutputVoltage();
     }
 
-    
     public double getPredictedAzimuthAngularVelocity() {
         return swerveControlLoop.getObserver().getXhat(1);
     }
@@ -414,8 +403,10 @@ public class DiffSwerveModule {
     }
 
     /**
-     * gets the wanted voltage from our control law. u = K(r-x) our control law is slightly
-     * different as we need to be continuous. Check method predict() for calculations.
+     * gets the wanted voltage from our control law. u = K(r-x) our control law is
+     * slightly
+     * different as we need to be continuous. Check method predict() for
+     * calculations.
      *
      * @return hi wanted voltage
      */
@@ -427,7 +418,6 @@ public class DiffSwerveModule {
         return input.get(0, 0);
     }
 
-
     public double getHiMeasuredVoltage() {
         return getMotorVoltage(hiMotor);
     }
@@ -435,7 +425,6 @@ public class DiffSwerveModule {
     public double getLoMeasuredVoltage() {
         return getMotorVoltage(loMotor);
     }
-
 
     public double getHiMeasuredCurrent() {
         return getMotorCurrent(hiMotor);
@@ -473,7 +462,6 @@ public class DiffSwerveModule {
         return new SwerveModuleState(getWheelVelocity(), new Rotation2d(getModuleAngle()));
     }
 
-
     public SwerveModulePosition getPosition() {
         return new SwerveModulePosition(getWheelPosition(), new Rotation2d(getModuleAngle()));
     }
@@ -500,7 +488,8 @@ public class DiffSwerveModule {
     /**
      * sets the modules to take the shorted path to the newest state.
      *
-     * @param state azimuth angle in radians and velocity of wheel in meters per sec.
+     * @param state azimuth angle in radians and velocity of wheel in meters per
+     *              sec.
      */
     public void setIdealState(SwerveModuleState state) {
         setModuleState(SwerveModuleState.optimize(state, new Rotation2d(getModuleAngle())));

@@ -73,7 +73,7 @@ public class NavX {
     public void calibrateYaw(double yaw) {
         this.offset = yaw - this.getYaw() + this.offset;
     }
-    
+
     public double getVelocityX() {
         return this.base.getVelocityX();
     }

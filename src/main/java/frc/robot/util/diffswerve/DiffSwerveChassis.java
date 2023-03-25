@@ -90,10 +90,10 @@ public class DiffSwerveChassis implements ChassisInterface {
                 frontRight.getModuleLocation());
 
         modulePositions = new SwerveModulePosition[] {
-            new SwerveModulePosition(),
-            new SwerveModulePosition(),
-            new SwerveModulePosition(),
-            new SwerveModulePosition()
+                new SwerveModulePosition(),
+                new SwerveModulePosition(),
+                new SwerveModulePosition(),
+                new SwerveModulePosition()
         };
         odometry = new SwerveDriveOdometry(kinematics, Rotation2d.fromDegrees(imu.getYaw()), modulePositions);
 
@@ -130,14 +130,13 @@ public class DiffSwerveChassis implements ChassisInterface {
         batteryLimiter.reset(RobotController.getBatteryVoltage());
 
         collisionBoundingBox = new BoundingBox(
-            Constants.BOUNDARY_WIDTH / 2.0, 
-            Constants.BOUNDARY_LENGTH / 2.0,
-            -Constants.BOUNDARY_WIDTH / 2.0,
-            -Constants.BOUNDARY_LENGTH / 2.0,
-            Constants.MIN_COLLISION_INFLATE,
-            Constants.MAX_COLLISION_INFLATE,
-            Constants.DriveTrain.MAX_CHASSIS_SPEED
-        );
+                Constants.BOUNDARY_WIDTH / 2.0,
+                Constants.BOUNDARY_LENGTH / 2.0,
+                -Constants.BOUNDARY_WIDTH / 2.0,
+                -Constants.BOUNDARY_LENGTH / 2.0,
+                Constants.MIN_COLLISION_INFLATE,
+                Constants.MAX_COLLISION_INFLATE,
+                Constants.DriveTrain.MAX_CHASSIS_SPEED);
 
         System.out.println("Model created!");
     }
@@ -180,8 +179,7 @@ public class DiffSwerveChassis implements ChassisInterface {
         modulePositions[3] = frontRight.getPosition();
     }
 
-    private void updateIdealState()
-    {
+    private void updateIdealState() {
         setIdealState(getModuleStatesWithConstraints(chassisSpeedsSetpoint));
     }
 
@@ -207,10 +205,9 @@ public class DiffSwerveChassis implements ChassisInterface {
         frontRight.resetPosition(new SwerveModulePosition());
         updateModulePositions();
         odometry.resetPosition(
-            getHeading(),
-            modulePositions,
-            pose
-        );
+                getHeading(),
+                modulePositions,
+                pose);
     }
 
     public void resetFieldOffset() {
@@ -232,9 +229,8 @@ public class DiffSwerveChassis implements ChassisInterface {
     public double getChassisSpeed() {
         ChassisSpeeds speeds = getChassisSpeeds();
         return Math.sqrt(
-            speeds.vxMetersPerSecond * speeds.vxMetersPerSecond + 
-            speeds.vyMetersPerSecond * speeds.vyMetersPerSecond
-        );
+                speeds.vxMetersPerSecond * speeds.vxMetersPerSecond +
+                        speeds.vyMetersPerSecond * speeds.vyMetersPerSecond);
     }
 
     public SwerveModuleState[] getModuleStates() {
@@ -321,8 +317,7 @@ public class DiffSwerveChassis implements ChassisInterface {
         }
     }
 
-    private boolean isWithinDeadband(double vx, double vy, double angularVelocity)
-    {
+    private boolean isWithinDeadband(double vx, double vy, double angularVelocity) {
         return Math.abs(vx) < Constants.DriveTrain.LINEAR_DEADBAND
                 && Math.abs(vy) < Constants.DriveTrain.LINEAR_DEADBAND
                 && Math.abs(angularVelocity) < Constants.DriveTrain.ANG_DEADBAND;
@@ -339,10 +334,10 @@ public class DiffSwerveChassis implements ChassisInterface {
         if (commandsAreFieldRelative()) {
             // Apply field relative adjustment after slew limiter to avoid lagging
             limitedChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                limitedChassisSpeeds.vxMetersPerSecond, 
-                limitedChassisSpeeds.vyMetersPerSecond, 
-                limitedChassisSpeeds.omegaRadiansPerSecond, 
-                getHeadingWithOffset());
+                    limitedChassisSpeeds.vxMetersPerSecond,
+                    limitedChassisSpeeds.vyMetersPerSecond,
+                    limitedChassisSpeeds.omegaRadiansPerSecond,
+                    getHeadingWithOffset());
         }
 
         if (isWithinDeadband(limitedChassisSpeeds)) {
@@ -352,8 +347,7 @@ public class DiffSwerveChassis implements ChassisInterface {
                 swerveModuleStates[index] = new SwerveModuleState(0.0, new Rotation2d(modules[index].getModuleAngle()));
             }
             resetAngleSetpoint();
-        }
-        else {
+        } else {
             swerveModuleStates = kinematics.toSwerveModuleStates(limitedChassisSpeeds);
             SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, getBatteryLimitedMaxSpeed());
         }
@@ -375,7 +369,7 @@ public class DiffSwerveChassis implements ChassisInterface {
             }
 
             double adjustedMaxSpeed = Constants.DriveTrain.MAX_CHASSIS_SPEED *
-                limitedBatteryVoltage /
+                    limitedBatteryVoltage /
                     Constants.DifferentialSwerveModule.CONTROL_EFFORT;
             if (adjustedMaxSpeed > Constants.DriveTrain.MAX_CHASSIS_SPEED) {
                 adjustedMaxSpeed = Constants.DriveTrain.MAX_CHASSIS_SPEED;
@@ -383,24 +377,22 @@ public class DiffSwerveChassis implements ChassisInterface {
                 adjustedMaxSpeed = 0.0;
             }
             return adjustedMaxSpeed;
-        }
-        else {
+        } else {
             return Constants.DriveTrain.MAX_CHASSIS_SPEED;
         }
     }
 
     private ChassisSpeeds getAccelLimitedChassisSpeeds(ChassisSpeeds chassisSpeeds) {
         return new ChassisSpeeds(
-            Constants.DriveTrain.ENABLE_LINEAR_ACCEL_CONSTRAINT
+                Constants.DriveTrain.ENABLE_LINEAR_ACCEL_CONSTRAINT
                         ? vxLimiter.calculate(chassisSpeeds.vxMetersPerSecond)
                         : chassisSpeeds.vxMetersPerSecond,
-            Constants.DriveTrain.ENABLE_LINEAR_ACCEL_CONSTRAINT
+                Constants.DriveTrain.ENABLE_LINEAR_ACCEL_CONSTRAINT
                         ? vyLimiter.calculate(chassisSpeeds.vyMetersPerSecond)
                         : chassisSpeeds.vyMetersPerSecond,
-            Constants.DriveTrain.ENABLE_ANG_ACCEL_CONSTRAINT
+                Constants.DriveTrain.ENABLE_ANG_ACCEL_CONSTRAINT
                         ? vtLimiter.calculate(chassisSpeeds.omegaRadiansPerSecond)
-                        : chassisSpeeds.omegaRadiansPerSecond
-        );
+                        : chassisSpeeds.omegaRadiansPerSecond);
     }
 
     public void followPose(Pose2d pose, Rotation2d heading, double vel) {

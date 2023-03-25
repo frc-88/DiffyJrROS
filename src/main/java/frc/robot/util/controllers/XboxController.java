@@ -21,12 +21,12 @@ public class XboxController extends Joystick {
 	private static final int BUTTON_START = 8;
 	private static final int BUTTON_LEFT_STICK = 9;
 	private static final int BUTTON_RIGHT_STICK = 10;
-	
+
 	public XboxController(int port) {
 		super(port);
 	}
 
-	public Trigger buttonA = new JoystickButton(this, BUTTON_A);	
+	public Trigger buttonA = new JoystickButton(this, BUTTON_A);
 	public Trigger buttonB = new JoystickButton(this, BUTTON_B);
 	public Trigger buttonX = new JoystickButton(this, BUTTON_X);
 	public Trigger buttonY = new JoystickButton(this, BUTTON_Y);
@@ -41,43 +41,42 @@ public class XboxController extends Joystick {
 		return this.getRawButton(BUTTON_A);
 	}
 
-	
 	public boolean isButtonBPressed() {
 		return this.getRawButton(BUTTON_B);
 	}
-	
+
 	public boolean isButtonXPressed() {
 		return this.getRawButton(BUTTON_X);
 	}
-	
+
 	public boolean isButtonYPressed() {
 		return this.getRawButton(BUTTON_Y);
 	}
-	
+
 	public boolean isButtonLeftBumperPressed() {
 		return this.getRawButton(BUTTON_LEFT_BUMPER);
 	}
-	
+
 	public boolean isButtonRightBumperPressed() {
 		return this.getRawButton(BUTTON_RIGHT_BUMPER);
 	}
-	
+
 	public boolean isButtonBackPressed() {
 		return this.getRawButton(BUTTON_BACK);
 	}
-	
+
 	public boolean isButtonStartPressed() {
 		return this.getRawButton(BUTTON_START);
 	}
-	
+
 	public boolean isButtonLeftStickPressed() {
 		return this.getRawButton(BUTTON_LEFT_STICK);
 	}
-	
+
 	public boolean isButtonRightStickPressed() {
 		return this.getRawButton(BUTTON_RIGHT_STICK);
 	}
-	
+
 	public double getRightStickY() {
 		return -this.getRawAxis(RIGHT_VERT_AXIS);
 	}
@@ -118,5 +117,5 @@ public class XboxController extends Joystick {
 	public void rumbleRight(double rumble) {
 		this.setRumble(RumbleType.kRightRumble, rumble);
 	}
-	
+
 }

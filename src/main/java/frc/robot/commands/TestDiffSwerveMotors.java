@@ -58,7 +58,7 @@ public class TestDiffSwerveMotors extends CommandBase {
   }
 
   private int timeToIndex(long time) {
-    return (int)(time / commandInterval);
+    return (int) (time / commandInterval);
   }
 
   private long getTime() {
@@ -76,8 +76,7 @@ public class TestDiffSwerveMotors extends CommandBase {
   private double getVoltage(ArrayList<Double> commands, int index) {
     if (index >= commands.size()) {
       return commands.get(commands.size() - 1);
-    }
-    else {
+    } else {
       return commands.get(index);
     }
   }
@@ -85,7 +84,7 @@ public class TestDiffSwerveMotors extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    for (int module_index = 0; module_index < m_drive.getSwerve().getNumModules(); module_index++){
+    for (int module_index = 0; module_index < m_drive.getSwerve().getNumModules(); module_index++) {
       DiffSwerveModule module = m_drive.getSwerve().getModule(module_index);
       currentIndex = timeToIndex(getTime() - startTime);
       module.setHiMotorVoltage(getVoltage(hiCommands, currentIndex));
@@ -108,6 +107,6 @@ public class TestDiffSwerveMotors extends CommandBase {
 
   @Override
   public boolean runsWhenDisabled() {
-      return false;
+    return false;
   }
 }

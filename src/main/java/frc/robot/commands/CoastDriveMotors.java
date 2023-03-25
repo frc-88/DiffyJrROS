@@ -9,6 +9,7 @@ import frc.robot.subsystems.DriveSubsystem;
 
 public class CoastDriveMotors extends CommandBase {
   DriveSubsystem m_drive;
+
   /** Creates a new CoastDriveMotors. */
   public CoastDriveMotors(DriveSubsystem drive) {
     m_drive = drive;
@@ -18,7 +19,8 @@ public class CoastDriveMotors extends CommandBase {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -41,6 +43,6 @@ public class CoastDriveMotors extends CommandBase {
 
   @Override
   public boolean runsWhenDisabled() {
-      return true;
+    return true;
   }
 }
