@@ -30,7 +30,6 @@ def getter_template(full_type: str, name: str) -> str:
     return f"""    public {full_type} {camel_case('get_' + name)}() {{
         return this.{name};
     }}
-
 """
 
 
@@ -38,7 +37,6 @@ def setter_template(full_type: str, name: str) -> str:
     return f"""    public void {camel_case('set_' + name)}({full_type} {name}) {{
         this.{name} = {name};
     }}
-
 """
 
 
@@ -191,7 +189,6 @@ def generate_java_code_from_spec(path: str, spec: JavaClassSpec):
     getters = ""
     setters = ""
     json_constructor = ""
-    to_string = ""
     for name, field in spec.fields.items():
         if type(field) == JavaMessageField:
             if field.size == -1:
@@ -234,6 +231,7 @@ def generate_java_code_from_spec(path: str, spec: JavaClassSpec):
     json_constructor = json_constructor[:-1]
 
     imports.add("import com.google.gson.JsonObject;")
+    imports.add("import com.google.gson.Gson;")
 
     import_code = "\n".join(imports)
 
@@ -245,6 +243,7 @@ package {package_root}{package_name};
 public class {class_name} implements {package_root}RosMessage {{
 {constants_code}
 {fields_code}
+    Gson ginst = new Gson();
 
     public {class_name}() {{
 
@@ -259,15 +258,14 @@ public class {class_name} implements {package_root}RosMessage {{
     }}
 
 {getters}
-
 {setters}
-
-    public String toString() {{
-{to_string}
-        return "";
+    public JsonObject toJSON() {{
+        return ginst.toJsonTree(this).getAsJsonObject();
     }}
 
-    
+    public String toString() {{
+        return ginst.toJson(this);
+    }}
 }}
 """
 
@@ -327,8 +325,11 @@ def generate_message_interface_java_code(path: str) -> str:
     code = f"""// Auto generated!! Do not modify.
 package {package_root};
 
-public interface RosMessage {{
+import com.google.gson.JsonObject;
 
+
+public interface RosMessage {{
+    public JsonObject toJSON();
 }}
 """
     return code

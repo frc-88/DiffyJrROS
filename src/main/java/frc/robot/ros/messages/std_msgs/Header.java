@@ -1,6 +1,7 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.std_msgs;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 public class Header implements frc.robot.ros.messages.RosMessage {
@@ -9,6 +10,7 @@ public class Header implements frc.robot.ros.messages.RosMessage {
     private long stamp = 0;
     private String frame_id = "";
 
+    Gson ginst = new Gson();
 
     public Header() {
 
@@ -29,35 +31,28 @@ public class Header implements frc.robot.ros.messages.RosMessage {
     public int getSeq() {
         return this.seq;
     }
-
     public long getStamp() {
         return this.stamp;
     }
-
     public String getFrameId() {
         return this.frame_id;
     }
 
-
-
     public void setSeq(int seq) {
         this.seq = seq;
     }
-
     public void setStamp(long stamp) {
         this.stamp = stamp;
     }
-
     public void setFrameId(String frame_id) {
         this.frame_id = frame_id;
     }
 
-
-
-    public String toString() {
-
-        return "";
+    public JsonObject toJSON() {
+        return ginst.toJsonTree(this).getAsJsonObject();
     }
 
-    
+    public String toString() {
+        return ginst.toJson(this);
+    }
 }

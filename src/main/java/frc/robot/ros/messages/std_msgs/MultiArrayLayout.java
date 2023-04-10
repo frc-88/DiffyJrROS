@@ -1,16 +1,18 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.std_msgs;
 
-import java.util.ArrayList;
-import com.google.gson.JsonObject;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import java.util.ArrayList;
 import java.util.Arrays;
+import com.google.gson.JsonObject;
 
 public class MultiArrayLayout implements frc.robot.ros.messages.RosMessage {
 
     private ArrayList<frc.robot.ros.messages.std_msgs.MultiArrayDimension> dim = new ArrayList<>();
     private int data_offset = 0;
 
+    Gson ginst = new Gson();
 
     public MultiArrayLayout() {
 
@@ -31,27 +33,22 @@ public class MultiArrayLayout implements frc.robot.ros.messages.RosMessage {
     public ArrayList<frc.robot.ros.messages.std_msgs.MultiArrayDimension> getDim() {
         return this.dim;
     }
-
     public int getDataOffset() {
         return this.data_offset;
     }
 
-
-
     public void setDim(ArrayList<frc.robot.ros.messages.std_msgs.MultiArrayDimension> dim) {
         this.dim = dim;
     }
-
     public void setDataOffset(int data_offset) {
         this.data_offset = data_offset;
     }
 
-
-
-    public String toString() {
-
-        return "";
+    public JsonObject toJSON() {
+        return ginst.toJsonTree(this).getAsJsonObject();
     }
 
-    
+    public String toString() {
+        return ginst.toJson(this);
+    }
 }

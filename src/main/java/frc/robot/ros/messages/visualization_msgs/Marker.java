@@ -1,28 +1,29 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.visualization_msgs;
 
-import java.util.ArrayList;
-import com.google.gson.JsonObject;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import java.util.ArrayList;
 import java.util.Arrays;
+import com.google.gson.JsonObject;
 
 public class Marker implements frc.robot.ros.messages.RosMessage {
-    public static int ADD = 0;
-    public static int POINTS = 8;
-    public static int TRIANGLE_LIST = 11;
-    public static int ARROW = 0;
-    public static int SPHERE = 2;
-    public static int CYLINDER = 3;
-    public static int CUBE = 1;
-    public static int TEXT_VIEW_FACING = 9;
     public static int MESH_RESOURCE = 10;
-    public static int LINE_LIST = 5;
-    public static int CUBE_LIST = 6;
     public static int DELETE = 2;
-    public static int MODIFY = 0;
-    public static int LINE_STRIP = 4;
     public static int DELETEALL = 3;
+    public static int TEXT_VIEW_FACING = 9;
+    public static int ADD = 0;
+    public static int LINE_STRIP = 4;
+    public static int CUBE_LIST = 6;
     public static int SPHERE_LIST = 7;
+    public static int CUBE = 1;
+    public static int CYLINDER = 3;
+    public static int LINE_LIST = 5;
+    public static int POINTS = 8;
+    public static int MODIFY = 0;
+    public static int SPHERE = 2;
+    public static int ARROW = 0;
+    public static int TRIANGLE_LIST = 11;
 
     private frc.robot.ros.messages.std_msgs.Header header = new frc.robot.ros.messages.std_msgs.Header();
     private String ns = "";
@@ -40,6 +41,7 @@ public class Marker implements frc.robot.ros.messages.RosMessage {
     private String mesh_resource = "";
     private boolean mesh_use_embedded_materials = false;
 
+    Gson ginst = new Gson();
 
     public Marker() {
 
@@ -88,131 +90,100 @@ public class Marker implements frc.robot.ros.messages.RosMessage {
     public frc.robot.ros.messages.std_msgs.Header getHeader() {
         return this.header;
     }
-
     public String getNs() {
         return this.ns;
     }
-
     public int getId() {
         return this.id;
     }
-
     public int getType() {
         return this.type;
     }
-
     public int getAction() {
         return this.action;
     }
-
     public frc.robot.ros.messages.geometry_msgs.Pose getPose() {
         return this.pose;
     }
-
     public frc.robot.ros.messages.geometry_msgs.Vector3 getScale() {
         return this.scale;
     }
-
     public frc.robot.ros.messages.std_msgs.ColorRGBA getColor() {
         return this.color;
     }
-
     public long getLifetime() {
         return this.lifetime;
     }
-
     public boolean getFrameLocked() {
         return this.frame_locked;
     }
-
     public ArrayList<frc.robot.ros.messages.geometry_msgs.Point> getPoints() {
         return this.points;
     }
-
     public ArrayList<frc.robot.ros.messages.std_msgs.ColorRGBA> getColors() {
         return this.colors;
     }
-
     public String getText() {
         return this.text;
     }
-
     public String getMeshResource() {
         return this.mesh_resource;
     }
-
     public boolean getMeshUseEmbeddedMaterials() {
         return this.mesh_use_embedded_materials;
     }
 
-
-
     public void setHeader(frc.robot.ros.messages.std_msgs.Header header) {
         this.header = header;
     }
-
     public void setNs(String ns) {
         this.ns = ns;
     }
-
     public void setId(int id) {
         this.id = id;
     }
-
     public void setType(int type) {
         this.type = type;
     }
-
     public void setAction(int action) {
         this.action = action;
     }
-
     public void setPose(frc.robot.ros.messages.geometry_msgs.Pose pose) {
         this.pose = pose;
     }
-
     public void setScale(frc.robot.ros.messages.geometry_msgs.Vector3 scale) {
         this.scale = scale;
     }
-
     public void setColor(frc.robot.ros.messages.std_msgs.ColorRGBA color) {
         this.color = color;
     }
-
     public void setLifetime(long lifetime) {
         this.lifetime = lifetime;
     }
-
     public void setFrameLocked(boolean frame_locked) {
         this.frame_locked = frame_locked;
     }
-
     public void setPoints(ArrayList<frc.robot.ros.messages.geometry_msgs.Point> points) {
         this.points = points;
     }
-
     public void setColors(ArrayList<frc.robot.ros.messages.std_msgs.ColorRGBA> colors) {
         this.colors = colors;
     }
-
     public void setText(String text) {
         this.text = text;
     }
-
     public void setMeshResource(String mesh_resource) {
         this.mesh_resource = mesh_resource;
     }
-
     public void setMeshUseEmbeddedMaterials(boolean mesh_use_embedded_materials) {
         this.mesh_use_embedded_materials = mesh_use_embedded_materials;
     }
 
-
-
-    public String toString() {
-
-        return "";
+    public JsonObject toJSON() {
+        return ginst.toJsonTree(this).getAsJsonObject();
     }
 
-    
+    public String toString() {
+        return ginst.toJson(this);
+    }
 }

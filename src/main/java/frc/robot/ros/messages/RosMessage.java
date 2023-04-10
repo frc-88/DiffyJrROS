@@ -1,6 +1,9 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages;
 
-public interface RosMessage {
+import com.google.gson.JsonObject;
 
+
+public interface RosMessage {
+    public JsonObject toJSON();
 }

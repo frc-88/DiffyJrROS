@@ -1,8 +1,9 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.tj2_interfaces;
 
-import com.google.gson.JsonObject;
 import com.google.gson.JsonElement;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 public class UVBoundingBox implements frc.robot.ros.messages.RosMessage {
 
@@ -15,6 +16,7 @@ public class UVBoundingBox implements frc.robot.ros.messages.RosMessage {
     private int width = 0;
     private int height = 0;
 
+    Gson ginst = new Gson();
 
     public UVBoundingBox() {
 
@@ -40,35 +42,28 @@ public class UVBoundingBox implements frc.robot.ros.messages.RosMessage {
     public frc.robot.ros.messages.tj2_interfaces.UVKeypoint[] getPoints() {
         return this.points;
     }
-
     public int getWidth() {
         return this.width;
     }
-
     public int getHeight() {
         return this.height;
     }
 
-
-
     public void setPoints(frc.robot.ros.messages.tj2_interfaces.UVKeypoint[] points) {
         this.points = points;
     }
-
     public void setWidth(int width) {
         this.width = width;
     }
-
     public void setHeight(int height) {
         this.height = height;
     }
 
-
-
-    public String toString() {
-
-        return "";
+    public JsonObject toJSON() {
+        return ginst.toJsonTree(this).getAsJsonObject();
     }
 
-    
+    public String toString() {
+        return ginst.toJson(this);
+    }
 }

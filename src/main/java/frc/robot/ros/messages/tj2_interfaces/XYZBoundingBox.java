@@ -1,8 +1,9 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.tj2_interfaces;
 
-import com.google.gson.JsonObject;
 import com.google.gson.JsonElement;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 public class XYZBoundingBox implements frc.robot.ros.messages.RosMessage {
 
@@ -18,6 +19,7 @@ public class XYZBoundingBox implements frc.robot.ros.messages.RosMessage {
     };
     private frc.robot.ros.messages.geometry_msgs.Vector3 dimensions = new frc.robot.ros.messages.geometry_msgs.Vector3();
 
+    Gson ginst = new Gson();
 
     public XYZBoundingBox() {
 
@@ -41,27 +43,22 @@ public class XYZBoundingBox implements frc.robot.ros.messages.RosMessage {
     public frc.robot.ros.messages.tj2_interfaces.XYZKeypoint[] getPoints() {
         return this.points;
     }
-
     public frc.robot.ros.messages.geometry_msgs.Vector3 getDimensions() {
         return this.dimensions;
     }
 
-
-
     public void setPoints(frc.robot.ros.messages.tj2_interfaces.XYZKeypoint[] points) {
         this.points = points;
     }
-
     public void setDimensions(frc.robot.ros.messages.geometry_msgs.Vector3 dimensions) {
         this.dimensions = dimensions;
     }
 
-
-
-    public String toString() {
-
-        return "";
+    public JsonObject toJSON() {
+        return ginst.toJsonTree(this).getAsJsonObject();
     }
 
-    
+    public String toString() {
+        return ginst.toJson(this);
+    }
 }

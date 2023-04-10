@@ -1,10 +1,11 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.tj2_interfaces;
 
-import java.util.ArrayList;
-import com.google.gson.JsonObject;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import java.util.ArrayList;
 import java.util.Arrays;
+import com.google.gson.JsonObject;
 
 public class GameObjectsStamped implements frc.robot.ros.messages.RosMessage {
 
@@ -13,6 +14,7 @@ public class GameObjectsStamped implements frc.robot.ros.messages.RosMessage {
     private int width = 0;
     private int height = 0;
 
+    Gson ginst = new Gson();
 
     public GameObjectsStamped() {
 
@@ -37,43 +39,34 @@ public class GameObjectsStamped implements frc.robot.ros.messages.RosMessage {
     public frc.robot.ros.messages.std_msgs.Header getHeader() {
         return this.header;
     }
-
     public ArrayList<frc.robot.ros.messages.tj2_interfaces.GameObject> getObjects() {
         return this.objects;
     }
-
     public int getWidth() {
         return this.width;
     }
-
     public int getHeight() {
         return this.height;
     }
 
-
-
     public void setHeader(frc.robot.ros.messages.std_msgs.Header header) {
         this.header = header;
     }
-
     public void setObjects(ArrayList<frc.robot.ros.messages.tj2_interfaces.GameObject> objects) {
         this.objects = objects;
     }
-
     public void setWidth(int width) {
         this.width = width;
     }
-
     public void setHeight(int height) {
         this.height = height;
     }
 
-
-
-    public String toString() {
-
-        return "";
+    public JsonObject toJSON() {
+        return ginst.toJsonTree(this).getAsJsonObject();
     }
 
-    
+    public String toString() {
+        return ginst.toJson(this);
+    }
 }
