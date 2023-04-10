@@ -1,8 +1,8 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.tj2_interfaces;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.Gson;
 
 public class XYZKeypoint implements frc.robot.ros.messages.RosMessage {
 

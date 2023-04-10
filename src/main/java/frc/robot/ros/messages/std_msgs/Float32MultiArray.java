@@ -1,11 +1,11 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.std_msgs;
 
+import com.google.gson.JsonObject;
 import com.google.gson.Gson;
+import java.util.Arrays;
 import com.google.gson.JsonElement;
 import java.util.ArrayList;
-import java.util.Arrays;
-import com.google.gson.JsonObject;
 
 public class Float32MultiArray implements frc.robot.ros.messages.RosMessage {
 
@@ -26,7 +26,7 @@ public class Float32MultiArray implements frc.robot.ros.messages.RosMessage {
     public Float32MultiArray(JsonObject jsonObj) {
         this.layout = new frc.robot.ros.messages.std_msgs.MultiArrayLayout(jsonObj.get("layout").getAsJsonObject());
         for (JsonElement data_element : jsonObj.getAsJsonArray("data")) {
-            this.data.add(new Float(data_element.getAsFloat()));
+            this.data.add(data_element.getAsFloat());
         }
     }
 

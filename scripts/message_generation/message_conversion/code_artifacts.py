@@ -62,12 +62,17 @@ def generate_code_from_field(imports: set, package_root: str, name: str, field: 
     )
 
 
-def generate_code_from_arraylist_type(imports: set, name: str, full_type: str, get_value_string_format: str) -> GeneratedCodeArtifacts:
+def generate_code_from_arraylist_type(imports: set, name: str, full_type: str) -> GeneratedCodeArtifacts:
     imports.add("import java.util.ArrayList;")
     imports.add("import java.util.Arrays;")
     imports.add("import com.google.gson.JsonElement;")
 
     array_type = f"ArrayList<{full_type}>"
+    if full_type in JAVA_OBJECT_TO_PRIMITIVE:
+        primitive = JavaPrimitive(JAVA_OBJECT_TO_PRIMITIVE[full_type].value)
+        new_from_json_code = PRIMITIVE_JSON_FUNCTIONS[primitive]
+    else:
+        new_from_json_code = f"new {full_type}({{obj}}.getAsJsonObject())"
 
     fields_code = f"    private {array_type} {name} = new ArrayList<>();\n"
     arg = f"{full_type}[] {name}"
@@ -75,9 +80,8 @@ def generate_code_from_arraylist_type(imports: set, name: str, full_type: str, g
     getter = getter_template(array_type, name)
     setter = setter_template(array_type, name)
 
-    json_get_obj = get_value_string_format.format(obj=f"{name}_element")
     json_constructor = f"""        for (JsonElement {name}_element : jsonObj.getAsJsonArray("{name}")) {{
-            this.{name}.add(new {full_type}({json_get_obj}));
+            this.{name}.add({new_from_json_code.format(obj=f"{name}_element")});
         }}
 """
 
@@ -135,7 +139,7 @@ def generate_code_from_static_array_type(imports: set, name: str, full_type: str
 
 
 def generate_code_from_field_variable_list(imports: set, package_root: str, name: str, field: JavaMessageField) -> GeneratedCodeArtifacts:
-    return generate_code_from_arraylist_type(imports, name, PRIMITIVE_TO_JAVA_OBJECT[field.msg_type], PRIMITIVE_JSON_FUNCTIONS[field.msg_type])
+    return generate_code_from_arraylist_type(imports, name, PRIMITIVE_TO_JAVA_OBJECT[field.msg_type])
 
 
 def generate_code_from_field_static_list(imports: set, package_root: str, name: str, field: JavaMessageField) -> GeneratedCodeArtifacts:
@@ -162,7 +166,7 @@ def generate_code_from_spec_sub_msg(imports: set, package_root: str, name: str, 
 
 
 def generate_code_from_spec_variable_list(imports: set, package_root: str, name: str, field: JavaClassSpec) -> GeneratedCodeArtifacts:
-    return generate_code_from_arraylist_type(imports, name, get_full_type(package_root, field), "{obj}.getAsJsonObject()")
+    return generate_code_from_arraylist_type(imports, name, get_full_type(package_root, field))
 
 
 def generate_code_from_spec_static_list(imports: set, package_root: str, name: str, field: JavaClassSpec) -> GeneratedCodeArtifacts:

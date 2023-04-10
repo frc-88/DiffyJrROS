@@ -1,8 +1,8 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.geometry_msgs;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.Gson;
 
 public class Pose implements frc.robot.ros.messages.RosMessage {
 

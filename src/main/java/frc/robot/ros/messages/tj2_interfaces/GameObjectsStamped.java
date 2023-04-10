@@ -1,11 +1,11 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.tj2_interfaces;
 
+import com.google.gson.JsonObject;
 import com.google.gson.Gson;
+import java.util.Arrays;
 import com.google.gson.JsonElement;
 import java.util.ArrayList;
-import java.util.Arrays;
-import com.google.gson.JsonObject;
 
 public class GameObjectsStamped implements frc.robot.ros.messages.RosMessage {
 
