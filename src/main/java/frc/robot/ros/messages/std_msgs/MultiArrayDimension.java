@@ -4,6 +4,7 @@ package frc.robot.ros.messages.std_msgs;
 import com.google.gson.JsonObject;
 
 public class MultiArrayDimension implements frc.robot.ros.messages.RosMessage {
+
     private String label = "";
     private int size = 0;
     private int stride = 0;

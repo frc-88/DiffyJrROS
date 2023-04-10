@@ -4,6 +4,7 @@ package frc.robot.ros.messages.geometry_msgs;
 import com.google.gson.JsonObject;
 
 public class Pose implements frc.robot.ros.messages.RosMessage {
+
     private frc.robot.ros.messages.geometry_msgs.Point position = new frc.robot.ros.messages.geometry_msgs.Point();
     private frc.robot.ros.messages.geometry_msgs.Quaternion orientation = new frc.robot.ros.messages.geometry_msgs.Quaternion();
 

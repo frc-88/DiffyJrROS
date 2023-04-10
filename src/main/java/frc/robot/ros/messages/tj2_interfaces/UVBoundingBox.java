@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonElement;
 
 public class UVBoundingBox implements frc.robot.ros.messages.RosMessage {
+
     private frc.robot.ros.messages.tj2_interfaces.UVKeypoint[] points = new frc.robot.ros.messages.tj2_interfaces.UVKeypoint[] {
         new frc.robot.ros.messages.tj2_interfaces.UVKeypoint(),
         new frc.robot.ros.messages.tj2_interfaces.UVKeypoint(),

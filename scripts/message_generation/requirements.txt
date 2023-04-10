@@ -9,5 +9,4 @@ nav-msgs
 std-msgs
 sensor-msgs
 visualization-msgs
-
-pymongo
+genpy

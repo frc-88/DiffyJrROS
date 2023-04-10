@@ -4,6 +4,7 @@ package frc.robot.ros.messages.std_msgs;
 import com.google.gson.JsonObject;
 
 public class ColorRGBA implements frc.robot.ros.messages.RosMessage {
+
     private float r = 0.0f;
     private float g = 0.0f;
     private float b = 0.0f;

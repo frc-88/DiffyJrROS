@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonElement;
 
 public class XYZBoundingBox implements frc.robot.ros.messages.RosMessage {
+
     private frc.robot.ros.messages.tj2_interfaces.XYZKeypoint[] points = new frc.robot.ros.messages.tj2_interfaces.XYZKeypoint[] {
         new frc.robot.ros.messages.tj2_interfaces.XYZKeypoint(),
         new frc.robot.ros.messages.tj2_interfaces.XYZKeypoint(),

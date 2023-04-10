@@ -4,6 +4,7 @@ package frc.robot.ros.messages.geometry_msgs;
 import com.google.gson.JsonObject;
 
 public class Quaternion implements frc.robot.ros.messages.RosMessage {
+
     private double x = 0.0;
     private double y = 0.0;
     private double z = 0.0;

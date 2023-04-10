@@ -4,6 +4,7 @@ package frc.robot.ros.messages.tj2_interfaces;
 import com.google.gson.JsonObject;
 
 public class GameObject implements frc.robot.ros.messages.RosMessage {
+
     private String label = "";
     private int object_index = 0;
     private short class_index = 0;

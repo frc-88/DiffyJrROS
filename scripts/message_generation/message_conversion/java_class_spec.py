@@ -15,11 +15,15 @@ class JavaMessageField:
 class JavaClassSpec:
     def __init__(self, msg_type_name: str, size=-1) -> None:
         self.fields: Dict[str, Union[JavaMessageField, JavaClassSpec]] = {}
+        self.constants: Dict[str, PythonPrimitive] = {}
         self.msg_type = msg_type_name
         self.size = size
         # -1 = not a list
         # 0 = variable list
         # >0 = fixed size list
+
+    def add_constant(self, name: str, value: PythonPrimitive) -> None:
+        self.constants[name] = value
 
     def add_field(self, name: str, value: PythonPrimitive, msg_type: JavaPrimitive, size=-1) -> None:
         self.fields[name] = JavaMessageField(value, msg_type, size)

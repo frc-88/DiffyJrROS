@@ -1,7 +1,7 @@
 import re
 from importlib import import_module
 from typing import Dict
-from .constants import PRIMITIVE_MAPPING, RosPrimitive
+from .constants import ROS_TO_JAVA_PRIMITIVE_MAPPING, RosPrimitive
 from .java_class_spec import JavaClassSpec
 
 
@@ -39,6 +39,22 @@ def get_list_type(msg_type_name: str) -> str:
 MSG_CLASS_CACHE = {}
 
 
+def get_message_constants(msg_instance):
+    slots = set(msg_instance.__slots__)
+    props = set()
+    for name, value in vars(msg_instance.__class__).items():
+        if name.startswith('_'):
+            continue
+        if callable(value):
+            continue
+        props.add(name)
+    constants = props.difference(slots)
+    constants_map = {}
+    for name in constants:
+        constants_map[name] = getattr(msg_instance, name)
+    return constants_map
+
+
 def java_class_spec_generator(class_spec: JavaClassSpec, msg_instance):
     for name, data_type in zip(msg_instance.__slots__, msg_instance._slot_types):
         if is_msg_type_list(data_type):
@@ -58,7 +74,9 @@ def java_class_spec_generator(class_spec: JavaClassSpec, msg_instance):
             java_class_spec_generator(sub_class_spec, msg_class())
         else:
             class_spec.add_field(
-                name, value, PRIMITIVE_MAPPING[data_primitive], size)
+                name, value, ROS_TO_JAVA_PRIMITIVE_MAPPING[data_primitive], size)
+    for name, value in get_message_constants(msg_instance).items():
+        class_spec.add_constant(name, value)
 
 
 def filter_unique_objects(unique_objects: Dict[str, JavaClassSpec], class_spec: JavaClassSpec):

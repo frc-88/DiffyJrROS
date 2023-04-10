@@ -1,12 +1,13 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.std_msgs;
 
-import java.util.Arrays;
-import com.google.gson.JsonObject;
 import java.util.ArrayList;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonElement;
+import java.util.Arrays;
 
 public class Float32MultiArray implements frc.robot.ros.messages.RosMessage {
+
     private frc.robot.ros.messages.std_msgs.MultiArrayLayout layout = new frc.robot.ros.messages.std_msgs.MultiArrayLayout();
     private ArrayList<Float> data = new ArrayList<>();
 

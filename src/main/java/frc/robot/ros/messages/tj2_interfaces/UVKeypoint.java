@@ -4,6 +4,7 @@ package frc.robot.ros.messages.tj2_interfaces;
 import com.google.gson.JsonObject;
 
 public class UVKeypoint implements frc.robot.ros.messages.RosMessage {
+
     private int x = 0;
     private int y = 0;
 

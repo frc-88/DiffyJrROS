@@ -35,7 +35,7 @@ class RosPrimitive(Enum):
 
 PythonPrimitive = Union[bool, bytes, int, float, str]
 
-PRIMITIVE_MAPPING = {
+ROS_TO_JAVA_PRIMITIVE_MAPPING = {
     RosPrimitive.bool: JavaPrimitive.boolean,
     RosPrimitive.int8: JavaPrimitive.byte,
     RosPrimitive.uint8: JavaPrimitive.char,
@@ -51,7 +51,14 @@ PRIMITIVE_MAPPING = {
     RosPrimitive.time: JavaPrimitive.long,
     RosPrimitive.duration: JavaPrimitive.long,
 }
-
+PYTHON_TO_JAVA_PRIMITIVE_MAPPING = {
+    bool: JavaPrimitive.boolean,
+    int: JavaPrimitive.int,
+    float: JavaPrimitive.double,
+    str: JavaPrimitive.String,
+    # this may be a problem if there are constants defined with bytes
+    bytes: JavaPrimitive.String,
+}
 PRIMITIVE_DEFAULTS = {
     JavaPrimitive.boolean: "false",
     JavaPrimitive.byte: "0",
@@ -64,7 +71,7 @@ PRIMITIVE_DEFAULTS = {
     JavaPrimitive.String: "\"\"",
 }
 
-PRIMITIVE_TO_JAVA_OBJECTS = {
+PRIMITIVE_TO_JAVA_OBJECT = {
     JavaPrimitive.boolean: "Boolean",
     JavaPrimitive.byte: "Byte",
     JavaPrimitive.char: "Char",
@@ -75,6 +82,7 @@ PRIMITIVE_TO_JAVA_OBJECTS = {
     JavaPrimitive.double: "Double",
     JavaPrimitive.String: "String",
 }
+JAVA_OBJECT_TO_PRIMITIVE = {v: k for k, v in PRIMITIVE_TO_JAVA_OBJECT.items()}
 PRIMITIVE_JSON_FUNCTIONS = {
     JavaPrimitive.boolean: "{obj}.getAsBoolean()",
     JavaPrimitive.byte: "{obj}.getAsByte()",

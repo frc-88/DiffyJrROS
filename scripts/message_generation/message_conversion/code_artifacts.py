@@ -1,7 +1,7 @@
 import re
 from dataclasses import dataclass
 from typing import Iterable
-from .constants import PRIMITIVE_DEFAULTS, PRIMITIVE_JSON_FUNCTIONS, PRIMITIVE_TO_JAVA_OBJECTS
+from .constants import JAVA_OBJECT_TO_PRIMITIVE, PRIMITIVE_DEFAULTS, PRIMITIVE_JSON_FUNCTIONS, PRIMITIVE_TO_JAVA_OBJECT, PYTHON_TO_JAVA_PRIMITIVE_MAPPING, JavaPrimitive
 from .java_class_spec import JavaClassSpec, JavaMessageField
 
 
@@ -93,11 +93,20 @@ def generate_code_from_arraylist_type(imports: set, name: str, full_type: str, g
     )
 
 
-def generate_code_from_static_array_type(imports: set, name: str, full_type: str, size: int, get_value_string_format: str) -> GeneratedCodeArtifacts:
+def generate_code_from_static_array_type(imports: set, name: str, full_type: str, size: int) -> GeneratedCodeArtifacts:
     imports.add("import com.google.gson.JsonElement;")
     static_array_values = ""
+    if full_type in JAVA_OBJECT_TO_PRIMITIVE:
+        primitive = JavaPrimitive(JAVA_OBJECT_TO_PRIMITIVE[full_type].value)
+        value = PRIMITIVE_DEFAULTS[primitive]
+        new_value_code = str(value)
+        new_from_json_code = PRIMITIVE_JSON_FUNCTIONS[primitive]
+    else:
+        new_value_code = f"new {full_type}()"
+        new_from_json_code = f"new {full_type}({{obj}}.getAsJsonObject())"
+
     for index in range(size):
-        static_array_values += f"\n        new {full_type}(),"
+        static_array_values += f"\n        {new_value_code},"
     static_array_values = static_array_values[:-1] + "\n    "
 
     array_type = f"{full_type}[]"
@@ -111,10 +120,9 @@ def generate_code_from_static_array_type(imports: set, name: str, full_type: str
     getter = getter_template(array_type, name)
     setter = setter_template(array_type, name)
 
-    json_get_obj = get_value_string_format.format(obj=f"{name}_element")
     json_constructor = f"""        int {name}_element_index = 0;
         for (JsonElement {name}_element : jsonObj.getAsJsonArray("{name}")) {{
-            this.{name}[{name}_element_index] = new {full_type}({json_get_obj});
+            this.{name}[{name}_element_index] = {new_from_json_code.format(obj=f"{name}_element")};
         }}
 """
 
@@ -129,11 +137,11 @@ def generate_code_from_static_array_type(imports: set, name: str, full_type: str
 
 
 def generate_code_from_field_variable_list(imports: set, package_root: str, name: str, field: JavaMessageField) -> GeneratedCodeArtifacts:
-    return generate_code_from_arraylist_type(imports, name, PRIMITIVE_TO_JAVA_OBJECTS[field.msg_type], PRIMITIVE_JSON_FUNCTIONS[field.msg_type])
+    return generate_code_from_arraylist_type(imports, name, PRIMITIVE_TO_JAVA_OBJECT[field.msg_type], PRIMITIVE_JSON_FUNCTIONS[field.msg_type])
 
 
 def generate_code_from_field_static_list(imports: set, package_root: str, name: str, field: JavaMessageField) -> GeneratedCodeArtifacts:
-    return generate_code_from_static_array_type(imports, name, PRIMITIVE_TO_JAVA_OBJECTS[field.msg_type], field.size, PRIMITIVE_JSON_FUNCTIONS[field.msg_type])
+    return generate_code_from_static_array_type(imports, name, PRIMITIVE_TO_JAVA_OBJECT[field.msg_type], field.size)
 
 
 def generate_code_from_spec_sub_msg(imports: set, package_root: str, name: str, field: JavaClassSpec) -> GeneratedCodeArtifacts:
@@ -160,7 +168,7 @@ def generate_code_from_spec_variable_list(imports: set, package_root: str, name:
 
 
 def generate_code_from_spec_static_list(imports: set, package_root: str, name: str, field: JavaClassSpec) -> GeneratedCodeArtifacts:
-    return generate_code_from_static_array_type(imports, name, get_full_type(package_root, field), field.size, "{obj}.getAsJsonObject()")
+    return generate_code_from_static_array_type(imports, name, get_full_type(package_root, field), field.size)
 
 
 def get_package_root(path: str) -> str:
@@ -215,6 +223,12 @@ def generate_java_code_from_spec(path: str, spec: JavaClassSpec):
         getters += results.getter
         setters += results.setter
         json_constructor += results.json_constructor
+
+    constants_code = ""
+    for name, value in spec.constants.items():
+        java_type = PYTHON_TO_JAVA_PRIMITIVE_MAPPING[type(value)]
+        constants_code += f"    public static {java_type.value} {name} = {value};\n"
+
     args = ", ".join(arg_strings)
     arg_assignment = arg_assignment[:-1]
     json_constructor = json_constructor[:-1]
@@ -229,6 +243,7 @@ package {package_root}{package_name};
 {import_code}
 
 public class {class_name} implements {package_root}RosMessage {{
+{constants_code}
 {fields_code}
 
     public {class_name}() {{

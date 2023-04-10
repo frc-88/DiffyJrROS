@@ -18,10 +18,9 @@ fi
 
 GEN_MSG_ROOT=${BASE_DIR}/genmsg
 
+mkdir -p ${GEN_MSG_ROOT}
 ROS_MSG_DIR=${GEN_MSG_ROOT}/tj2_interfaces
 rm -r ${ROS_MSG_DIR} || true
-mkdir -p ${ROS_MSG_DIR}
-
 cp -r ${SRC_ROS_MSG_DIR} ${ROS_MSG_DIR}
 
 if [ ! -d ${GEN_MSG_ROOT}/std_msgs ] ; then

@@ -4,6 +4,7 @@ package frc.robot.ros.messages.std_msgs;
 import com.google.gson.JsonObject;
 
 public class Header implements frc.robot.ros.messages.RosMessage {
+
     private int seq = 0;
     private long stamp = 0;
     private String frame_id = "";

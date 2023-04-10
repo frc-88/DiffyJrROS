@@ -27,6 +27,7 @@ public class TypeMapping {
         MAPPING.put("std_msgs/Float32MultiArray", frc.robot.ros.messages.std_msgs.Float32MultiArray.class);
         MAPPING.put("std_msgs/MultiArrayLayout", frc.robot.ros.messages.std_msgs.MultiArrayLayout.class);
         MAPPING.put("std_msgs/MultiArrayDimension", frc.robot.ros.messages.std_msgs.MultiArrayDimension.class);
+        MAPPING.put("tj2_interfaces/TestStaticArray", frc.robot.ros.messages.tj2_interfaces.TestStaticArray.class);
 
     }
 
