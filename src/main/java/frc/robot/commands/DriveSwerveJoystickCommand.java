@@ -38,19 +38,7 @@ public class DriveSwerveJoystickCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    VelocityCommand command = m_joystick.getCommand();
-    double speed = m_drive.getSwerve().getChassisSpeed();
-    if (m_coprocessor.getLaserScanObstacles().isObstacleWithinBounds(speed)) {
-      System.out.println("Obstacle detected within bounds!");
-      if (m_coprocessor.getLaserScanObstacles().isDirectionAllowed(command.getHeading(), speed)) {
-        m_drive.drive(command);
-      } else {
-        System.out.println("Velocity command doesn't move robot away from obstacle! Stopping motors.");
-        m_drive.stop();
-      }
-    } else {
-      m_drive.drive(command);
-    }
+    m_drive.drive(m_joystick.getCommand());
   }
 
   // Called once the command ends or is interrupted.

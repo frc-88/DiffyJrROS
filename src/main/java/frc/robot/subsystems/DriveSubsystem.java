@@ -4,50 +4,52 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.util.coprocessor.VelocityCommand;
-import frc.robot.util.diffswerve.DiffSwerveChassis;
-import frc.robot.util.diffswerve.NavX;
+import frc.robot.diffswerve.DiffSwerveChassis;
+import frc.robot.diffswerve.NavX;
 
 public class DriveSubsystem extends SubsystemBase {
-  private DiffSwerveChassis swerve;
+    private DiffSwerveChassis swerve;
+    private NavX imu;
 
-  /** Creates a new DriveSubsystem. */
-  public DriveSubsystem() {
-    swerve = new DiffSwerveChassis();
-  }
+    /** Creates a new DriveSubsystem. */
+    public DriveSubsystem() {
+        imu = new NavX();
+        swerve = new DiffSwerveChassis(imu);
+    }
 
-  @Override
-  public void periodic() {
-    swerve.periodic();
-  }
+    @Override
+    public void periodic() {
+        swerve.periodic();
+    }
 
-  public DiffSwerveChassis getSwerve() {
-    return swerve;
-  }
+    public DiffSwerveChassis getSwerve() {
+        return swerve;
+    }
 
-  public NavX getImu() {
-    return swerve.getImu();
-  }
+    public NavX getImu() {
+        return imu;
+    }
 
-  public void setCoast(boolean coast) {
-    swerve.setCoast(coast);
-  }
+    public void setCoast(boolean coast) {
+        swerve.setCoast(coast);
+    }
 
-  public void setEnabled(boolean enabled) {
-    swerve.setEnabled(enabled);
-  }
+    public void setEnabled(boolean enabled) {
+        swerve.setEnabled(enabled);
+    }
 
-  public void drive(VelocityCommand command) {
-    swerve.drive(command);
-  }
+    public void drive(ChassisSpeeds command) {
+        swerve.drive(command);
+    }
 
-  public void stop() {
-    swerve.stop();
-  }
+    public void stop() {
+        swerve.stop();
+    }
 
-  @Override
-  public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
-  }
+    @Override
+    public void simulationPeriodic() {
+        // This method will be called once per scheduler run during simulation
+    }
 }

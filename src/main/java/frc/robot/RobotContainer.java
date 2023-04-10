@@ -7,14 +7,13 @@ package frc.robot;
 import frc.robot.commands.CoastDriveMotors;
 import frc.robot.commands.DriveSwerveJoystickCommand;
 import frc.robot.commands.PassthroughRosCommand;
-import frc.robot.commands.SetGlobalPoseToTagGlobalPose;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.SwerveJoystick;
 import frc.robot.subsystems.SwerveJoystick.SwerveControllerType;
-import frc.robot.util.coprocessor.networktables.DiffyJrTable;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -73,7 +72,7 @@ public class RobotContainer {
         Constants.COPROCESSOR_SLOW_PERIODIC_UPDATE_OFFSET);
     // robot.addPeriodic(m_ros_interface::updateModules, 1.0 / 15.0, 0.03);
     robot.addPeriodic(m_drive.getSwerve()::controllerPeriodic,
-        frc.robot.util.diffswerve.Constants.DifferentialSwerveModule.kDt, 0.0025);
+        frc.robot.diffswerve.Constants.DifferentialSwerveModule.kDt, 0.0025);
   }
 
   public void setEnableDrive(boolean enabled) {
@@ -92,6 +91,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new SetGlobalPoseToTagGlobalPose(m_ros_interface);
+    return new WaitCommand(15.0);
   }
 }

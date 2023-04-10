@@ -4,13 +4,13 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.util.diffswerve.Constants;
-import frc.robot.util.diffswerve.Helpers;
-import frc.robot.util.controllers.NetworkTablesJoystick;
-import frc.robot.util.controllers.XboxController;
-import frc.robot.util.coprocessor.VelocityCommand;
+import frc.robot.diffswerve.Constants;
+import frc.robot.controllers.Helpers;
+import frc.robot.controllers.NetworkTablesJoystick;
+import frc.robot.controllers.XboxController;
 
 public class SwerveJoystick extends SubsystemBase {
   public enum SwerveControllerType {
@@ -24,7 +24,7 @@ public class SwerveJoystick extends SubsystemBase {
   private NetworkTablesJoystick nt_gamepad;
   private XboxController xbox_gamepad;
 
-  private VelocityCommand command = new VelocityCommand();
+  private ChassisSpeeds command = new ChassisSpeeds();
 
   /** Creates a new BasicJoystick. */
   public SwerveJoystick(SwerveControllerType type) {
@@ -118,12 +118,10 @@ public class SwerveJoystick extends SubsystemBase {
         vt = 0.0;
       }
     }
-    command.vx = vx;
-    command.vy = vy;
-    command.vt = vt;
+    command = new ChassisSpeeds(vx, vy, vt);
   }
 
-  public VelocityCommand getCommand() {
+  public ChassisSpeeds getCommand() {
     return command;
   }
 }

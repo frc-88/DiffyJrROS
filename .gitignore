@@ -1,3 +1,6 @@
+__pycache__/
+scripts/message_generation/genmsg
+
 .idea/
 *.slx.autosave
 *.slxc
