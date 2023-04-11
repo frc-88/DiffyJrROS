@@ -8,10 +8,7 @@ from message_conversion.generate_spec import (
     filter_unique_objects,
     java_class_spec_generator,
 )
-from message_conversion.code_artifacts import (
-    generate_java_code_from_spec,
-    generate_message_interface_java_code,
-)
+from message_conversion.code_artifacts import generate_java_code_from_spec
 
 
 def write_java_file(root_path: str, relative_path: str, code: str) -> None:
@@ -30,9 +27,9 @@ def generate_from_messages(root_path, messages):
         class_spec = JavaClassSpec(msg._type)
         java_class_spec_generator(class_spec, msg)
         filter_unique_objects(unique_objects, class_spec)
-        for spec in unique_objects.values():
-            relative_path, code = generate_java_code_from_spec(root_path, spec)
-            write_java_file(root_path, relative_path, code)
+    for spec in unique_objects.values():
+        relative_path, code = generate_java_code_from_spec(root_path, spec)
+        write_java_file(root_path, relative_path, code)
     return unique_objects
 
 
@@ -56,11 +53,7 @@ def main():
     root_path = "frc/robot/ros/messages"
     sources_file_path = sys.argv[1]
     messages = import_sources(sources_file_path)
-    unique_objects = generate_from_messages(root_path, messages)
-
-    write_java_file(
-        root_path, "RosMessage.java", generate_message_interface_java_code(root_path)
-    )
+    generate_from_messages(root_path, messages)
 
 
 if __name__ == "__main__":

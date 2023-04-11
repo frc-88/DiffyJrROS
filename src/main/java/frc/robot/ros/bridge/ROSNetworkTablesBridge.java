@@ -23,6 +23,7 @@ public class ROSNetworkTablesBridge {
     }
 
     public StringPublisher advertise(String topicName) {
+        System.out.println("Publishing to " + topicName);
         StringPublisher pub = ntToRosSubtable.getStringTopic(topicName)
                 .publish(PubSubOption.periodic(this.updateInterval));
         pub.set("");
@@ -30,7 +31,12 @@ public class ROSNetworkTablesBridge {
     }
 
     public StringSubscriber subscribe(String topicName) {
-        return rosToNtSubtable.getStringTopic(topicName).subscribe("", PubSubOption.sendAll(true),
+        System.out.println("Subscribing to " + topicName);
+        // Put empty entry so ROS knows to populate this topic
+        StringPublisher pub = this.advertise(topicName);
+        pub.close();
+        StringSubscriber sub = rosToNtSubtable.getStringTopic(topicName).subscribe("", PubSubOption.sendAll(true),
                 PubSubOption.periodic(this.updateInterval));
+        return sub;
     }
 }

@@ -9,7 +9,12 @@ from .constants import (
     PYTHON_TO_JAVA_PRIMITIVE_MAPPING,
     JavaPrimitive,
 )
-from .java_class_spec import JavaClassSpec, JavaMessageField
+from .java_class_spec import (
+    JavaClassSpec,
+    JavaDurationSpec,
+    JavaMessageField,
+    JavaTimeSpec,
+)
 
 
 def camel_case(s):
@@ -237,8 +242,7 @@ def generate_java_code_from_spec(path: str, spec: JavaClassSpec):
                 results = generate_code_from_field_static_list(
                     imports, package_root, name, field
                 )
-
-        elif type(field) == JavaClassSpec:
+        elif isinstance(field, JavaClassSpec):
             if field.size == -1:
                 results = generate_code_from_spec_sub_msg(
                     imports, package_root, name, field
@@ -311,25 +315,3 @@ public class {class_name} extends {package_root}RosMessage {{
     path = f"{package_name}/{class_name}.java"
 
     return path, code
-
-
-def generate_message_interface_java_code(path: str) -> str:
-    package_root = get_package_root(path)
-    if package_root.endswith("."):
-        package_root = package_root[:-1]
-    code = f"""// Auto generated!! Do not modify.
-package {package_root};
-
-import com.google.gson.JsonObject;
-import com.google.gson.Gson;
-
-
-public abstract class RosMessage {{
-    protected static final Gson ginst = new Gson();
-
-    public RosMessage() {{  }}
-    public RosMessage(JsonObject jsonObj) {{  }}
-    public abstract JsonObject toJSON();
-}}
-"""
-    return code

@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass
 from typing import Dict, Union
 
@@ -25,13 +24,18 @@ class JavaClassSpec:
     def add_constant(self, name: str, value: PythonPrimitive) -> None:
         self.constants[name] = value
 
-    def add_field(self, name: str, value: PythonPrimitive, msg_type: JavaPrimitive, size=-1) -> None:
+    def add_field(
+        self, name: str, value: PythonPrimitive, msg_type: JavaPrimitive, size=-1
+    ) -> None:
         self.fields[name] = JavaMessageField(value, msg_type, size)
 
     def add_sub_msg(self, name: str, msg_type_name: str, size=-1) -> "JavaClassSpec":
         spec = JavaClassSpec(msg_type_name, size)
-        self.fields[name] = spec
+        self.add_sub_spec(name, spec)
         return spec
+
+    def add_sub_spec(self, name: str, spec: "JavaClassSpec"):
+        self.fields[name] = spec
 
     def _to_str(self, indent=0) -> str:
         indent += 1
@@ -40,7 +44,7 @@ class JavaClassSpec:
         for name, value in self.fields.items():
             if type(value) == JavaMessageField:
                 string += f"{field_indent_str}{name}: {value}\n"
-            elif type(value) == JavaClassSpec:
+            elif isinstance(value, JavaClassSpec):
                 string += f"{field_indent_str}{name} {value._to_str(indent)}"
             else:
                 raise ValueError(f"Invalid object found in fields: {value}")
@@ -54,7 +58,10 @@ class JavaClassSpec:
                 other_field = __value.fields[name]
                 if type(field) != type(other_field):
                     return False
-                if type(field) == JavaMessageField and (field.value != other_field.value or field.msg_type != other_field.msg_type):  # type: ignore
+                if type(field) == JavaMessageField and (
+                    field.value != other_field.value
+                    or field.msg_type != other_field.msg_type
+                ):  # type: ignore
                     return False
                 elif type(field) == JavaClassSpec and field != other_field:
                     return False
@@ -64,3 +71,19 @@ class JavaClassSpec:
 
     def __repr__(self) -> str:
         return self._to_str()
+
+
+class JavaTimeSpec(JavaClassSpec):
+    def __init__(self) -> None:
+        super().__init__("Time", -1)
+
+        self.add_field("sec", 0, JavaPrimitive.int, -1)
+        self.add_field("nsec", 0, JavaPrimitive.int, -1)
+
+
+class JavaDurationSpec(JavaClassSpec):
+    def __init__(self) -> None:
+        super().__init__("Duration", -1)
+
+        self.add_field("sec", 0, JavaPrimitive.int, -1)
+        self.add_field("nsec", 0, JavaPrimitive.int, -1)

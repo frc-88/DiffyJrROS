@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 public class Header extends frc.robot.ros.messages.RosMessage {
 
     private int seq = 0;
-    private long stamp = 0;
+    private frc.robot.ros.messages.Time stamp = new frc.robot.ros.messages.Time();
     private String frame_id = "";
 
     public final String _type = "std_msgs/Header";
@@ -15,7 +15,7 @@ public class Header extends frc.robot.ros.messages.RosMessage {
 
     }
 
-    public Header(int seq, long stamp, String frame_id) {
+    public Header(int seq, frc.robot.ros.messages.Time stamp, String frame_id) {
         this.seq = seq;
         this.stamp = stamp;
         this.frame_id = frame_id;
@@ -23,14 +23,14 @@ public class Header extends frc.robot.ros.messages.RosMessage {
 
     public Header(JsonObject jsonObj) {
         this.seq = jsonObj.get("seq").getAsInt();
-        this.stamp = jsonObj.get("stamp").getAsLong();
+        this.stamp = new frc.robot.ros.messages.Time(jsonObj.get("stamp").getAsJsonObject());
         this.frame_id = jsonObj.get("frame_id").getAsString();
     }
 
     public int getSeq() {
         return this.seq;
     }
-    public long getStamp() {
+    public frc.robot.ros.messages.Time getStamp() {
         return this.stamp;
     }
     public String getFrameId() {
@@ -40,7 +40,7 @@ public class Header extends frc.robot.ros.messages.RosMessage {
     public void setSeq(int seq) {
         this.seq = seq;
     }
-    public void setStamp(long stamp) {
+    public void setStamp(frc.robot.ros.messages.Time stamp) {
         this.stamp = stamp;
     }
     public void setFrameId(String frame_id) {

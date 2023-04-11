@@ -7,6 +7,7 @@ import frc.robot.Constants;
 import frc.robot.ros.bridge.BridgePublisher;
 import frc.robot.ros.bridge.BridgeSubscriber;
 import frc.robot.ros.bridge.ROSNetworkTablesBridge;
+import frc.robot.ros.messages.Time;
 import frc.robot.ros.messages.geometry_msgs.Point;
 import frc.robot.ros.messages.geometry_msgs.Pose;
 import frc.robot.ros.messages.geometry_msgs.PoseWithCovariance;
@@ -27,7 +28,9 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
             Twist.class);
     private final BridgePublisher<Odometry> m_odomPub = new BridgePublisher<>(m_ros_interface, "/tj2/odom");
 
-    private final Odometry odomMsg = new Odometry(new Header(0, 0, "odom"), "base_link",
+    private final String frame_id = "odom";
+    private final String child_frame_id = "base_link";
+    private final Odometry odomMsg = new Odometry(new Header(0, new Time(), frame_id), child_frame_id,
             new PoseWithCovariance(new Pose(new Point(0, 0, 0), new Quaternion(0, 0, 0, 1)), new Double[] {
                     5e-2, 0.0, 0.0, 0.0, 0.0, 0.0,
                     0.0, 5e-2, 0.0, 0.0, 0.0, 0.0,
@@ -57,6 +60,13 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
     private void sendOdom() {
         Pose2d pose = m_drive.getSwerve().getOdometryPose();
         ChassisSpeeds velocity = m_drive.getSwerve().getChassisSpeeds();
+
+        odomMsg.setHeader(m_odomPub.getHeader(frame_id));
+        odomMsg.getPose().getPose().setPosition(new Point(pose.getX(), pose.getY(), 0.0));
+        // odomMsg.getPose().getPose().setOrientation(new Quaternion());
+        odomMsg.getTwist().getTwist()
+                .setLinear(new Vector3(velocity.vxMetersPerSecond, velocity.vyMetersPerSecond, 0.0));
+        odomMsg.getTwist().getTwist().setAngular(new Vector3(0.0, 0.0, velocity.omegaRadiansPerSecond));
 
         m_odomPub.send(odomMsg);
     }

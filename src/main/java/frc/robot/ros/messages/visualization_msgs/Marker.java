@@ -1,28 +1,28 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.visualization_msgs;
 
-import java.util.Arrays;
 import com.google.gson.JsonObject;
+import java.util.Arrays;
 import java.util.ArrayList;
 import com.google.gson.JsonElement;
 
 public class Marker extends frc.robot.ros.messages.RosMessage {
-    public static int CUBE = 1;
-    public static int MESH_RESOURCE = 10;
-    public static int SPHERE = 2;
-    public static int TRIANGLE_LIST = 11;
-    public static int CUBE_LIST = 6;
-    public static int ARROW = 0;
-    public static int SPHERE_LIST = 7;
     public static int POINTS = 8;
-    public static int DELETE = 2;
+    public static int ARROW = 0;
+    public static int MODIFY = 0;
+    public static int SPHERE_LIST = 7;
     public static int ADD = 0;
+    public static int MESH_RESOURCE = 10;
+    public static int CUBE_LIST = 6;
+    public static int CUBE = 1;
     public static int LINE_LIST = 5;
     public static int CYLINDER = 3;
     public static int TEXT_VIEW_FACING = 9;
-    public static int DELETEALL = 3;
     public static int LINE_STRIP = 4;
-    public static int MODIFY = 0;
+    public static int TRIANGLE_LIST = 11;
+    public static int DELETE = 2;
+    public static int SPHERE = 2;
+    public static int DELETEALL = 3;
 
     private frc.robot.ros.messages.std_msgs.Header header = new frc.robot.ros.messages.std_msgs.Header();
     private String ns = "";
@@ -32,7 +32,7 @@ public class Marker extends frc.robot.ros.messages.RosMessage {
     private frc.robot.ros.messages.geometry_msgs.Pose pose = new frc.robot.ros.messages.geometry_msgs.Pose();
     private frc.robot.ros.messages.geometry_msgs.Vector3 scale = new frc.robot.ros.messages.geometry_msgs.Vector3();
     private frc.robot.ros.messages.std_msgs.ColorRGBA color = new frc.robot.ros.messages.std_msgs.ColorRGBA();
-    private long lifetime = 0;
+    private frc.robot.ros.messages.Duration lifetime = new frc.robot.ros.messages.Duration();
     private boolean frame_locked = false;
     private ArrayList<frc.robot.ros.messages.geometry_msgs.Point> points = new ArrayList<>();
     private ArrayList<frc.robot.ros.messages.std_msgs.ColorRGBA> colors = new ArrayList<>();
@@ -46,7 +46,7 @@ public class Marker extends frc.robot.ros.messages.RosMessage {
 
     }
 
-    public Marker(frc.robot.ros.messages.std_msgs.Header header, String ns, int id, int type, int action, frc.robot.ros.messages.geometry_msgs.Pose pose, frc.robot.ros.messages.geometry_msgs.Vector3 scale, frc.robot.ros.messages.std_msgs.ColorRGBA color, long lifetime, boolean frame_locked, frc.robot.ros.messages.geometry_msgs.Point[] points, frc.robot.ros.messages.std_msgs.ColorRGBA[] colors, String text, String mesh_resource, boolean mesh_use_embedded_materials) {
+    public Marker(frc.robot.ros.messages.std_msgs.Header header, String ns, int id, int type, int action, frc.robot.ros.messages.geometry_msgs.Pose pose, frc.robot.ros.messages.geometry_msgs.Vector3 scale, frc.robot.ros.messages.std_msgs.ColorRGBA color, frc.robot.ros.messages.Duration lifetime, boolean frame_locked, frc.robot.ros.messages.geometry_msgs.Point[] points, frc.robot.ros.messages.std_msgs.ColorRGBA[] colors, String text, String mesh_resource, boolean mesh_use_embedded_materials) {
         this.header = header;
         this.ns = ns;
         this.id = id;
@@ -73,7 +73,7 @@ public class Marker extends frc.robot.ros.messages.RosMessage {
         this.pose = new frc.robot.ros.messages.geometry_msgs.Pose(jsonObj.get("pose").getAsJsonObject());
         this.scale = new frc.robot.ros.messages.geometry_msgs.Vector3(jsonObj.get("scale").getAsJsonObject());
         this.color = new frc.robot.ros.messages.std_msgs.ColorRGBA(jsonObj.get("color").getAsJsonObject());
-        this.lifetime = jsonObj.get("lifetime").getAsLong();
+        this.lifetime = new frc.robot.ros.messages.Duration(jsonObj.get("lifetime").getAsJsonObject());
         this.frame_locked = jsonObj.get("frame_locked").getAsBoolean();
         for (JsonElement points_element : jsonObj.getAsJsonArray("points")) {
             this.points.add(new frc.robot.ros.messages.geometry_msgs.Point(points_element.getAsJsonObject()));
@@ -110,7 +110,7 @@ public class Marker extends frc.robot.ros.messages.RosMessage {
     public frc.robot.ros.messages.std_msgs.ColorRGBA getColor() {
         return this.color;
     }
-    public long getLifetime() {
+    public frc.robot.ros.messages.Duration getLifetime() {
         return this.lifetime;
     }
     public boolean getFrameLocked() {
@@ -156,7 +156,7 @@ public class Marker extends frc.robot.ros.messages.RosMessage {
     public void setColor(frc.robot.ros.messages.std_msgs.ColorRGBA color) {
         this.color = color;
     }
-    public void setLifetime(long lifetime) {
+    public void setLifetime(frc.robot.ros.messages.Duration lifetime) {
         this.lifetime = lifetime;
     }
     public void setFrameLocked(boolean frame_locked) {

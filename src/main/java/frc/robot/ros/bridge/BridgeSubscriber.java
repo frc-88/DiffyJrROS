@@ -14,7 +14,7 @@ public class BridgeSubscriber<T extends RosMessage> {
     private ROSNetworkTablesBridge bridge;
     private String topicName;
     private Class<T> reference;
-    private StringSubscriber sub;
+    private StringSubscriber sub = null;
     private long prevAtomic = 0;
     private T cached = null;
 
@@ -22,10 +22,12 @@ public class BridgeSubscriber<T extends RosMessage> {
         this.bridge = bridge;
         this.topicName = topicName;
         this.reference = reference;
-        this.sub = this.bridge.subscribe(this.topicName);
     }
 
     public boolean didUpdate() {
+        if (sub == null) {
+            this.sub = this.bridge.subscribe(this.topicName);
+        }
         TimestampedString stampedString = sub.getAtomic();
         return stampedString.timestamp != prevAtomic || cached == null;
     }

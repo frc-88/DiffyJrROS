@@ -2,13 +2,13 @@ import re
 from importlib import import_module
 from typing import Dict
 from .constants import ROS_TO_JAVA_PRIMITIVE_MAPPING, RosPrimitive
-from .java_class_spec import JavaClassSpec
+from .java_class_spec import JavaClassSpec, JavaTimeSpec, JavaDurationSpec
 
 
 def get_msg_class(cache, msg_type_name: str):
     if msg_type_name not in cache:
-        connection_header = msg_type_name.split('/')
-        ros_pkg = connection_header[0] + '.msg'
+        connection_header = msg_type_name.split("/")
+        ros_pkg = connection_header[0] + ".msg"
         msg_type = connection_header[1]
         msg_class = getattr(import_module(ros_pkg), msg_type)
         cache[msg_type_name] = msg_class
@@ -43,7 +43,7 @@ def get_message_constants(msg_instance):
     slots = set(msg_instance.__slots__)
     props = set()
     for name, value in vars(msg_instance.__class__).items():
-        if name.startswith('_'):
+        if name.startswith("_"):
             continue
         if callable(value):
             continue
@@ -72,17 +72,26 @@ def java_class_spec_generator(class_spec: JavaClassSpec, msg_instance):
             msg_class = get_msg_class(MSG_CLASS_CACHE, data_type)
             sub_class_spec = class_spec.add_sub_msg(name, data_type, size)
             java_class_spec_generator(sub_class_spec, msg_class())
+        elif data_primitive == RosPrimitive.time:
+            class_spec.add_sub_spec(name, JavaTimeSpec())
+        elif data_primitive == RosPrimitive.duration:
+            class_spec.add_sub_spec(name, JavaDurationSpec())
         else:
             class_spec.add_field(
-                name, value, ROS_TO_JAVA_PRIMITIVE_MAPPING[data_primitive], size)
+                name, value, ROS_TO_JAVA_PRIMITIVE_MAPPING[data_primitive], size
+            )
     for name, value in get_message_constants(msg_instance).items():
         class_spec.add_constant(name, value)
 
 
-def filter_unique_objects(unique_objects: Dict[str, JavaClassSpec], class_spec: JavaClassSpec):
+def filter_unique_objects(
+    unique_objects: Dict[str, JavaClassSpec], class_spec: JavaClassSpec
+):
     if class_spec.msg_type in unique_objects:
-        assert unique_objects[class_spec.msg_type] == class_spec, "Found class specs that don't match: %s != %s" % (
-            unique_objects[class_spec.msg_type], class_spec)
+        assert unique_objects[class_spec.msg_type] == class_spec, (
+            "Found class specs that don't match: %s != %s"
+            % (unique_objects[class_spec.msg_type], class_spec)
+        )
     else:
         unique_objects[class_spec.msg_type] = class_spec
     for field in class_spec.fields.values():

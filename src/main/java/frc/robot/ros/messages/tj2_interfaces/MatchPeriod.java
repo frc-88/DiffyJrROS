@@ -4,8 +4,8 @@ package frc.robot.ros.messages.tj2_interfaces;
 import com.google.gson.JsonObject;
 
 public class MatchPeriod extends frc.robot.ros.messages.RosMessage {
-    public static int TELEOP = 2;
     public static int AUTONOMOUS = 1;
+    public static int TELEOP = 2;
     public static int DISABLED = 0;
 
     private int type = 0;
