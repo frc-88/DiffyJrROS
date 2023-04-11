@@ -7,6 +7,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.ros.bridge.BridgeSubscriber;
+import frc.robot.ros.bridge.ROSConversions;
 import frc.robot.ros.messages.geometry_msgs.Twist;
 import frc.robot.subsystems.DriveSubsystem;
 
@@ -32,11 +33,7 @@ public class PassthroughRosCommand extends CommandBase {
     public void execute() {
         if (m_twistSub.didUpdate()) {
             Twist msg = m_twistSub.receive();
-            m_drive.drive(
-                    new ChassisSpeeds(
-                            msg.getLinear().getX(),
-                            msg.getLinear().getY(),
-                            msg.getAngular().getZ()));
+            m_drive.drive(ROSConversions.rosToWpiTwist(msg));
         } else {
             m_drive.stop();
         }
