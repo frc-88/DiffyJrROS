@@ -6,8 +6,6 @@ package frc.robot.commands;
 
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.SwerveJoystick;
-import frc.robot.util.coprocessor.CoprocessorBase;
-import frc.robot.util.coprocessor.VelocityCommand;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
 /** An example command that uses an example subsystem. */
@@ -15,16 +13,14 @@ public class DriveSwerveJoystickCommand extends CommandBase {
   @SuppressWarnings({ "PMD.UnusedPrivateField", "PMD.SingularField" })
   private final DriveSubsystem m_drive;
   private final SwerveJoystick m_joystick;
-  private final CoprocessorBase m_coprocessor;
 
   /**
    * Creates a new DriveSwerveJoystickCommand.
    *
    * @param drive The subsystem used by this command.
    */
-  public DriveSwerveJoystickCommand(DriveSubsystem drive, CoprocessorBase coprocessor, SwerveJoystick joystick) {
+  public DriveSwerveJoystickCommand(DriveSubsystem drive, SwerveJoystick joystick) {
     m_drive = drive;
-    m_coprocessor = coprocessor;
     m_joystick = joystick;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(drive);

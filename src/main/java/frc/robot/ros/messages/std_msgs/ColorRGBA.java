@@ -2,16 +2,15 @@
 package frc.robot.ros.messages.std_msgs;
 
 import com.google.gson.JsonObject;
-import com.google.gson.Gson;
 
-public class ColorRGBA implements frc.robot.ros.messages.RosMessage {
+public class ColorRGBA extends frc.robot.ros.messages.RosMessage {
 
     private float r = 0.0f;
     private float g = 0.0f;
     private float b = 0.0f;
     private float a = 0.0f;
 
-    Gson ginst = new Gson();
+    public final String _type = "std_msgs/ColorRGBA";
 
     public ColorRGBA() {
 

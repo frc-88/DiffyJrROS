@@ -2,15 +2,14 @@
 package frc.robot.ros.messages.std_msgs;
 
 import com.google.gson.JsonObject;
-import com.google.gson.Gson;
 
-public class Header implements frc.robot.ros.messages.RosMessage {
+public class Header extends frc.robot.ros.messages.RosMessage {
 
     private int seq = 0;
     private long stamp = 0;
     private String frame_id = "";
 
-    Gson ginst = new Gson();
+    public final String _type = "std_msgs/Header";
 
     public Header() {
 

@@ -1,17 +1,16 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.visualization_msgs;
 
-import com.google.gson.JsonObject;
-import com.google.gson.Gson;
 import java.util.Arrays;
-import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.util.ArrayList;
+import com.google.gson.JsonElement;
 
-public class MarkerArray implements frc.robot.ros.messages.RosMessage {
+public class MarkerArray extends frc.robot.ros.messages.RosMessage {
 
     private ArrayList<frc.robot.ros.messages.visualization_msgs.Marker> markers = new ArrayList<>();
 
-    Gson ginst = new Gson();
+    public final String _type = "visualization_msgs/MarkerArray";
 
     public MarkerArray() {
 

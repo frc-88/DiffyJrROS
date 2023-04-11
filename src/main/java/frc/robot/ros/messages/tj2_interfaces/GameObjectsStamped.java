@@ -1,20 +1,19 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.tj2_interfaces;
 
-import com.google.gson.JsonObject;
-import com.google.gson.Gson;
 import java.util.Arrays;
-import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.util.ArrayList;
+import com.google.gson.JsonElement;
 
-public class GameObjectsStamped implements frc.robot.ros.messages.RosMessage {
+public class GameObjectsStamped extends frc.robot.ros.messages.RosMessage {
 
     private frc.robot.ros.messages.std_msgs.Header header = new frc.robot.ros.messages.std_msgs.Header();
     private ArrayList<frc.robot.ros.messages.tj2_interfaces.GameObject> objects = new ArrayList<>();
     private int width = 0;
     private int height = 0;
 
-    Gson ginst = new Gson();
+    public final String _type = "tj2_interfaces/GameObjectsStamped";
 
     public GameObjectsStamped() {
 

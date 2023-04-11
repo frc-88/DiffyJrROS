@@ -2,14 +2,13 @@
 package frc.robot.ros.messages.geometry_msgs;
 
 import com.google.gson.JsonObject;
-import com.google.gson.Gson;
 
-public class Pose implements frc.robot.ros.messages.RosMessage {
+public class Pose extends frc.robot.ros.messages.RosMessage {
 
     private frc.robot.ros.messages.geometry_msgs.Point position = new frc.robot.ros.messages.geometry_msgs.Point();
     private frc.robot.ros.messages.geometry_msgs.Quaternion orientation = new frc.robot.ros.messages.geometry_msgs.Quaternion();
 
-    Gson ginst = new Gson();
+    public final String _type = "geometry_msgs/Pose";
 
     public Pose() {
 

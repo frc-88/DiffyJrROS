@@ -1,13 +1,20 @@
 import re
 from dataclasses import dataclass
 from typing import Iterable
-from .constants import JAVA_OBJECT_TO_PRIMITIVE, PRIMITIVE_DEFAULTS, PRIMITIVE_JSON_FUNCTIONS, PRIMITIVE_TO_JAVA_OBJECT, PYTHON_TO_JAVA_PRIMITIVE_MAPPING, JavaPrimitive
+from .constants import (
+    JAVA_OBJECT_TO_PRIMITIVE,
+    PRIMITIVE_DEFAULTS,
+    PRIMITIVE_JSON_FUNCTIONS,
+    PRIMITIVE_TO_JAVA_OBJECT,
+    PYTHON_TO_JAVA_PRIMITIVE_MAPPING,
+    JavaPrimitive,
+)
 from .java_class_spec import JavaClassSpec, JavaMessageField
 
 
 def camel_case(s):
     s = re.sub(r"(_|-)+", " ", s).title().replace(" ", "")
-    return ''.join([s[0].lower(), s[1:]])
+    return "".join([s[0].lower(), s[1:]])
 
 
 @dataclass
@@ -40,7 +47,9 @@ def setter_template(full_type: str, name: str) -> str:
 """
 
 
-def generate_code_from_field(imports: set, package_root: str, name: str, field: JavaMessageField) -> GeneratedCodeArtifacts:
+def generate_code_from_field(
+    imports: set, package_root: str, name: str, field: JavaMessageField
+) -> GeneratedCodeArtifacts:
     field_java_type = field.msg_type.value
     fields_code = f"    private {field_java_type} {name} = {PRIMITIVE_DEFAULTS[field.msg_type]};\n"
     arg = f"{field_java_type} {name}"
@@ -49,7 +58,8 @@ def generate_code_from_field(imports: set, package_root: str, name: str, field: 
     setter = setter_template(field_java_type, name)
 
     json_parse = PRIMITIVE_JSON_FUNCTIONS[field.msg_type].format(
-        obj=f"jsonObj.get(\"{name}\")")
+        obj=f'jsonObj.get("{name}")'
+    )
     json_constructor = f"        this.{name} = {json_parse};\n"
 
     return GeneratedCodeArtifacts(
@@ -58,11 +68,13 @@ def generate_code_from_field(imports: set, package_root: str, name: str, field: 
         arg_assignment=arg_assignment,
         getter=getter,
         setter=setter,
-        json_constructor=json_constructor
+        json_constructor=json_constructor,
     )
 
 
-def generate_code_from_arraylist_type(imports: set, name: str, full_type: str) -> GeneratedCodeArtifacts:
+def generate_code_from_arraylist_type(
+    imports: set, name: str, full_type: str
+) -> GeneratedCodeArtifacts:
     imports.add("import java.util.ArrayList;")
     imports.add("import java.util.Arrays;")
     imports.add("import com.google.gson.JsonElement;")
@@ -95,7 +107,9 @@ def generate_code_from_arraylist_type(imports: set, name: str, full_type: str) -
     )
 
 
-def generate_code_from_static_array_type(imports: set, name: str, full_type: str, size: int) -> GeneratedCodeArtifacts:
+def generate_code_from_static_array_type(
+    imports: set, name: str, full_type: str, size: int
+) -> GeneratedCodeArtifacts:
     imports.add("import com.google.gson.JsonElement;")
     static_array_values = ""
     if full_type in JAVA_OBJECT_TO_PRIMITIVE:
@@ -138,22 +152,32 @@ def generate_code_from_static_array_type(imports: set, name: str, full_type: str
     )
 
 
-def generate_code_from_field_variable_list(imports: set, package_root: str, name: str, field: JavaMessageField) -> GeneratedCodeArtifacts:
-    return generate_code_from_arraylist_type(imports, name, PRIMITIVE_TO_JAVA_OBJECT[field.msg_type])
+def generate_code_from_field_variable_list(
+    imports: set, package_root: str, name: str, field: JavaMessageField
+) -> GeneratedCodeArtifacts:
+    return generate_code_from_arraylist_type(
+        imports, name, PRIMITIVE_TO_JAVA_OBJECT[field.msg_type]
+    )
 
 
-def generate_code_from_field_static_list(imports: set, package_root: str, name: str, field: JavaMessageField) -> GeneratedCodeArtifacts:
-    return generate_code_from_static_array_type(imports, name, PRIMITIVE_TO_JAVA_OBJECT[field.msg_type], field.size)
+def generate_code_from_field_static_list(
+    imports: set, package_root: str, name: str, field: JavaMessageField
+) -> GeneratedCodeArtifacts:
+    return generate_code_from_static_array_type(
+        imports, name, PRIMITIVE_TO_JAVA_OBJECT[field.msg_type], field.size
+    )
 
 
-def generate_code_from_spec_sub_msg(imports: set, package_root: str, name: str, field: JavaClassSpec) -> GeneratedCodeArtifacts:
+def generate_code_from_spec_sub_msg(
+    imports: set, package_root: str, name: str, field: JavaClassSpec
+) -> GeneratedCodeArtifacts:
     full_type = get_full_type(package_root, field)
     fields_code = f"    private {full_type} {name} = new {full_type}();\n"
     arg = f"{full_type} {name}"
     arg_assignment = f"        this.{name} = {name};\n"
     getter = getter_template(full_type, name)
     setter = setter_template(full_type, name)
-    json_constructor = f"        this.{name} = new {full_type}(jsonObj.get(\"{name}\").getAsJsonObject());\n"
+    json_constructor = f'        this.{name} = new {full_type}(jsonObj.get("{name}").getAsJsonObject());\n'
 
     return GeneratedCodeArtifacts(
         fields_code=fields_code,
@@ -161,16 +185,24 @@ def generate_code_from_spec_sub_msg(imports: set, package_root: str, name: str, 
         arg_assignment=arg_assignment,
         getter=getter,
         setter=setter,
-        json_constructor=json_constructor
+        json_constructor=json_constructor,
     )
 
 
-def generate_code_from_spec_variable_list(imports: set, package_root: str, name: str, field: JavaClassSpec) -> GeneratedCodeArtifacts:
-    return generate_code_from_arraylist_type(imports, name, get_full_type(package_root, field))
+def generate_code_from_spec_variable_list(
+    imports: set, package_root: str, name: str, field: JavaClassSpec
+) -> GeneratedCodeArtifacts:
+    return generate_code_from_arraylist_type(
+        imports, name, get_full_type(package_root, field)
+    )
 
 
-def generate_code_from_spec_static_list(imports: set, package_root: str, name: str, field: JavaClassSpec) -> GeneratedCodeArtifacts:
-    return generate_code_from_static_array_type(imports, name, get_full_type(package_root, field), field.size)
+def generate_code_from_spec_static_list(
+    imports: set, package_root: str, name: str, field: JavaClassSpec
+) -> GeneratedCodeArtifacts:
+    return generate_code_from_static_array_type(
+        imports, name, get_full_type(package_root, field), field.size
+    )
 
 
 def get_package_root(path: str) -> str:
@@ -196,25 +228,29 @@ def generate_java_code_from_spec(path: str, spec: JavaClassSpec):
     for name, field in spec.fields.items():
         if type(field) == JavaMessageField:
             if field.size == -1:
-                results = generate_code_from_field(
-                    imports, package_root, name, field)
+                results = generate_code_from_field(imports, package_root, name, field)
             elif field.size == 0:
                 results = generate_code_from_field_variable_list(
-                    imports, package_root, name, field)
+                    imports, package_root, name, field
+                )
             else:
                 results = generate_code_from_field_static_list(
-                    imports, package_root, name, field)
+                    imports, package_root, name, field
+                )
 
         elif type(field) == JavaClassSpec:
             if field.size == -1:
                 results = generate_code_from_spec_sub_msg(
-                    imports, package_root, name, field)
+                    imports, package_root, name, field
+                )
             elif field.size == 0:
                 results = generate_code_from_spec_variable_list(
-                    imports, package_root, name, field)
+                    imports, package_root, name, field
+                )
             else:
                 results = generate_code_from_spec_static_list(
-                    imports, package_root, name, field)
+                    imports, package_root, name, field
+                )
         else:
             raise ValueError(f"Invalid object found in fields: {field}")
 
@@ -235,7 +271,6 @@ def generate_java_code_from_spec(path: str, spec: JavaClassSpec):
     json_constructor = json_constructor[:-1]
 
     imports.add("import com.google.gson.JsonObject;")
-    imports.add("import com.google.gson.Gson;")
 
     import_code = "\n".join(imports)
 
@@ -244,10 +279,10 @@ package {package_root}{package_name};
 
 {import_code}
 
-public class {class_name} implements {package_root}RosMessage {{
+public class {class_name} extends {package_root}RosMessage {{
 {constants_code}
 {fields_code}
-    Gson ginst = new Gson();
+    public final String _type = "{spec.msg_type}";
 
     public {class_name}() {{
 
@@ -278,50 +313,6 @@ public class {class_name} implements {package_root}RosMessage {{
     return path, code
 
 
-def generate_type_mapping_java_code(path: str, specs: Iterable[JavaClassSpec]) -> str:
-    package_root = get_package_root(path)
-
-    populate_map = ""
-    for spec in specs:
-        key = spec.msg_type
-        value = get_full_type(package_root, spec)
-        populate_map += f"        MAPPING.put(\"{key}\", {value}.class);\n"
-
-    if package_root.endswith("."):
-        package_name = package_root[:-1]
-    else:
-        package_name = package_root
-
-    code = f"""// Auto generated!! Do not modify.
-package {package_name};
-
-import java.util.Map;
-import java.util.HashMap;
-import java.lang.reflect.InvocationTargetException;
-import com.google.gson.JsonObject;
-
-public class TypeMapping {{
-    public static final Map<String, Class<? extends RosMessage>> MAPPING = new HashMap<>();
-
-    static {{
-{populate_map}
-    }}
-
-    public RosMessage fromJSON(JsonObject jsonObj) {{
-        try {{
-            return MAPPING.get(jsonObj.get("_type").getAsString()).getConstructor(JsonObject.class)
-                    .newInstance(jsonObj);
-        }} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                | NoSuchMethodException | SecurityException e) {{
-            e.printStackTrace();
-            return null;
-        }}
-    }}
-}}
-"""
-    return code
-
-
 def generate_message_interface_java_code(path: str) -> str:
     package_root = get_package_root(path)
     if package_root.endswith("."):
@@ -330,10 +321,15 @@ def generate_message_interface_java_code(path: str) -> str:
 package {package_root};
 
 import com.google.gson.JsonObject;
+import com.google.gson.Gson;
 
 
-public interface RosMessage {{
-    public JsonObject toJSON();
+public abstract class RosMessage {{
+    protected static final Gson ginst = new Gson();
+
+    public RosMessage() {{  }}
+    public RosMessage(JsonObject jsonObj) {{  }}
+    public abstract JsonObject toJSON();
 }}
 """
     return code

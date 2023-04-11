@@ -2,9 +2,8 @@
 package frc.robot.ros.messages.tj2_interfaces;
 
 import com.google.gson.JsonObject;
-import com.google.gson.Gson;
 
-public class GameObject implements frc.robot.ros.messages.RosMessage {
+public class GameObject extends frc.robot.ros.messages.RosMessage {
 
     private String label = "";
     private int object_index = 0;
@@ -14,7 +13,7 @@ public class GameObject implements frc.robot.ros.messages.RosMessage {
     private frc.robot.ros.messages.tj2_interfaces.UVBoundingBox bounding_box_2d = new frc.robot.ros.messages.tj2_interfaces.UVBoundingBox();
     private frc.robot.ros.messages.tj2_interfaces.XYZBoundingBox bounding_box_3d = new frc.robot.ros.messages.tj2_interfaces.XYZBoundingBox();
 
-    Gson ginst = new Gson();
+    public final String _type = "tj2_interfaces/GameObject";
 
     public GameObject() {
 

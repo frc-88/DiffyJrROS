@@ -7,17 +7,18 @@ package frc.robot.commands;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
+import frc.robot.ros.bridge.BridgeSubscriber;
+import frc.robot.ros.messages.geometry_msgs.Twist;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.util.coprocessor.CoprocessorBase;
 
 public class PassthroughRosCommand extends CommandBase {
     private final DriveSubsystem m_drive;
-    private final CoprocessorBase m_coprocessor;
+    private final BridgeSubscriber<Twist> m_twistSub;
 
     /** Creates a new PassthroughRosCommand. */
-    public PassthroughRosCommand(DriveSubsystem drive, CoprocessorBase coprocessor) {
+    public PassthroughRosCommand(DriveSubsystem drive, BridgeSubscriber<Twist> twistSub) {
         m_drive = drive;
-        m_coprocessor = coprocessor;
+        m_twistSub = twistSub;
         // Use addRequirements() here to declare subsystem dependencies.
         addRequirements(drive);
     }
@@ -30,8 +31,13 @@ public class PassthroughRosCommand extends CommandBase {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        if (m_coprocessor.isTwistActive()) {
-            m_drive.drive(m_coprocessor.getTwist());
+        if (m_twistSub.didUpdate()) {
+            Twist msg = m_twistSub.receive();
+            m_drive.drive(
+                    new ChassisSpeeds(
+                            msg.getLinear().getX(),
+                            msg.getLinear().getY(),
+                            msg.getAngular().getZ()));
         } else {
             m_drive.stop();
         }

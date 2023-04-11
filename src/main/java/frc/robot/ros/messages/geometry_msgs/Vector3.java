@@ -2,15 +2,14 @@
 package frc.robot.ros.messages.geometry_msgs;
 
 import com.google.gson.JsonObject;
-import com.google.gson.Gson;
 
-public class Vector3 implements frc.robot.ros.messages.RosMessage {
+public class Vector3 extends frc.robot.ros.messages.RosMessage {
 
     private double x = 0.0;
     private double y = 0.0;
     private double z = 0.0;
 
-    Gson ginst = new Gson();
+    public final String _type = "geometry_msgs/Vector3";
 
     public Vector3() {
 

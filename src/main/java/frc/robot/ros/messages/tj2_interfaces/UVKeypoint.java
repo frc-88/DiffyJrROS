@@ -2,14 +2,13 @@
 package frc.robot.ros.messages.tj2_interfaces;
 
 import com.google.gson.JsonObject;
-import com.google.gson.Gson;
 
-public class UVKeypoint implements frc.robot.ros.messages.RosMessage {
+public class UVKeypoint extends frc.robot.ros.messages.RosMessage {
 
     private int x = 0;
     private int y = 0;
 
-    Gson ginst = new Gson();
+    public final String _type = "tj2_interfaces/UVKeypoint";
 
     public UVKeypoint() {
 

@@ -7,6 +7,12 @@ package frc.robot;
 import frc.robot.commands.CoastDriveMotors;
 import frc.robot.commands.DriveSwerveJoystickCommand;
 import frc.robot.commands.PassthroughRosCommand;
+import frc.robot.ros.bridge.BridgePublisher;
+import frc.robot.ros.bridge.BridgeSubscriber;
+import frc.robot.ros.bridge.ROSNetworkTablesBridge;
+import frc.robot.ros.messages.geometry_msgs.Twist;
+import frc.robot.ros.messages.nav_msgs.Odometry;
+import frc.robot.subsystems.DiffyJrCoprocessorBridge;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.SwerveJoystick;
 import frc.robot.subsystems.SwerveJoystick.SwerveControllerType;
@@ -29,16 +35,10 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DriveSubsystem m_drive = new DriveSubsystem();
   private final SwerveJoystick m_joystick = new SwerveJoystick(SwerveControllerType.NT);
-  private final DiffyJrTable m_ros_interface = new DiffyJrTable(
-      m_drive.getSwerve(),
-      m_drive.getImu(),
-      Robot.isSimulation() ? Constants.COPROCESSOR_ADDRESS_SIMULATED : Constants.COPROCESSOR_ADDRESS,
-      Constants.COPROCESSOR_PORT,
-      Constants.COPROCESSOR_TABLE_UPDATE_DELAY);
+  private final DiffyJrCoprocessorBridge m_bridge = new DiffyJrCoprocessorBridge();
 
-  private final CommandBase m_joystickDriveCommand = new DriveSwerveJoystickCommand(m_drive, m_ros_interface,
-      m_joystick);
-  private final CommandBase m_passthroughRosCommand = new PassthroughRosCommand(m_drive, m_ros_interface);
+  private final CommandBase m_joystickDriveCommand = new DriveSwerveJoystickCommand(m_drive, m_joystick);
+  private final CommandBase m_passthroughRosCommand = new PassthroughRosCommand(m_drive, m_bridge.getTwistSub());
   private Trigger userButton = new Trigger(() -> RobotController.getUserButton());
 
   /**
@@ -66,11 +66,6 @@ public class RobotContainer {
   }
 
   private void configurePeriodics(Robot robot) {
-    robot.addPeriodic(m_ros_interface::update, Constants.COPROCESSOR_PERIODIC_UPDATE_DELAY,
-        Constants.COPROCESSOR_PERIODIC_UPDATE_OFFSET);
-    robot.addPeriodic(m_ros_interface::updateSlow, Constants.COPROCESSOR_SLOW_PERIODIC_UPDATE_DELAY,
-        Constants.COPROCESSOR_SLOW_PERIODIC_UPDATE_OFFSET);
-    // robot.addPeriodic(m_ros_interface::updateModules, 1.0 / 15.0, 0.03);
     robot.addPeriodic(m_drive.getSwerve()::controllerPeriodic,
         frc.robot.diffswerve.Constants.DifferentialSwerveModule.kDt, 0.0025);
   }

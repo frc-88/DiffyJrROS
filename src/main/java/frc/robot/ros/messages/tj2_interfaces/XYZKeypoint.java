@@ -2,15 +2,14 @@
 package frc.robot.ros.messages.tj2_interfaces;
 
 import com.google.gson.JsonObject;
-import com.google.gson.Gson;
 
-public class XYZKeypoint implements frc.robot.ros.messages.RosMessage {
+public class XYZKeypoint extends frc.robot.ros.messages.RosMessage {
 
     private float x = 0.0f;
     private float y = 0.0f;
     private float z = 0.0f;
 
-    Gson ginst = new Gson();
+    public final String _type = "tj2_interfaces/XYZKeypoint";
 
     public XYZKeypoint() {
 

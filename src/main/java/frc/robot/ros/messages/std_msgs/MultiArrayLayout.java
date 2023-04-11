@@ -1,13 +1,13 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.std_msgs;
 
-import com.google.gson.JsonObject;
-import com.google.gson.Gson;
 import java.util.Arrays;
 import com.google.gson.JsonElement;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import java.util.ArrayList;
 
-public class MultiArrayLayout implements frc.robot.ros.messages.RosMessage {
+public class MultiArrayLayout extends frc.robot.ros.messages.RosMessage {
 
     private ArrayList<frc.robot.ros.messages.std_msgs.MultiArrayDimension> dim = new ArrayList<>();
     private int data_offset = 0;

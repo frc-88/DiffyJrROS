@@ -9,4 +9,5 @@ nav-msgs
 std-msgs
 sensor-msgs
 visualization-msgs
+tf2-msgs
 genpy
