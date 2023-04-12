@@ -43,6 +43,9 @@ public class BridgePublisher<T extends RosMessage> {
             this.pub = this.bridge.advertise(this.topicName);
         }
         String input = msg.toString();
+        if (input.length() == 0) {
+            return;
+        }
         String encodedString = Base64.getEncoder().encodeToString(input.getBytes());
         this.pub.set(encodedString);
     }

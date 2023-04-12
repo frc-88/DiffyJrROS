@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.ros.bridge.BridgeSubscriber;
 import frc.robot.ros.bridge.ROSConversions;
@@ -14,6 +15,9 @@ import frc.robot.subsystems.DriveSubsystem;
 public class PassthroughRosCommand extends CommandBase {
     private final DriveSubsystem m_drive;
     private final BridgeSubscriber<Twist> m_twistSub;
+    private long prevTime = 0;
+    private final long TIMEOUT = 250_000;
+    private ChassisSpeeds cached = new ChassisSpeeds();
 
     /** Creates a new PassthroughRosCommand. */
     public PassthroughRosCommand(DriveSubsystem drive, BridgeSubscriber<Twist> twistSub) {
@@ -28,15 +32,25 @@ public class PassthroughRosCommand extends CommandBase {
     public void initialize() {
     }
 
+    private long getTime() {
+        return RobotController.getFPGATime();
+    }
+
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        if (m_twistSub.didUpdate()) {
-            Twist msg = m_twistSub.receive();
-            m_drive.drive(ROSConversions.rosToWpiTwist(msg));
+        Twist msg;
+        long now = getTime();
+        if ((msg = m_twistSub.receive()) != null) {
+            cached = ROSConversions.rosToWpiTwist(msg);
+            prevTime = now;
+        }
+        if (getTime() - now < TIMEOUT) {
+            m_drive.drive(cached);
         } else {
             m_drive.stop();
         }
+
     }
 
     // Called once the command ends or is interrupted.

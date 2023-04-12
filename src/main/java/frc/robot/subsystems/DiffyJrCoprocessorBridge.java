@@ -30,9 +30,11 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
     private final BridgeSubscriber<Twist> m_twistSub = new BridgeSubscriber<>(m_ros_interface, "/tj2/cmd_vel",
             Twist.class);
     private final BridgePublisher<Odometry> m_odomPub = new BridgePublisher<>(m_ros_interface, "/tj2/odom");
-    private final BridgeSubscriber<Float64> m_pingSendSub = new BridgeSubscriber<>(m_ros_interface, "/tj2/ping_send",
+    private final BridgeSubscriber<Float64> m_pingSendSub = new BridgeSubscriber<>(m_ros_interface,
+            "/tj2/ping_send",
             Float64.class);
-    private final BridgePublisher<Float64> m_pingReturnPub = new BridgePublisher<>(m_ros_interface, "/tj2/ping_return");
+    private final BridgePublisher<Float64> m_pingReturnPub = new BridgePublisher<>(m_ros_interface,
+            "/tj2/ping_return");
 
     private final String frame_id = "odom";
     private final String child_frame_id = "base_link";
@@ -64,8 +66,8 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
     }
 
     private void checkPing() {
-        if (m_pingSendSub.didUpdate()) {
-            Float64 ping = m_pingSendSub.receive();
+        Float64 ping;
+        if ((ping = m_pingSendSub.receive()) != null) {
             m_pingReturnPub.send(ping);
         }
     }

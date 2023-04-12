@@ -1,5 +1,6 @@
 package frc.robot.ros.bridge;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PubSubOption;
@@ -24,19 +25,19 @@ public class ROSNetworkTablesBridge {
 
     public StringPublisher advertise(String topicName) {
         System.out.println("Publishing to " + topicName);
-        StringPublisher pub = ntToRosSubtable.getStringTopic(topicName)
+        String ntTopic = topicName.replace('/', '\\');
+        StringPublisher pub = ntToRosSubtable.getStringTopic(ntTopic)
                 .publish(PubSubOption.periodic(this.updateInterval));
         pub.set("");
         return pub;
     }
 
-    public StringSubscriber subscribe(String topicName) {
+    public Pair<StringSubscriber, StringPublisher> subscribe(String topicName) {
         System.out.println("Subscribing to " + topicName);
-        // Put empty entry so ROS knows to populate this topic
-        StringPublisher pub = this.advertise(topicName);
-        pub.close();
-        StringSubscriber sub = rosToNtSubtable.getStringTopic(topicName).subscribe("", PubSubOption.sendAll(true),
+        String ntTopic = topicName.replace('/', '\\');
+        StringSubscriber sub = rosToNtSubtable.getStringTopic(ntTopic).subscribe("", PubSubOption.sendAll(true),
                 PubSubOption.periodic(this.updateInterval));
-        return sub;
+        StringPublisher pub = rosToNtSubtable.getStringTopic(ntTopic).publish();
+        return new Pair<>(sub, pub);
     }
 }
