@@ -8,41 +8,41 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DriveSubsystem;
 
 public class CoastDriveMotors extends CommandBase {
-  DriveSubsystem m_drive;
+    DriveSubsystem m_drive;
 
-  /** Creates a new CoastDriveMotors. */
-  public CoastDriveMotors(DriveSubsystem drive) {
-    m_drive = drive;
-    // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(m_drive);
-  }
+    /** Creates a new CoastDriveMotors. */
+    public CoastDriveMotors(DriveSubsystem drive) {
+        m_drive = drive;
+        // Use addRequirements() here to declare subsystem dependencies.
+        addRequirements(m_drive);
+    }
 
-  // Called when the command is initially scheduled.
-  @Override
-  public void initialize() {
-  }
+    // Called when the command is initially scheduled.
+    @Override
+    public void initialize() {
+    }
 
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {
-    m_drive.stop();
-    m_drive.setCoast(true);
-  }
+    // Called every time the scheduler runs while the command is scheduled.
+    @Override
+    public void execute() {
+        m_drive.stop();
+        m_drive.setCoast(true);
+    }
 
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) {
-    m_drive.setCoast(false);
-  }
+    // Called once the command ends or is interrupted.
+    @Override
+    public void end(boolean interrupted) {
+        m_drive.setCoast(false);
+    }
 
-  // Returns true when the command should end.
-  @Override
-  public boolean isFinished() {
-    return false;
-  }
+    // Returns true when the command should end.
+    @Override
+    public boolean isFinished() {
+        return false;
+    }
 
-  @Override
-  public boolean runsWhenDisabled() {
-    return true;
-  }
+    @Override
+    public boolean runsWhenDisabled() {
+        return true;
+    }
 }

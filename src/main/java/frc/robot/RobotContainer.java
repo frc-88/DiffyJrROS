@@ -27,60 +27,60 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
-  private final DriveSubsystem m_drive = new DriveSubsystem();
-  private final SwerveJoystick m_joystick = new SwerveJoystick(SwerveControllerType.NT);
-  private final DiffyJrCoprocessorBridge m_bridge = new DiffyJrCoprocessorBridge(m_drive);
+    // The robot's subsystems and commands are defined here...
+    private final DriveSubsystem m_drive = new DriveSubsystem();
+    private final SwerveJoystick m_joystick = new SwerveJoystick(SwerveControllerType.NT);
+    private final DiffyJrCoprocessorBridge m_bridge = new DiffyJrCoprocessorBridge(m_drive);
 
-  private final CommandBase m_joystickDriveCommand = new DriveSwerveJoystickCommand(m_drive, m_joystick);
-  private final CommandBase m_passthroughRosCommand = new PassthroughRosCommand(m_drive, m_bridge.getTwistSub());
-  private Trigger userButton = new Trigger(() -> RobotController.getUserButton());
+    private final CommandBase m_joystickDriveCommand = new DriveSwerveJoystickCommand(m_drive, m_joystick);
+    private final CommandBase m_passthroughRosCommand = new PassthroughRosCommand(m_drive, m_bridge.getTwistSub());
+    private Trigger userButton = new Trigger(() -> RobotController.getUserButton());
 
-  /**
-   * The container for the robot. Contains subsystems, OI devices, and commands.
-   */
-  public RobotContainer(Robot robot) {
-    System.out.println("RobotContainer initializing");
-    configureDriveCommand();
-    configurePeriodics(robot);
-    m_drive.getSwerve().setAngleControllerEnabled(false);
-    System.out.println("RobotContainer initialization complete");
-  }
+    /**
+     * The container for the robot. Contains subsystems, OI devices, and commands.
+     */
+    public RobotContainer(Robot robot) {
+        System.out.println("RobotContainer initializing");
+        configureDriveCommand();
+        configurePeriodics(robot);
+        m_drive.getSwerve().setAngleControllerEnabled(false);
+        System.out.println("RobotContainer initialization complete");
+    }
 
-  private void configureDriveCommand() {
-    m_drive.setDefaultCommand(m_passthroughRosCommand);
-    // m_drive.setDefaultCommand(m_joystickDriveCommand);
-    m_joystick.getLeftTriggerButton().whileTrue(m_joystickDriveCommand);
-    // m_joystick.getRightTriggerButton().whileTrue(m_passthroughRosCommand);
-    // m_joystick.getLeftTriggerButton().whileTrue(new PointToCenterDriveCommand(
-    // m_drive, m_ros_interface, m_joystick,
-    // frc.robot.util.diffswerve.Constants.DriveTrain.MAX_CHASSIS_ANG_VEL * 0.75)
-    // );
-    userButton.whileTrue(new CoastDriveMotors(m_drive));
-    // userButton.whileTrue(new TestDiffSwerveMotors(m_drive));
-  }
+    private void configureDriveCommand() {
+        m_drive.setDefaultCommand(m_passthroughRosCommand);
+        // m_drive.setDefaultCommand(m_joystickDriveCommand);
+        m_joystick.getLeftTriggerButton().whileTrue(m_joystickDriveCommand);
+        // m_joystick.getRightTriggerButton().whileTrue(m_passthroughRosCommand);
+        // m_joystick.getLeftTriggerButton().whileTrue(new PointToCenterDriveCommand(
+        // m_drive, m_ros_interface, m_joystick,
+        // frc.robot.util.diffswerve.Constants.DriveTrain.MAX_CHASSIS_ANG_VEL * 0.75)
+        // );
+        userButton.whileTrue(new CoastDriveMotors(m_drive));
+        // userButton.whileTrue(new TestDiffSwerveMotors(m_drive));
+    }
 
-  private void configurePeriodics(Robot robot) {
-    robot.addPeriodic(m_drive.getSwerve()::controllerPeriodic,
-        frc.robot.diffswerve.Constants.DifferentialSwerveModule.kDt, 0.0025);
-  }
+    private void configurePeriodics(Robot robot) {
+        robot.addPeriodic(m_drive.getSwerve()::controllerPeriodic,
+                frc.robot.diffswerve.Constants.DifferentialSwerveModule.kDt, 0.0025);
+    }
 
-  public void setEnableDrive(boolean enabled) {
-    System.out.println("Set drive motors to " + enabled);
-    m_drive.setEnabled(enabled);
-    m_drive.setCoast(!enabled);
-  }
+    public void setEnableDrive(boolean enabled) {
+        System.out.println("Set drive motors to " + enabled);
+        m_drive.setEnabled(enabled);
+        m_drive.setCoast(!enabled);
+    }
 
-  public void disabledPeriodic() {
+    public void disabledPeriodic() {
 
-  }
+    }
 
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
-  public Command getAutonomousCommand() {
-    return new WaitCommand(15.0);
-  }
+    /**
+     * Use this to pass the autonomous command to the main {@link Robot} class.
+     *
+     * @return the command to run in autonomous
+     */
+    public Command getAutonomousCommand() {
+        return new WaitCommand(15.0);
+    }
 }
