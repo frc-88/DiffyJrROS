@@ -1,6 +1,7 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.geometry_msgs;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.JsonObject;
 
 public class PoseStamped extends frc.robot.ros.messages.RosMessage {
@@ -8,6 +9,7 @@ public class PoseStamped extends frc.robot.ros.messages.RosMessage {
     private frc.robot.ros.messages.std_msgs.Header header = new frc.robot.ros.messages.std_msgs.Header();
     private frc.robot.ros.messages.geometry_msgs.Pose pose = new frc.robot.ros.messages.geometry_msgs.Pose();
 
+    @Expose(serialize = false, deserialize = false)
     public final String _type = "geometry_msgs/PoseStamped";
 
     public PoseStamped() {

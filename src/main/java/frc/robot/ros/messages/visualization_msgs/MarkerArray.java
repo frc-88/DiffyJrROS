@@ -4,12 +4,14 @@ package frc.robot.ros.messages.visualization_msgs;
 import com.google.gson.JsonObject;
 import java.util.Arrays;
 import java.util.ArrayList;
+import com.google.gson.annotations.Expose;
 import com.google.gson.JsonElement;
 
 public class MarkerArray extends frc.robot.ros.messages.RosMessage {
 
     private ArrayList<frc.robot.ros.messages.visualization_msgs.Marker> markers = new ArrayList<>();
 
+    @Expose(serialize = false, deserialize = false)
     public final String _type = "visualization_msgs/MarkerArray";
 
     public MarkerArray() {

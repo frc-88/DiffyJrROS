@@ -1,6 +1,7 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.geometry_msgs;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.JsonObject;
 
 public class Pose extends frc.robot.ros.messages.RosMessage {
@@ -8,6 +9,7 @@ public class Pose extends frc.robot.ros.messages.RosMessage {
     private frc.robot.ros.messages.geometry_msgs.Point position = new frc.robot.ros.messages.geometry_msgs.Point();
     private frc.robot.ros.messages.geometry_msgs.Quaternion orientation = new frc.robot.ros.messages.geometry_msgs.Quaternion();
 
+    @Expose(serialize = false, deserialize = false)
     public final String _type = "geometry_msgs/Pose";
 
     public Pose() {

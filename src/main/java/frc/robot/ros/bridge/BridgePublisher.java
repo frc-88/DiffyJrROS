@@ -27,9 +27,9 @@ public class BridgePublisher<T extends RosMessage> {
 
     public Time getNow() {
         long localTime = RobotController.getFPGATime();
-        int sec = (int) (localTime * 1e-6);
-        int nsec = (int) (localTime * 1e3);
-        return new Time(sec, nsec);
+        int secs = (int) (localTime * 1e-6);
+        int nsecs = (int) (localTime * 1e3);
+        return new Time(secs, nsecs);
     }
 
     public int getSeq() {

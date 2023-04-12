@@ -1,6 +1,7 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.std_msgs;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.JsonObject;
 
 public class Header extends frc.robot.ros.messages.RosMessage {
@@ -9,6 +10,7 @@ public class Header extends frc.robot.ros.messages.RosMessage {
     private frc.robot.ros.messages.Time stamp = new frc.robot.ros.messages.Time();
     private String frame_id = "";
 
+    @Expose(serialize = false, deserialize = false)
     public final String _type = "std_msgs/Header";
 
     public Header() {

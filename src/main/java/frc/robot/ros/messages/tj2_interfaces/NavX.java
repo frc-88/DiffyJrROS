@@ -1,6 +1,7 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.tj2_interfaces;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.JsonObject;
 
 public class NavX extends frc.robot.ros.messages.RosMessage {
@@ -10,6 +11,7 @@ public class NavX extends frc.robot.ros.messages.RosMessage {
     private frc.robot.ros.messages.geometry_msgs.Vector3 angular_velocity = new frc.robot.ros.messages.geometry_msgs.Vector3();
     private frc.robot.ros.messages.geometry_msgs.Vector3 linear_acceleration = new frc.robot.ros.messages.geometry_msgs.Vector3();
 
+    @Expose(serialize = false, deserialize = false)
     public final String _type = "tj2_interfaces/NavX";
 
     public NavX() {

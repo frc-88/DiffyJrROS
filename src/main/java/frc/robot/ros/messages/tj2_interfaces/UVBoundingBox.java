@@ -1,8 +1,9 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.tj2_interfaces;
 
-import com.google.gson.JsonObject;
+import com.google.gson.annotations.Expose;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 public class UVBoundingBox extends frc.robot.ros.messages.RosMessage {
 
@@ -15,6 +16,7 @@ public class UVBoundingBox extends frc.robot.ros.messages.RosMessage {
     private int width = 0;
     private int height = 0;
 
+    @Expose(serialize = false, deserialize = false)
     public final String _type = "tj2_interfaces/UVBoundingBox";
 
     public UVBoundingBox() {

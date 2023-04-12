@@ -1,6 +1,7 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.tj2_interfaces;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.JsonObject;
 
 public class Match extends frc.robot.ros.messages.RosMessage {
@@ -10,6 +11,7 @@ public class Match extends frc.robot.ros.messages.RosMessage {
     private byte team_position = 0;
     private frc.robot.ros.messages.tj2_interfaces.MatchPeriod match_period = new frc.robot.ros.messages.tj2_interfaces.MatchPeriod();
 
+    @Expose(serialize = false, deserialize = false)
     public final String _type = "tj2_interfaces/Match";
 
     public Match() {

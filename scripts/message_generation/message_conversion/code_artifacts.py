@@ -275,6 +275,7 @@ def generate_java_code_from_spec(path: str, spec: JavaClassSpec):
     json_constructor = json_constructor[:-1]
 
     imports.add("import com.google.gson.JsonObject;")
+    imports.add("import com.google.gson.annotations.Expose;")
 
     import_code = "\n".join(imports)
 
@@ -286,6 +287,7 @@ package {package_root}{package_name};
 public class {class_name} extends {package_root}RosMessage {{
 {constants_code}
 {fields_code}
+    @Expose(serialize = false, deserialize = false)
     public final String _type = "{spec.msg_type}";
 
     public {class_name}() {{

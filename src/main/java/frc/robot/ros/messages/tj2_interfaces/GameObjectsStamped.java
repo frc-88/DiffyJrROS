@@ -4,6 +4,7 @@ package frc.robot.ros.messages.tj2_interfaces;
 import com.google.gson.JsonObject;
 import java.util.Arrays;
 import java.util.ArrayList;
+import com.google.gson.annotations.Expose;
 import com.google.gson.JsonElement;
 
 public class GameObjectsStamped extends frc.robot.ros.messages.RosMessage {
@@ -13,6 +14,7 @@ public class GameObjectsStamped extends frc.robot.ros.messages.RosMessage {
     private int width = 0;
     private int height = 0;
 
+    @Expose(serialize = false, deserialize = false)
     public final String _type = "tj2_interfaces/GameObjectsStamped";
 
     public GameObjectsStamped() {

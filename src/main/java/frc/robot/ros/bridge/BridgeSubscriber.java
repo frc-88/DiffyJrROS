@@ -57,7 +57,7 @@ public class BridgeSubscriber<T extends RosMessage> {
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
                 | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             e.printStackTrace();
-            throw new RuntimeException("Failed to instantiate ros message");
+            return null;
         }
     }
 }

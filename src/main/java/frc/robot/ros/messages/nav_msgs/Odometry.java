@@ -1,6 +1,7 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.nav_msgs;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.JsonObject;
 
 public class Odometry extends frc.robot.ros.messages.RosMessage {
@@ -10,6 +11,7 @@ public class Odometry extends frc.robot.ros.messages.RosMessage {
     private frc.robot.ros.messages.geometry_msgs.PoseWithCovariance pose = new frc.robot.ros.messages.geometry_msgs.PoseWithCovariance();
     private frc.robot.ros.messages.geometry_msgs.TwistWithCovariance twist = new frc.robot.ros.messages.geometry_msgs.TwistWithCovariance();
 
+    @Expose(serialize = false, deserialize = false)
     public final String _type = "nav_msgs/Odometry";
 
     public Odometry() {

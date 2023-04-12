@@ -1,6 +1,7 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.tj2_interfaces;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.JsonObject;
 
 public class UVKeypoint extends frc.robot.ros.messages.RosMessage {
@@ -8,6 +9,7 @@ public class UVKeypoint extends frc.robot.ros.messages.RosMessage {
     private int x = 0;
     private int y = 0;
 
+    @Expose(serialize = false, deserialize = false)
     public final String _type = "tj2_interfaces/UVKeypoint";
 
     public UVKeypoint() {

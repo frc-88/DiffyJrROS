@@ -1,6 +1,7 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.geometry_msgs;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.JsonObject;
 
 public class Quaternion extends frc.robot.ros.messages.RosMessage {
@@ -10,6 +11,7 @@ public class Quaternion extends frc.robot.ros.messages.RosMessage {
     private double z = 0.0;
     private double w = 0.0;
 
+    @Expose(serialize = false, deserialize = false)
     public final String _type = "geometry_msgs/Quaternion";
 
     public Quaternion() {

@@ -4,8 +4,8 @@ import com.google.gson.JsonObject;
 
 public class Time extends frc.robot.ros.messages.RosMessage {
 
-    private int sec = 0;
-    private int nsec = 0;
+    private int secs = 0;
+    private int nsecs = 0;
 
     public final String _type = "std_msgs/Time";
 
@@ -13,44 +13,44 @@ public class Time extends frc.robot.ros.messages.RosMessage {
 
     }
 
-    public Time(int sec, int nsec) {
-        this.sec = sec;
-        this.nsec = nsec;
+    public Time(int secs, int nsecs) {
+        this.secs = secs;
+        this.nsecs = nsecs;
     }
 
     public Time(double seconds) {
-        this.sec = (int) seconds;
-        this.nsec = (int) (seconds * 1e9);
+        this.secs = (int) seconds;
+        this.nsecs = (int) (seconds * 1e9);
     }
 
     public Time(JsonObject jsonObj) {
-        this.sec = jsonObj.get("sec").getAsInt();
-        this.nsec = jsonObj.get("nsec").getAsInt();
+        this.secs = jsonObj.get("secs").getAsInt();
+        this.nsecs = jsonObj.get("nsecs").getAsInt();
     }
 
     public Time(Duration duration) {
-        this.sec = duration.getSec();
-        this.nsec = duration.getNsec();
+        this.secs = duration.getSecs();
+        this.nsecs = duration.getNsecs();
     }
 
-    public int getSec() {
-        return this.sec;
+    public int getSecs() {
+        return this.secs;
     }
 
-    public int getNsec() {
-        return this.nsec;
+    public int getNsecs() {
+        return this.nsecs;
     }
 
-    public void setSec(int sec) {
-        this.sec = sec;
+    public void setSecs(int secs) {
+        this.secs = secs;
     }
 
-    public void setNsec(int nsec) {
-        this.nsec = nsec;
+    public void setNsecs(int nsecs) {
+        this.nsecs = nsecs;
     }
 
     public double toSeconds() {
-        return (double) sec + (1e-9 * nsec);
+        return (double) secs + (1e-9 * nsecs);
     }
 
     public JsonObject toJSON() {
@@ -62,10 +62,10 @@ public class Time extends frc.robot.ros.messages.RosMessage {
     }
 
     public Duration minus(Time other) {
-        return new Duration(this.sec - other.getSec(), this.nsec - other.getNsec());
+        return new Duration(this.secs - other.getSecs(), this.nsecs - other.getNsecs());
     }
 
     public Time plus(Duration other) {
-        return new Time(this.sec + other.getSec(), this.nsec + other.getNsec());
+        return new Time(this.secs + other.getSecs(), this.nsecs + other.getNsecs());
     }
 }

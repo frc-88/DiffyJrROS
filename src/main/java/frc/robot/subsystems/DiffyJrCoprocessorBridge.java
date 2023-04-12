@@ -20,6 +20,7 @@ import frc.robot.ros.messages.geometry_msgs.Vector3;
 import frc.robot.ros.messages.nav_msgs.Odometry;
 import frc.robot.ros.messages.std_msgs.Float64;
 import frc.robot.ros.messages.std_msgs.Header;
+import frc.robot.ros.messages.tf2_msgs.TFMessage;
 
 public class DiffyJrCoprocessorBridge extends SubsystemBase {
     private final DriveSubsystem m_drive;
@@ -35,6 +36,8 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
             Float64.class);
     private final BridgePublisher<Float64> m_pingReturnPub = new BridgePublisher<>(m_ros_interface,
             "/tj2/ping_return");
+    private final BridgeSubscriber<TFMessage> m_tfCompactSub = new BridgeSubscriber<>(m_ros_interface, "/tf_compact",
+            TFMessage.class);
 
     private final String frame_id = "odom";
     private final String child_frame_id = "base_link";
@@ -65,6 +68,10 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
         return m_twistSub;
     }
 
+    public BridgeSubscriber<TFMessage> getTF() {
+        return m_tfCompactSub;
+    }
+
     private void checkPing() {
         Float64 ping;
         if ((ping = m_pingSendSub.receive()) != null) {
@@ -90,5 +97,9 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
         super.periodic();
         sendOdom();
         checkPing();
+        TFMessage msg;
+        if ((msg = m_tfCompactSub.receive()) != null) {
+            System.out.println("TF: " + msg.toString());
+        }
     }
 }

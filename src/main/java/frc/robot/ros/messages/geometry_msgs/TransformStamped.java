@@ -1,6 +1,7 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.geometry_msgs;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.JsonObject;
 
 public class TransformStamped extends frc.robot.ros.messages.RosMessage {
@@ -9,6 +10,7 @@ public class TransformStamped extends frc.robot.ros.messages.RosMessage {
     private String child_frame_id = "";
     private frc.robot.ros.messages.geometry_msgs.Transform transform = new frc.robot.ros.messages.geometry_msgs.Transform();
 
+    @Expose(serialize = false, deserialize = false)
     public final String _type = "geometry_msgs/TransformStamped";
 
     public TransformStamped() {

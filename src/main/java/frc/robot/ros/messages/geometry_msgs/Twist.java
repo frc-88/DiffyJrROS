@@ -1,6 +1,7 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.geometry_msgs;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.JsonObject;
 
 public class Twist extends frc.robot.ros.messages.RosMessage {
@@ -8,6 +9,7 @@ public class Twist extends frc.robot.ros.messages.RosMessage {
     private frc.robot.ros.messages.geometry_msgs.Vector3 linear = new frc.robot.ros.messages.geometry_msgs.Vector3();
     private frc.robot.ros.messages.geometry_msgs.Vector3 angular = new frc.robot.ros.messages.geometry_msgs.Vector3();
 
+    @Expose(serialize = false, deserialize = false)
     public final String _type = "geometry_msgs/Twist";
 
     public Twist() {

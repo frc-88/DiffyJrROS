@@ -1,6 +1,7 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.tj2_interfaces;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.JsonObject;
 
 public class GameObject extends frc.robot.ros.messages.RosMessage {
@@ -13,6 +14,7 @@ public class GameObject extends frc.robot.ros.messages.RosMessage {
     private frc.robot.ros.messages.tj2_interfaces.UVBoundingBox bounding_box_2d = new frc.robot.ros.messages.tj2_interfaces.UVBoundingBox();
     private frc.robot.ros.messages.tj2_interfaces.XYZBoundingBox bounding_box_3d = new frc.robot.ros.messages.tj2_interfaces.XYZBoundingBox();
 
+    @Expose(serialize = false, deserialize = false)
     public final String _type = "tj2_interfaces/GameObject";
 
     public GameObject() {

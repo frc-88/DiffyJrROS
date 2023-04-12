@@ -4,12 +4,14 @@ package frc.robot.ros.messages.tf2_msgs;
 import com.google.gson.JsonObject;
 import java.util.Arrays;
 import java.util.ArrayList;
+import com.google.gson.annotations.Expose;
 import com.google.gson.JsonElement;
 
 public class TFMessage extends frc.robot.ros.messages.RosMessage {
 
     private ArrayList<frc.robot.ros.messages.geometry_msgs.TransformStamped> transforms = new ArrayList<>();
 
+    @Expose(serialize = false, deserialize = false)
     public final String _type = "tf2_msgs/TFMessage";
 
     public TFMessage() {

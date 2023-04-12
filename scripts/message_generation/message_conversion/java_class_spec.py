@@ -77,13 +77,13 @@ class JavaTimeSpec(JavaClassSpec):
     def __init__(self) -> None:
         super().__init__("Time", -1)
 
-        self.add_field("sec", 0, JavaPrimitive.int, -1)
-        self.add_field("nsec", 0, JavaPrimitive.int, -1)
+        self.add_field("secs", 0, JavaPrimitive.int, -1)
+        self.add_field("nsecs", 0, JavaPrimitive.int, -1)
 
 
 class JavaDurationSpec(JavaClassSpec):
     def __init__(self) -> None:
         super().__init__("Duration", -1)
 
-        self.add_field("sec", 0, JavaPrimitive.int, -1)
-        self.add_field("nsec", 0, JavaPrimitive.int, -1)
+        self.add_field("secs", 0, JavaPrimitive.int, -1)
+        self.add_field("nsecs", 0, JavaPrimitive.int, -1)
