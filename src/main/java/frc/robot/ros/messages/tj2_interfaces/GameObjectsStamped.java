@@ -1,27 +1,27 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.tj2_interfaces;
 
-import com.google.gson.JsonObject;
-import java.util.Arrays;
-import java.util.ArrayList;
-import com.google.gson.annotations.Expose;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.annotations.Expose;
+import java.util.ArrayList;
+import java.util.Arrays;
 
-public class GameObjectsStamped extends frc.robot.ros.messages.RosMessage {
+public class GameObjectsStamped extends frc.team88.ros.messages.RosMessage {
 
-    private frc.robot.ros.messages.std_msgs.Header header = new frc.robot.ros.messages.std_msgs.Header();
+    private frc.team88.ros.messages.std_msgs.Header header = new frc.team88.ros.messages.std_msgs.Header();
     private ArrayList<frc.robot.ros.messages.tj2_interfaces.GameObject> objects = new ArrayList<>();
     private int width = 0;
     private int height = 0;
 
     @Expose(serialize = false, deserialize = false)
-    public final String _type = "tj2_interfaces/GameObjectsStamped";
+    public final java.lang.String _type = "tj2_interfaces/GameObjectsStamped";
 
     public GameObjectsStamped() {
 
     }
 
-    public GameObjectsStamped(frc.robot.ros.messages.std_msgs.Header header, frc.robot.ros.messages.tj2_interfaces.GameObject[] objects, int width, int height) {
+    public GameObjectsStamped(frc.team88.ros.messages.std_msgs.Header header, frc.robot.ros.messages.tj2_interfaces.GameObject[] objects, int width, int height) {
         this.header = header;
         this.objects = new ArrayList<>(Arrays.asList(objects));
         this.width = width;
@@ -29,7 +29,7 @@ public class GameObjectsStamped extends frc.robot.ros.messages.RosMessage {
     }
 
     public GameObjectsStamped(JsonObject jsonObj) {
-        this.header = new frc.robot.ros.messages.std_msgs.Header(jsonObj.get("header").getAsJsonObject());
+        this.header = new frc.team88.ros.messages.std_msgs.Header(jsonObj.get("header").getAsJsonObject());
         for (JsonElement objects_element : jsonObj.getAsJsonArray("objects")) {
             this.objects.add(new frc.robot.ros.messages.tj2_interfaces.GameObject(objects_element.getAsJsonObject()));
         }
@@ -37,7 +37,7 @@ public class GameObjectsStamped extends frc.robot.ros.messages.RosMessage {
         this.height = jsonObj.get("height").getAsInt();
     }
 
-    public frc.robot.ros.messages.std_msgs.Header getHeader() {
+    public frc.team88.ros.messages.std_msgs.Header getHeader() {
         return this.header;
     }
     public ArrayList<frc.robot.ros.messages.tj2_interfaces.GameObject> getObjects() {
@@ -50,7 +50,7 @@ public class GameObjectsStamped extends frc.robot.ros.messages.RosMessage {
         return this.height;
     }
 
-    public void setHeader(frc.robot.ros.messages.std_msgs.Header header) {
+    public void setHeader(frc.team88.ros.messages.std_msgs.Header header) {
         this.header = header;
     }
     public void setObjects(ArrayList<frc.robot.ros.messages.tj2_interfaces.GameObject> objects) {
@@ -67,7 +67,7 @@ public class GameObjectsStamped extends frc.robot.ros.messages.RosMessage {
         return ginst.toJsonTree(this).getAsJsonObject();
     }
 
-    public String toString() {
+    public java.lang.String toString() {
         return ginst.toJson(this);
     }
 }

@@ -1,24 +1,24 @@
 // Auto generated!! Do not modify.
 package frc.robot.ros.messages.tj2_interfaces;
 
-import com.google.gson.annotations.Expose;
 import com.google.gson.JsonObject;
+import com.google.gson.annotations.Expose;
 
-public class Match extends frc.robot.ros.messages.RosMessage {
+public class Match extends frc.team88.ros.messages.RosMessage {
 
     private double match_time = 0.0;
-    private String team_color = "";
+    private java.lang.String team_color = "";
     private byte team_position = 0;
     private frc.robot.ros.messages.tj2_interfaces.MatchPeriod match_period = new frc.robot.ros.messages.tj2_interfaces.MatchPeriod();
 
     @Expose(serialize = false, deserialize = false)
-    public final String _type = "tj2_interfaces/Match";
+    public final java.lang.String _type = "tj2_interfaces/Match";
 
     public Match() {
 
     }
 
-    public Match(double match_time, String team_color, byte team_position, frc.robot.ros.messages.tj2_interfaces.MatchPeriod match_period) {
+    public Match(double match_time, java.lang.String team_color, byte team_position, frc.robot.ros.messages.tj2_interfaces.MatchPeriod match_period) {
         this.match_time = match_time;
         this.team_color = team_color;
         this.team_position = team_position;
@@ -35,7 +35,7 @@ public class Match extends frc.robot.ros.messages.RosMessage {
     public double getMatchTime() {
         return this.match_time;
     }
-    public String getTeamColor() {
+    public java.lang.String getTeamColor() {
         return this.team_color;
     }
     public byte getTeamPosition() {
@@ -48,7 +48,7 @@ public class Match extends frc.robot.ros.messages.RosMessage {
     public void setMatchTime(double match_time) {
         this.match_time = match_time;
     }
-    public void setTeamColor(String team_color) {
+    public void setTeamColor(java.lang.String team_color) {
         this.team_color = team_color;
     }
     public void setTeamPosition(byte team_position) {
@@ -62,7 +62,7 @@ public class Match extends frc.robot.ros.messages.RosMessage {
         return ginst.toJsonTree(this).getAsJsonObject();
     }
 
-    public String toString() {
+    public java.lang.String toString() {
         return ginst.toJson(this);
     }
 }

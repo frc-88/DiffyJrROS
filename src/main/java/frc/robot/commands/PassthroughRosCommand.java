@@ -7,9 +7,9 @@ package frc.robot.commands;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.ros.bridge.BridgeSubscriber;
-import frc.robot.ros.conversions.ROSConversions;
-import frc.robot.ros.messages.geometry_msgs.Twist;
+import frc.team88.ros.bridge.BridgeSubscriber;
+import frc.team88.ros.conversions.ROSConversions;
+import frc.team88.ros.messages.geometry_msgs.Twist;
 import frc.robot.subsystems.DriveSubsystem;
 
 public class PassthroughRosCommand extends CommandBase {
