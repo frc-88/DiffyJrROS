@@ -1,7 +1,5 @@
 package frc.robot.ros.bridge;
 
-import java.util.Base64;
-
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.ros.messages.RosMessage;
@@ -46,7 +44,6 @@ public class BridgePublisher<T extends RosMessage> {
         if (input.length() == 0) {
             return;
         }
-        String encodedString = Base64.getEncoder().encodeToString(input.getBytes());
-        this.pub.set(encodedString);
+        this.pub.set(input);
     }
 }

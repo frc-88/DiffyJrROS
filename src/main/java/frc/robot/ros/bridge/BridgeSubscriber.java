@@ -1,7 +1,6 @@
 package frc.robot.ros.bridge;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Base64;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -42,15 +41,13 @@ public class BridgeSubscriber<T extends RosMessage> {
             return null;
         }
         prevAtomic = stampedString.timestamp;
-        String encodedString = stampedString.value;
-        if (encodedString.length() == 0) {
+        String jsonString = stampedString.value;
+        if (jsonString.length() == 0) {
             return null;
         }
-        byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
-        String decodedString = new String(decodedBytes);
         JsonObject jsonObject;
         try {
-            jsonObject = JsonParser.parseString(decodedString).getAsJsonObject();
+            jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
         } catch (java.lang.IllegalStateException e) {
             e.printStackTrace();
             return null;
