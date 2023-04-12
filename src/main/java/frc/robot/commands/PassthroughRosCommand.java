@@ -8,7 +8,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.ros.bridge.BridgeSubscriber;
-import frc.robot.ros.bridge.ROSConversions;
+import frc.robot.ros.conversions.ROSConversions;
 import frc.robot.ros.messages.geometry_msgs.Twist;
 import frc.robot.subsystems.DriveSubsystem;
 

@@ -1,4 +1,6 @@
-package frc.robot.ros.bridge;
+package frc.robot.ros.conversions;
+
+import edu.wpi.first.math.geometry.Translation3d;
 
 public class ROSConversions {
     public static frc.robot.ros.messages.geometry_msgs.Quaternion wpiToRosRotation(
@@ -20,6 +22,11 @@ public class ROSConversions {
 
     public static edu.wpi.first.math.geometry.Translation3d rosToWpiTranslation(
             frc.robot.ros.messages.geometry_msgs.Point point) {
+        return new edu.wpi.first.math.geometry.Translation3d(point.getX(), point.getY(), point.getZ());
+    }
+
+    public static edu.wpi.first.math.geometry.Translation3d rosToWpiTranslation(
+            frc.robot.ros.messages.geometry_msgs.Vector3 point) {
         return new edu.wpi.first.math.geometry.Translation3d(point.getX(), point.getY(), point.getZ());
     }
 
@@ -46,5 +53,12 @@ public class ROSConversions {
         return new frc.robot.ros.messages.geometry_msgs.Twist(
                 new frc.robot.ros.messages.geometry_msgs.Vector3(twist.vxMetersPerSecond, twist.vyMetersPerSecond, 0.0),
                 new frc.robot.ros.messages.geometry_msgs.Vector3(0.0, 0.0, twist.omegaRadiansPerSecond));
+    }
+
+    public static edu.wpi.first.math.geometry.Transform3d rosToWpiTransform(
+            frc.robot.ros.messages.geometry_msgs.TransformStamped transform) {
+        return new edu.wpi.first.math.geometry.Transform3d(
+                rosToWpiTranslation(transform.getTransform().getTranslation()),
+                rosToWpiRotation(transform.getTransform().getRotation()));
     }
 }

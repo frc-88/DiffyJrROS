@@ -7,8 +7,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.ros.bridge.BridgePublisher;
 import frc.robot.ros.bridge.BridgeSubscriber;
-import frc.robot.ros.bridge.ROSConversions;
 import frc.robot.ros.bridge.ROSNetworkTablesBridge;
+import frc.robot.ros.conversions.ROSConversions;
+import frc.robot.ros.conversions.TFListenerCompact;
 import frc.robot.ros.messages.Time;
 import frc.robot.ros.messages.geometry_msgs.Point;
 import frc.robot.ros.messages.geometry_msgs.Pose;
@@ -20,7 +21,6 @@ import frc.robot.ros.messages.geometry_msgs.Vector3;
 import frc.robot.ros.messages.nav_msgs.Odometry;
 import frc.robot.ros.messages.std_msgs.Float64;
 import frc.robot.ros.messages.std_msgs.Header;
-import frc.robot.ros.messages.tf2_msgs.TFMessage;
 
 public class DiffyJrCoprocessorBridge extends SubsystemBase {
     private final DriveSubsystem m_drive;
@@ -36,8 +36,7 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
             Float64.class);
     private final BridgePublisher<Float64> m_pingReturnPub = new BridgePublisher<>(m_ros_interface,
             "/tj2/ping_return");
-    private final BridgeSubscriber<TFMessage> m_tfCompactSub = new BridgeSubscriber<>(m_ros_interface, "/tf_compact",
-            TFMessage.class);
+    private final TFListenerCompact m_tfListenerCompact = new TFListenerCompact(m_ros_interface, "/tf_compact");
 
     private final String frame_id = "odom";
     private final String child_frame_id = "base_link";
@@ -68,8 +67,8 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
         return m_twistSub;
     }
 
-    public BridgeSubscriber<TFMessage> getTF() {
-        return m_tfCompactSub;
+    public TFListenerCompact getTFListener() {
+        return m_tfListenerCompact;
     }
 
     private void checkPing() {
@@ -97,9 +96,6 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
         super.periodic();
         sendOdom();
         checkPing();
-        TFMessage msg;
-        if ((msg = m_tfCompactSub.receive()) != null) {
-            System.out.println("TF: " + msg.toString());
-        }
+        m_tfListenerCompact.update();
     }
 }
