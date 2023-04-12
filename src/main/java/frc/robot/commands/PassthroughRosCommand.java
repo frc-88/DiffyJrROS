@@ -45,7 +45,7 @@ public class PassthroughRosCommand extends CommandBase {
             cached = ROSConversions.rosToWpiTwist(msg);
             prevTime = now;
         }
-        if (getTime() - now < TIMEOUT) {
+        if (getTime() - prevTime < TIMEOUT) {
             m_drive.drive(cached);
         } else {
             m_drive.stop();
