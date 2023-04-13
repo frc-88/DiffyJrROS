@@ -7,7 +7,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.diffswerve.DiffSwerveChassis;
 import frc.robot.ros.bridge.JointPublisher;
 import frc.robot.ros.messages.tj2_interfaces.NavX;
 import frc.team88.ros.bridge.BridgePublisher;
@@ -24,6 +23,7 @@ import frc.team88.ros.messages.geometry_msgs.Twist;
 import frc.team88.ros.messages.geometry_msgs.TwistWithCovariance;
 import frc.team88.ros.messages.geometry_msgs.Vector3;
 import frc.team88.ros.messages.nav_msgs.Odometry;
+import frc.team88.ros.messages.std_msgs.Bool;
 import frc.team88.ros.messages.std_msgs.Float64;
 import frc.team88.ros.messages.std_msgs.Header;
 
@@ -81,6 +81,9 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
             "base_link_to_wheel_3_joint"
     };
     private final JointPublisher m_jointPublisher = new JointPublisher(m_ros_interface, "/tj2/joint");
+    private final BridgeSubscriber<Bool> m_fieldRelativeSub = new BridgeSubscriber<>(m_ros_interface,
+            "/tj2/field_relative",
+            Bool.class);
 
     public DiffyJrCoprocessorBridge(
             DriveSubsystem drive) {
@@ -135,6 +138,14 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
         }
     }
 
+    private void checkFieldRelative() {
+        Bool msg;
+        if ((msg = m_fieldRelativeSub.receive()) != null) {
+            m_drive.getSwerve().setFieldRelativeCommands(msg.getData());
+            m_drive.getSwerve().resetFieldOffset();
+        }
+    }
+
     public void slowPeriodic() {
         sendJoints();
     }
@@ -145,6 +156,7 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
         sendOdom();
         sendImu();
         checkPing();
+        checkFieldRelative();
         m_tfListenerCompact.update();
         if (m_updateCounter % SLOW_INTERVAL == 0) {
             slowPeriodic();
