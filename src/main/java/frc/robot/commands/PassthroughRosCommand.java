@@ -16,7 +16,7 @@ public class PassthroughRosCommand extends CommandBase {
     private final DriveSubsystem m_drive;
     private final BridgeSubscriber<Twist> m_twistSub;
     private long prevTime = 0;
-    private final long TIMEOUT = 250_000;
+    private final long TIMEOUT = 30_000_000;
     private ChassisSpeeds cached = new ChassisSpeeds();
 
     /** Creates a new PassthroughRosCommand. */
