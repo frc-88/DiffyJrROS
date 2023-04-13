@@ -4,8 +4,11 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.diffswerve.DiffSwerveChassis;
+import frc.robot.ros.bridge.JointPublisher;
 import frc.robot.ros.messages.tj2_interfaces.NavX;
 import frc.team88.ros.bridge.BridgePublisher;
 import frc.team88.ros.bridge.BridgeSubscriber;
@@ -32,6 +35,8 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
             Constants.COPROCESSOR_ADDRESS,
             Constants.COPROCESSOR_PORT,
             Constants.COPROCESSOR_TABLE_UPDATE_DELAY);
+    private final long SLOW_INTERVAL = 5; // every 5 periodic ticks, slow update is called
+    private long m_updateCounter = 0;
 
     private final BridgeSubscriber<Twist> m_twistSub = new BridgeSubscriber<>(m_ros_interface, "/tj2/cmd_vel",
             Twist.class);
@@ -51,7 +56,7 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
     public final String BASE_FRAME = "base_link";
     public final String IMU_FRAME = "imu";
 
-    private final Odometry odomMsg = new Odometry(new Header(0, new Time(), ODOM_FRAME), BASE_FRAME,
+    private final Odometry m_odomMsg = new Odometry(new Header(0, new Time(), ODOM_FRAME), BASE_FRAME,
             new PoseWithCovariance(new Pose(new Point(0, 0, 0), new Quaternion(0, 0, 0, 1)), new Double[] {
                     5e-2, 0.0, 0.0, 0.0, 0.0, 0.0,
                     0.0, 5e-2, 0.0, 0.0, 0.0, 0.0,
@@ -69,10 +74,22 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
                     0.0, 0.0, 0.0, 0.0, 0.0, 10e-2
             }));
 
+    private final String[] JOINT_NAMES = new String[] {
+            "base_link_to_wheel_0_joint",
+            "base_link_to_wheel_1_joint",
+            "base_link_to_wheel_2_joint",
+            "base_link_to_wheel_3_joint"
+    };
+    private final JointPublisher m_jointPublisher = new JointPublisher(m_ros_interface, "/tj2/joint");
+
     public DiffyJrCoprocessorBridge(
             DriveSubsystem drive) {
         m_drive = drive;
         m_imu = m_drive.getImu();
+
+        for (String name : JOINT_NAMES) {
+            m_jointPublisher.addJoint(name);
+        }
     }
 
     public BridgeSubscriber<Twist> getTwistSub() {
@@ -94,13 +111,13 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
         Pose2d pose = m_drive.getSwerve().getOdometryPose();
         ChassisSpeeds velocity = m_drive.getSwerve().getChassisSpeeds();
 
-        odomMsg.setHeader(m_odomPub.getHeader(ODOM_FRAME));
-        odomMsg.getPose().setPose(ROSConversions.wpiToRosPose(new Pose3d(pose)));
-        odomMsg.getTwist().getTwist()
+        m_odomMsg.setHeader(m_odomPub.getHeader(ODOM_FRAME));
+        m_odomMsg.getPose().setPose(ROSConversions.wpiToRosPose(new Pose3d(pose)));
+        m_odomMsg.getTwist().getTwist()
                 .setLinear(new Vector3(velocity.vxMetersPerSecond, velocity.vyMetersPerSecond, 0.0));
-        odomMsg.getTwist().getTwist().setAngular(new Vector3(0.0, 0.0, velocity.omegaRadiansPerSecond));
+        m_odomMsg.getTwist().getTwist().setAngular(new Vector3(0.0, 0.0, velocity.omegaRadiansPerSecond));
 
-        m_odomPub.send(odomMsg);
+        m_odomPub.send(m_odomMsg);
     }
 
     private void sendImu() {
@@ -110,6 +127,18 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
                 new Vector3(m_imu.getAccelX(), m_imu.getAccelY(), m_imu.getAccelZ())));
     }
 
+    private void sendJoints() {
+        SwerveModuleState[] states = m_drive.getSwerve().getModuleStates();
+        for (int moduleIndex = 0; moduleIndex < states.length; moduleIndex++) {
+            SwerveModuleState state = states[moduleIndex];
+            m_jointPublisher.sendJointPosition(JOINT_NAMES[moduleIndex], state.angle.getRadians());
+        }
+    }
+
+    public void slowPeriodic() {
+        sendJoints();
+    }
+
     @Override
     public void periodic() {
         super.periodic();
@@ -117,5 +146,9 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
         sendImu();
         checkPing();
         m_tfListenerCompact.update();
+        if (m_updateCounter % SLOW_INTERVAL == 0) {
+            slowPeriodic();
+        }
+        m_updateCounter++;
     }
 }
