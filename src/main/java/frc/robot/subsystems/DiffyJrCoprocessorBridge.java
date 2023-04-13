@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.ros.bridge.JointPublisher;
@@ -31,25 +32,18 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
     private final DriveSubsystem m_drive;
     private final frc.robot.diffswerve.NavX m_imu;
 
-    private final ROSNetworkTablesBridge m_ros_interface = new ROSNetworkTablesBridge(
-            Constants.COPROCESSOR_ADDRESS,
-            Constants.COPROCESSOR_PORT,
-            Constants.COPROCESSOR_TABLE_UPDATE_DELAY);
+    private final ROSNetworkTablesBridge m_ros_interface;
     private final long SLOW_INTERVAL = 5; // every 5 periodic ticks, slow update is called
     private long m_updateCounter = 0;
 
-    private final BridgeSubscriber<Twist> m_twistSub = new BridgeSubscriber<>(m_ros_interface, "/tj2/cmd_vel",
-            Twist.class);
-    private final BridgeSubscriber<Float64> m_pingSendSub = new BridgeSubscriber<>(m_ros_interface,
-            "/tj2/ping_send",
-            Float64.class);
+    private final BridgeSubscriber<Twist> m_twistSub;
+    private final BridgeSubscriber<Float64> m_pingSendSub;
 
-    private final BridgePublisher<Odometry> m_odomPub = new BridgePublisher<>(m_ros_interface, "/tj2/odom");
-    private final BridgePublisher<NavX> m_imuPub = new BridgePublisher<>(m_ros_interface, "/tj2/imu");
-    private final BridgePublisher<Float64> m_pingReturnPub = new BridgePublisher<>(m_ros_interface,
-            "/tj2/ping_return");
+    private final BridgePublisher<Odometry> m_odomPub;
+    private final BridgePublisher<NavX> m_imuPub;
+    private final BridgePublisher<Float64> m_pingReturnPub;
 
-    private final TFListenerCompact m_tfListenerCompact = new TFListenerCompact(m_ros_interface, "/tf_compact");
+    private final TFListenerCompact m_tfListenerCompact;
 
     public final String MAP_FRAME = "map";
     public final String ODOM_FRAME = "odom";
@@ -80,13 +74,27 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
             "base_link_to_wheel_2_joint",
             "base_link_to_wheel_3_joint"
     };
-    private final JointPublisher m_jointPublisher = new JointPublisher(m_ros_interface, "/tj2/joint");
-    private final BridgeSubscriber<Bool> m_fieldRelativeSub = new BridgeSubscriber<>(m_ros_interface,
-            "/tj2/field_relative",
-            Bool.class);
+    private final JointPublisher m_jointPublisher;
+    private final BridgeSubscriber<Bool> m_fieldRelativeSub;
 
     public DiffyJrCoprocessorBridge(
             DriveSubsystem drive) {
+        NetworkTableInstance instance = NetworkTableInstance.create();
+        instance.startClient3("bridge");
+        instance.setServer(Constants.COPROCESSOR_ADDRESS, Constants.COPROCESSOR_PORT);
+        m_ros_interface = new ROSNetworkTablesBridge(instance.getTable(""), Constants.COPROCESSOR_TABLE_UPDATE_DELAY);
+
+        m_twistSub = new BridgeSubscriber<>(m_ros_interface, "/tj2/cmd_vel", Twist.class);
+        m_pingSendSub = new BridgeSubscriber<>(m_ros_interface, "/tj2/ping_send", Float64.class);
+        m_fieldRelativeSub = new BridgeSubscriber<>(m_ros_interface, "/tj2/field_relative", Bool.class);
+
+        m_odomPub = new BridgePublisher<>(m_ros_interface, "/tj2/odom");
+        m_imuPub = new BridgePublisher<>(m_ros_interface, "/tj2/imu");
+        m_pingReturnPub = new BridgePublisher<>(m_ros_interface, "/tj2/ping_return");
+        m_jointPublisher = new JointPublisher(m_ros_interface, "/tj2/joint");
+
+        m_tfListenerCompact = new TFListenerCompact(m_ros_interface, "/tf_compact");
+
         m_drive = drive;
         m_imu = m_drive.getImu();
 
