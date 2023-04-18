@@ -7,7 +7,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.ros.bridge.JointPublisher;
 import frc.robot.ros.messages.tj2_interfaces.NavX;
 import frc.team88.ros.bridge.BridgePublisher;
@@ -79,19 +78,17 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
 
     public DiffyJrCoprocessorBridge(
             DriveSubsystem drive) {
-        NetworkTableInstance instance = NetworkTableInstance.create();
-        instance.startClient3("bridge");
-        instance.setServer(Constants.COPROCESSOR_ADDRESS, Constants.COPROCESSOR_PORT);
-        m_ros_interface = new ROSNetworkTablesBridge(instance.getTable(""), Constants.COPROCESSOR_TABLE_UPDATE_DELAY);
+        NetworkTableInstance instance = NetworkTableInstance.getDefault();
+        m_ros_interface = new ROSNetworkTablesBridge(instance.getTable(""), 0.02);
 
-        m_twistSub = new BridgeSubscriber<>(m_ros_interface, "/tj2/cmd_vel", Twist.class);
-        m_pingSendSub = new BridgeSubscriber<>(m_ros_interface, "/tj2/ping_send", Float64.class);
-        m_fieldRelativeSub = new BridgeSubscriber<>(m_ros_interface, "/tj2/field_relative", Bool.class);
+        m_twistSub = new BridgeSubscriber<>(m_ros_interface, "cmd_vel", Twist.class);
+        m_pingSendSub = new BridgeSubscriber<>(m_ros_interface, "ping_send", Float64.class);
+        m_fieldRelativeSub = new BridgeSubscriber<>(m_ros_interface, "field_relative", Bool.class);
 
-        m_odomPub = new BridgePublisher<>(m_ros_interface, "/tj2/odom");
-        m_imuPub = new BridgePublisher<>(m_ros_interface, "/tj2/imu");
-        m_pingReturnPub = new BridgePublisher<>(m_ros_interface, "/tj2/ping_return");
-        m_jointPublisher = new JointPublisher(m_ros_interface, "/tj2/joint");
+        m_odomPub = new BridgePublisher<>(m_ros_interface, "odom");
+        m_imuPub = new BridgePublisher<>(m_ros_interface, "imu");
+        m_pingReturnPub = new BridgePublisher<>(m_ros_interface, "ping_return");
+        m_jointPublisher = new JointPublisher(m_ros_interface, "joint");
 
         m_tfListenerCompact = new TFListenerCompact(m_ros_interface, "/tf_compact");
 
