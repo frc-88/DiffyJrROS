@@ -29,7 +29,7 @@ public class PreferenceConstants {
      * Registers an updatable constant to be updated.
      * 
      * @param constant
-     *                     The constant to be registered
+     *                 The constant to be registered
      */
     protected static void addUpdatableConstant(UpdatableConstant constant) {
         if (Objects.isNull(updatableConstants)) {

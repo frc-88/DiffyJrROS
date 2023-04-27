@@ -29,7 +29,7 @@ public interface PreferenceConstant<T> extends UpdatableConstant {
      * change handler.
      * 
      * @param value
-     *                  The value to set.
+     *              The value to set.
      */
     public void setValue(T value);
 

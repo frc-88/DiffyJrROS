@@ -27,6 +27,7 @@ import frc.team88.ros.messages.geometry_msgs.TwistWithCovariance;
 import frc.team88.ros.messages.geometry_msgs.Vector3;
 import frc.team88.ros.messages.nav_msgs.Odometry;
 import frc.team88.ros.messages.std_msgs.Bool;
+import frc.team88.ros.messages.std_msgs.Empty;
 import frc.team88.ros.messages.std_msgs.Float64;
 import frc.team88.ros.messages.std_msgs.Header;
 
@@ -47,13 +48,14 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
     private final BridgePublisher<Float64> m_pingReturnPub;
     private final BridgePublisher<Match> m_matchPub;
     private final BridgePublisher<MatchPeriod> m_matchPeriodPub;
+    private final BridgePublisher<Empty> m_startBagPub;
 
     private final TFListenerCompact m_tfListenerCompact;
 
-    public final String MAP_FRAME = "map";
-    public final String ODOM_FRAME = "odom";
-    public final String BASE_FRAME = "base_link";
-    public final String IMU_FRAME = "imu";
+    public static final String MAP_FRAME = "map";
+    public static final String ODOM_FRAME = "odom";
+    public static final String BASE_FRAME = "base_link";
+    public static final String IMU_FRAME = "imu";
 
     private final Odometry m_odomMsg = new Odometry(new Header(0, new Time(), ODOM_FRAME), BASE_FRAME,
             new PoseWithCovariance(new Pose(new Point(0, 0, 0), new Quaternion(0, 0, 0, 1)), new Double[] {
@@ -97,6 +99,7 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
         m_jointPublisher = new JointPublisher(m_ros_interface, "joint");
         m_matchPub = new BridgePublisher<>(m_ros_interface, "match");
         m_matchPeriodPub = new BridgePublisher<>(m_ros_interface, "match_period");
+        m_startBagPub = new BridgePublisher<>(m_ros_interface, "start_bag");
 
         m_tfListenerCompact = new TFListenerCompact(m_ros_interface, "/tf_compact");
 
@@ -107,6 +110,10 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
             m_jointPublisher.addJoint(name);
         }
     }
+
+    // ---
+    // Subscription updates
+    // ---
 
     public BridgeSubscriber<Twist> getTwistSub() {
         return m_twistSub;
@@ -122,6 +129,18 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
             m_pingReturnPub.send(ping);
         }
     }
+
+    private void checkFieldRelative() {
+        Bool msg;
+        if ((msg = m_fieldRelativeSub.receive()) != null) {
+            m_drive.getSwerve().setFieldRelativeCommands(msg.getData());
+            m_drive.getSwerve().resetFieldOffset();
+        }
+    }
+
+    // ---
+    // Publication updates
+    // ---
 
     private void sendOdom() {
         Pose2d pose = m_drive.getSwerve().getOdometryPose();
@@ -174,13 +193,13 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
                 m_matchPeriod));
     }
 
-    private void checkFieldRelative() {
-        Bool msg;
-        if ((msg = m_fieldRelativeSub.receive()) != null) {
-            m_drive.getSwerve().setFieldRelativeCommands(msg.getData());
-            m_drive.getSwerve().resetFieldOffset();
-        }
+    public void startBag() {
+        m_startBagPub.send(new Empty());
     }
+
+    // ---
+    // Periodics
+    // ---
 
     public void slowPeriodic() {
         sendJoints();

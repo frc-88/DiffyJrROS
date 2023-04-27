@@ -16,10 +16,10 @@ public class DoublePreferenceConstant extends BasePreferenceConstant<Double> {
      * Constructor. Will call update() once.
      * 
      * @param name
-     *                         The name to be used as a key in WPILib preferences
+     *                     The name to be used as a key in WPILib preferences
      * @param defaultValue
-     *                         The value that will be set as default if the value
-     *                         doesn't exist in WPILib preferences
+     *                     The value that will be set as default if the value
+     *                     doesn't exist in WPILib preferences
      */
     public DoublePreferenceConstant(String name, double defaultValue) {
         this.name = Objects.requireNonNull(name);

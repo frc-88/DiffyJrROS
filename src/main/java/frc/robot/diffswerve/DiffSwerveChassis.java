@@ -165,6 +165,10 @@ public class DiffSwerveChassis {
         return odometry.getPoseMeters();
     }
 
+    public SwerveDriveKinematics getSwerveKinematics() {
+        return kinematics;
+    }
+
     public void resetOdom(Pose2d pose) {
         frontLeft.resetPosition(new SwerveModulePosition());
         backLeft.resetPosition(new SwerveModulePosition());
@@ -172,10 +176,9 @@ public class DiffSwerveChassis {
         frontRight.resetPosition(new SwerveModulePosition());
         updateModulePositions();
         odometry.resetPosition(
-            getHeading(),
-            modulePositions,
-            pose
-        );
+                getHeading(),
+                modulePositions,
+                pose);
     }
 
     public void resetFieldOffset() {
@@ -188,11 +191,10 @@ public class DiffSwerveChassis {
 
     public ChassisSpeeds getChassisSpeeds() {
         return kinematics.toChassisSpeeds(
-            frontLeft.getState(),
-            backLeft.getState(),
-            backRight.getState(),
-            frontRight.getState()
-        );
+                frontLeft.getState(),
+                backLeft.getState(),
+                backRight.getState(),
+                frontRight.getState());
     }
 
     public double getChassisSpeed() {

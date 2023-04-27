@@ -16,10 +16,10 @@ public class BooleanPreferenceConstant extends BasePreferenceConstant<Boolean> {
      * Constructor. Will call update() once.
      * 
      * @param name
-     *                         The name to be used as a key in WPILib preferences
+     *                     The name to be used as a key in WPILib preferences
      * @param defaultValue
-     *                         The value that will be set as default if the value
-     *                         doesn't exist in WPILib preferences
+     *                     The value that will be set as default if the value
+     *                     doesn't exist in WPILib preferences
      */
     public BooleanPreferenceConstant(String name, boolean defaultValue) {
         this.name = Objects.requireNonNull(name);
