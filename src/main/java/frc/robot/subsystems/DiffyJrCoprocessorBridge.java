@@ -6,9 +6,12 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.ros.bridge.JointPublisher;
 import frc.robot.ros.messages.tj2_interfaces.NavX;
+import frc.robot.ros.messages.tj2_interfaces.Match;
+import frc.robot.ros.messages.tj2_interfaces.MatchPeriod;
 import frc.team88.ros.bridge.BridgePublisher;
 import frc.team88.ros.bridge.BridgeSubscriber;
 import frc.team88.ros.bridge.ROSNetworkTablesBridge;
@@ -34,6 +37,7 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
     private final ROSNetworkTablesBridge m_ros_interface;
     private final long SLOW_INTERVAL = 5; // every 5 periodic ticks, slow update is called
     private long m_updateCounter = 0;
+    private MatchPeriod m_matchPeriod = new MatchPeriod(MatchPeriod.DISABLED);
 
     private final BridgeSubscriber<Twist> m_twistSub;
     private final BridgeSubscriber<Float64> m_pingSendSub;
@@ -41,6 +45,8 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
     private final BridgePublisher<Odometry> m_odomPub;
     private final BridgePublisher<NavX> m_imuPub;
     private final BridgePublisher<Float64> m_pingReturnPub;
+    private final BridgePublisher<Match> m_matchPub;
+    private final BridgePublisher<MatchPeriod> m_matchPeriodPub;
 
     private final TFListenerCompact m_tfListenerCompact;
 
@@ -89,6 +95,8 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
         m_imuPub = new BridgePublisher<>(m_ros_interface, "imu");
         m_pingReturnPub = new BridgePublisher<>(m_ros_interface, "ping_return");
         m_jointPublisher = new JointPublisher(m_ros_interface, "joint");
+        m_matchPub = new BridgePublisher<>(m_ros_interface, "match");
+        m_matchPeriodPub = new BridgePublisher<>(m_ros_interface, "match_period");
 
         m_tfListenerCompact = new TFListenerCompact(m_ros_interface, "/tf_compact");
 
@@ -143,6 +151,29 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
         }
     }
 
+    public void sendDisableMatchPeriod() {
+        m_matchPeriod = new MatchPeriod(MatchPeriod.DISABLED);
+        m_matchPeriodPub.send(m_matchPeriod);
+    }
+
+    public void sendAutonomousMatchPeriod() {
+        m_matchPeriod = new MatchPeriod(MatchPeriod.AUTONOMOUS);
+        m_matchPeriodPub.send(m_matchPeriod);
+    }
+
+    public void sendTeleopMatchPeriod() {
+        m_matchPeriod = new MatchPeriod(MatchPeriod.TELEOP);
+        m_matchPeriodPub.send(m_matchPeriod);
+    }
+
+    private void sendMatch() {
+        m_matchPub.send(new Match(
+                DriverStation.getMatchTime(),
+                DriverStation.getAlliance().name(),
+                (byte) DriverStation.getLocation(),
+                m_matchPeriod));
+    }
+
     private void checkFieldRelative() {
         Bool msg;
         if ((msg = m_fieldRelativeSub.receive()) != null) {
@@ -153,6 +184,7 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
 
     public void slowPeriodic() {
         sendJoints();
+        sendMatch();
     }
 
     @Override
