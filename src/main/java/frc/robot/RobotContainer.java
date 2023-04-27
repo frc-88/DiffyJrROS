@@ -6,15 +6,19 @@ package frc.robot;
 
 import frc.robot.commands.CoastDriveMotors;
 import frc.robot.commands.DriveSwerveJoystickCommand;
+import frc.robot.commands.FollowTrajectory;
 import frc.robot.commands.PassthroughRosCommand;
+import frc.robot.localization.Localization;
+import frc.robot.localization.ROSLocalization;
 import frc.robot.subsystems.DiffyJrCoprocessorBridge;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.SwerveJoystick;
 import frc.robot.subsystems.SwerveJoystick.SwerveControllerType;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -31,6 +35,7 @@ public class RobotContainer {
     private final DriveSubsystem m_drive = new DriveSubsystem();
     private final SwerveJoystick m_joystick = new SwerveJoystick(SwerveControllerType.NT);
     private final DiffyJrCoprocessorBridge m_bridge = new DiffyJrCoprocessorBridge(m_drive);
+    private final Localization m_localization = new ROSLocalization(m_drive, m_bridge);
 
     private final CommandBase m_joystickDriveCommand = new DriveSwerveJoystickCommand(m_drive, m_joystick);
     private final CommandBase m_passthroughRosCommand = new PassthroughRosCommand(m_drive, m_bridge.getTwistSub());
@@ -49,15 +54,8 @@ public class RobotContainer {
 
     private void configureDriveCommand() {
         m_drive.setDefaultCommand(m_passthroughRosCommand);
-        // m_drive.setDefaultCommand(m_joystickDriveCommand);
         m_joystick.getLeftTriggerButton().whileTrue(m_joystickDriveCommand);
-        // m_joystick.getRightTriggerButton().whileTrue(m_passthroughRosCommand);
-        // m_joystick.getLeftTriggerButton().whileTrue(new PointToCenterDriveCommand(
-        // m_drive, m_ros_interface, m_joystick,
-        // frc.robot.util.diffswerve.Constants.DriveTrain.MAX_CHASSIS_ANG_VEL * 0.75)
-        // );
         userButton.whileTrue(new CoastDriveMotors(m_drive));
-        // userButton.whileTrue(new TestDiffSwerveMotors(m_drive));
     }
 
     private void configurePeriodics(Robot robot) {
@@ -81,6 +79,6 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return new WaitCommand(15.0);
+        return new FollowTrajectory(m_drive, m_localization, new Pose2d(1.0, 0.0, new Rotation2d()));
     }
 }

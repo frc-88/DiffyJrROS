@@ -8,9 +8,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.diffswerve.Constants;
-import frc.robot.controllers.Helpers;
-import frc.robot.controllers.NetworkTablesJoystick;
-import frc.robot.controllers.XboxController;
+import frc.robot.driverinput.Helpers;
+import frc.robot.driverinput.NetworkTablesJoystick;
+import frc.robot.driverinput.XboxController;
 
 public class SwerveJoystick extends SubsystemBase {
     public enum SwerveControllerType {
