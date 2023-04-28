@@ -17,7 +17,9 @@ import frc.team88.ros.bridge.BridgeSubscriber;
 import frc.team88.ros.bridge.ROSNetworkTablesBridge;
 import frc.team88.ros.conversions.ROSConversions;
 import frc.team88.ros.conversions.TFListenerCompact;
-import frc.team88.ros.messages.Time;
+import frc.team88.ros.messages.std_msgs.Time;
+import frc.team88.ros.messages.DurationPrimitive;
+import frc.team88.ros.messages.TimePrimitive;
 import frc.team88.ros.messages.geometry_msgs.Point;
 import frc.team88.ros.messages.geometry_msgs.Pose;
 import frc.team88.ros.messages.geometry_msgs.PoseWithCovariance;
@@ -27,7 +29,6 @@ import frc.team88.ros.messages.geometry_msgs.TwistWithCovariance;
 import frc.team88.ros.messages.geometry_msgs.Vector3;
 import frc.team88.ros.messages.nav_msgs.Odometry;
 import frc.team88.ros.messages.std_msgs.Bool;
-import frc.team88.ros.messages.std_msgs.Empty;
 import frc.team88.ros.messages.std_msgs.Float64;
 import frc.team88.ros.messages.std_msgs.Header;
 
@@ -48,7 +49,7 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
     private final BridgePublisher<Float64> m_pingReturnPub;
     private final BridgePublisher<Match> m_matchPub;
     private final BridgePublisher<MatchPeriod> m_matchPeriodPub;
-    private final BridgePublisher<Empty> m_startBagPub;
+    private final BridgePublisher<frc.team88.ros.messages.std_msgs.Time> m_startBagPub;
 
     private final TFListenerCompact m_tfListenerCompact;
 
@@ -57,7 +58,7 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
     public static final String BASE_FRAME = "base_link";
     public static final String IMU_FRAME = "imu";
 
-    private final Odometry m_odomMsg = new Odometry(new Header(0, new Time(), ODOM_FRAME), BASE_FRAME,
+    private final Odometry m_odomMsg = new Odometry(new Header(0, new TimePrimitive(), ODOM_FRAME), BASE_FRAME,
             new PoseWithCovariance(new Pose(new Point(0, 0, 0), new Quaternion(0, 0, 0, 1)), new Double[] {
                     5e-2, 0.0, 0.0, 0.0, 0.0, 0.0,
                     0.0, 5e-2, 0.0, 0.0, 0.0, 0.0,
@@ -87,6 +88,7 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
     public DiffyJrCoprocessorBridge(
             DriveSubsystem drive) {
         NetworkTableInstance instance = NetworkTableInstance.getDefault();
+
         m_ros_interface = new ROSNetworkTablesBridge(instance.getTable(""), 0.02);
 
         m_twistSub = new BridgeSubscriber<>(m_ros_interface, "cmd_vel", Twist.class);
@@ -194,7 +196,8 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
     }
 
     public void startBag() {
-        m_startBagPub.send(new Empty());
+        TimePrimitive now = m_startBagPub.getNow();
+        m_startBagPub.send(new Time(now));
     }
 
     // ---

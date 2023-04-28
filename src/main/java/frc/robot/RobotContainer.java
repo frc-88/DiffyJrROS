@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -69,6 +70,19 @@ public class RobotContainer {
         m_drive.setCoast(!enabled);
     }
 
+    public void disabledInit() {
+        m_bridge.sendDisableMatchPeriod();
+    }
+
+    public void autonomousInit() {
+        m_bridge.startBag();
+        m_bridge.sendAutonomousMatchPeriod();
+    }
+
+    public void teleopInit() {
+        m_bridge.sendTeleopMatchPeriod();
+    }
+
     public void disabledPeriodic() {
 
     }
@@ -79,6 +93,8 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return new FollowTrajectory(m_drive, m_localization, new Pose2d(1.0, 0.0, new Rotation2d()));
+        // return new FollowTrajectory(m_drive, m_localization, new Pose2d(1.0, 0.0, new
+        // Rotation2d()));
+        return new WaitCommand(15.0);
     }
 }
