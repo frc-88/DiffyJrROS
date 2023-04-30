@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -33,6 +34,7 @@ import frc.robot.trajectory.CustomHolonomicDriveController;
 import frc.robot.trajectory.CustomTrajectoryGenerator;
 import frc.robot.trajectory.RotationSequence;
 import frc.robot.trajectory.Waypoint;
+import frc.robot.trajectory.custompathweaver.CustomPathweaverLoader;
 
 public class FollowTrajectory extends CommandBase {
     private final DriveSubsystem drive;
@@ -51,6 +53,16 @@ public class FollowTrajectory extends CommandBase {
 
     private final CustomHolonomicDriveController driveController = new CustomHolonomicDriveController(
             xController, yController, thetaController);
+
+    public FollowTrajectory(
+            DriveSubsystem drive,
+            Localization localization) {
+        this.drive = drive;
+        this.localization = localization;
+        this.trajectory = new Trajectory();
+        this.rotationSequence = new RotationSequence(new TreeMap<>());
+        addRequirements(drive);
+    }
 
     public FollowTrajectory(
             DriveSubsystem drive,
@@ -118,6 +130,7 @@ public class FollowTrajectory extends CommandBase {
             trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
         } catch (IOException ex) {
             DriverStation.reportError("Unable to open trajectory: " + filePath, ex.getStackTrace());
+            return new FollowTrajectory(drive, localization);
         }
         trajectory = trajectory.transformBy(new Transform2d(new Pose2d(), origin));
         TreeMap<Double, Rotation2d> holonomicWaypoints = new TreeMap<>();
@@ -127,6 +140,22 @@ public class FollowTrajectory extends CommandBase {
         }
 
         RotationSequence rotationSequence = new RotationSequence(holonomicWaypoints);
+        return new FollowTrajectory(drive, localization, trajectory, rotationSequence);
+    }
+
+    public static FollowTrajectory fromJSONHolonomic(DriveSubsystem drive, Localization localization, String filePath,
+            Pose2d origin) {
+        filePath = "pathplanner/generatedJSON/" + filePath;
+        Pair<Trajectory, RotationSequence> data;
+        try {
+            Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(filePath);
+            data = CustomPathweaverLoader.fromPathweaverJson(trajectoryPath);
+        } catch (IOException ex) {
+            DriverStation.reportError("Unable to open trajectory: " + filePath, ex.getStackTrace());
+            return new FollowTrajectory(drive, localization);
+        }
+        Trajectory trajectory = data.getFirst().transformBy(new Transform2d(new Pose2d(), origin));
+        RotationSequence rotationSequence = data.getSecond();
         return new FollowTrajectory(drive, localization, trajectory, rotationSequence);
     }
 

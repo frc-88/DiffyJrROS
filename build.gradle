@@ -75,7 +75,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
-    // implementation 'com.github.frc-88:ROSNetworkTablesBridge:v0.0.8-alpha'
+    implementation 'com.github.frc-88:ROSNetworkTablesBridge:v0.0.9-alpha'
 }
 
 test {
