@@ -5,6 +5,8 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -18,16 +20,18 @@ import frc.team88.ros.bridge.ROSNetworkTablesBridge;
 import frc.team88.ros.conversions.ROSConversions;
 import frc.team88.ros.conversions.TFListenerCompact;
 import frc.team88.ros.messages.std_msgs.Time;
-import frc.team88.ros.messages.DurationPrimitive;
 import frc.team88.ros.messages.TimePrimitive;
 import frc.team88.ros.messages.geometry_msgs.Point;
 import frc.team88.ros.messages.geometry_msgs.Pose;
+import frc.team88.ros.messages.geometry_msgs.PoseArray;
+import frc.team88.ros.messages.geometry_msgs.PoseStamped;
 import frc.team88.ros.messages.geometry_msgs.PoseWithCovariance;
 import frc.team88.ros.messages.geometry_msgs.Quaternion;
 import frc.team88.ros.messages.geometry_msgs.Twist;
 import frc.team88.ros.messages.geometry_msgs.TwistWithCovariance;
 import frc.team88.ros.messages.geometry_msgs.Vector3;
 import frc.team88.ros.messages.nav_msgs.Odometry;
+import frc.team88.ros.messages.nav_msgs.Path;
 import frc.team88.ros.messages.std_msgs.Bool;
 import frc.team88.ros.messages.std_msgs.Float64;
 import frc.team88.ros.messages.std_msgs.Header;
@@ -49,7 +53,7 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
     private final BridgePublisher<Float64> m_pingReturnPub;
     private final BridgePublisher<Match> m_matchPub;
     private final BridgePublisher<MatchPeriod> m_matchPeriodPub;
-    private final BridgePublisher<frc.team88.ros.messages.std_msgs.Time> m_startBagPub;
+    private final BridgePublisher<Time> m_startBagPub;
 
     private final TFListenerCompact m_tfListenerCompact;
 
@@ -84,6 +88,7 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
     };
     private final JointPublisher m_jointPublisher;
     private final BridgeSubscriber<Bool> m_fieldRelativeSub;
+    private final BridgePublisher<Path> m_autoPathPub;
 
     public DiffyJrCoprocessorBridge(
             DriveSubsystem drive) {
@@ -102,6 +107,7 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
         m_matchPub = new BridgePublisher<>(m_ros_interface, "match");
         m_matchPeriodPub = new BridgePublisher<>(m_ros_interface, "match_period");
         m_startBagPub = new BridgePublisher<>(m_ros_interface, "start_bag");
+        m_autoPathPub = new BridgePublisher<>(m_ros_interface, "auto/path");
 
         m_tfListenerCompact = new TFListenerCompact(m_ros_interface, "/tf_compact");
 
@@ -198,6 +204,17 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
     public void startBag() {
         TimePrimitive now = m_startBagPub.getNow();
         m_startBagPub.send(new Time(now));
+    }
+
+    public void sendAutoInfo(Trajectory trajectory) {
+        Path path = new Path();
+        Header header = m_autoPathPub.getHeader(MAP_FRAME);
+        path.setHeader(header);
+        for (State state : trajectory.getStates()) {
+            Pose pose3d = ROSConversions.wpiToRosPose(new Pose3d(state.poseMeters));
+            path.getPoses().add(new PoseStamped(header, pose3d));
+        }
+        m_autoPathPub.send(path);
     }
 
     // ---

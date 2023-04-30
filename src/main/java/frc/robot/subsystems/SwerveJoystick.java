@@ -36,6 +36,22 @@ public class SwerveJoystick extends SubsystemBase {
         }
     }
 
+    public Trigger getAButton() {
+        if (m_type == SwerveControllerType.NT) {
+            return this.nt_gamepad.getButton("A");
+        } else {
+            return new Trigger(() -> this.xbox_gamepad.isButtonAPressed());
+        }
+    }
+
+    public Trigger getBButton() {
+        if (m_type == SwerveControllerType.NT) {
+            return this.nt_gamepad.getButton("B");
+        } else {
+            return new Trigger(() -> this.xbox_gamepad.isButtonBPressed());
+        }
+    }
+
     public Trigger getRightTriggerButton() {
         if (m_type == SwerveControllerType.NT) {
             return this.nt_gamepad.getButton("RT");

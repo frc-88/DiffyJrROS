@@ -18,6 +18,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryUtil;
+import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.math.trajectory.constraint.CentripetalAccelerationConstraint;
 import edu.wpi.first.math.trajectory.constraint.TrajectoryConstraint;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -103,8 +104,7 @@ public class FollowTrajectory extends CommandBase {
         addRequirements(drive);
     }
 
-    public static FollowTrajectory fromJSON(DriveSubsystem drive, Localization localization, String filePath,
-            Rotation2d startRotation, Rotation2d endRotation) {
+    public static FollowTrajectory fromJSON(DriveSubsystem drive, Localization localization, String filePath) {
         filePath = "pathplanner/generatedJSON/" + filePath;
         Trajectory trajectory = new Trajectory();
         try {
@@ -115,11 +115,9 @@ public class FollowTrajectory extends CommandBase {
         }
         TreeMap<Double, Rotation2d> holonomicWaypoints = new TreeMap<>();
 
-        // rotation at t = 0.0 seconds
-        holonomicWaypoints.put(0.0, startRotation);
-
-        // rotation at t = end of trajectory seconds
-        holonomicWaypoints.put(trajectory.getTotalTimeSeconds(), endRotation);
+        for (State state : trajectory.getStates()) {
+            holonomicWaypoints.put(state.timeSeconds, state.poseMeters.getRotation());
+        }
 
         RotationSequence rotationSequence = new RotationSequence(holonomicWaypoints);
         return new FollowTrajectory(drive, localization, trajectory, rotationSequence);
@@ -138,6 +136,14 @@ public class FollowTrajectory extends CommandBase {
 
     private Pose2d getPose() {
         return this.localization.getPose();
+    }
+
+    public Trajectory getTrajectory() {
+        return trajectory;
+    }
+
+    public RotationSequence getRotationSequence() {
+        return rotationSequence;
     }
 
     // Called when the command is initially scheduled.

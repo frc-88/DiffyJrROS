@@ -5,20 +5,26 @@
 package frc.robot;
 
 import frc.robot.commands.CoastDriveMotors;
-import frc.robot.commands.DriveSwerveJoystickCommand;
 import frc.robot.commands.FollowTrajectory;
-import frc.robot.commands.PassthroughRosCommand;
+import frc.robot.commands.SwitchableJoystickCommand;
+import frc.robot.commands.SwitchableJoystickCommand.JoystickType;
 import frc.robot.localization.Localization;
 import frc.robot.localization.ROSLocalization;
+import frc.robot.preferenceconstants.IntPreferenceConstant;
+import frc.robot.preferenceconstants.StringPreferenceConstant;
 import frc.robot.subsystems.DiffyJrCoprocessorBridge;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.SwerveJoystick;
 import frc.robot.subsystems.SwerveJoystick.SwerveControllerType;
+
+import java.util.Map;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -34,13 +40,18 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
     // The robot's subsystems and commands are defined here...
     private final DriveSubsystem m_drive = new DriveSubsystem();
-    private final SwerveJoystick m_joystick = new SwerveJoystick(SwerveControllerType.NT);
+    private final SwerveJoystick m_joystick = new SwerveJoystick(SwerveControllerType.XBOX);
     private final DiffyJrCoprocessorBridge m_bridge = new DiffyJrCoprocessorBridge(m_drive);
     private final Localization m_localization = new ROSLocalization(m_drive, m_bridge);
 
-    private final CommandBase m_joystickDriveCommand = new DriveSwerveJoystickCommand(m_drive, m_joystick);
-    private final CommandBase m_passthroughRosCommand = new PassthroughRosCommand(m_drive, m_bridge.getTwistSub());
+    private final IntPreferenceConstant joystickPreferenceConstant = new IntPreferenceConstant("joystick", 0);
+    private final CommandBase m_switchableJoystickCommand = new SwitchableJoystickCommand(m_drive,
+            m_bridge.getTwistSub(), m_joystick, this::getJoystickType);
     private Trigger userButton = new Trigger(() -> RobotController.getUserButton());
+
+    private final StringPreferenceConstant m_autonomousPreferenceConstant = new StringPreferenceConstant("auto", "");
+    private String m_selectedAutonomous = "";
+    private Map<String, CommandBase> m_autos;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -53,15 +64,61 @@ public class RobotContainer {
         System.out.println("RobotContainer initialization complete");
     }
 
+    private JoystickType getJoystickType() {
+        switch (joystickPreferenceConstant.getValue()) {
+            case 0:
+                return JoystickType.ROS;
+            case 1:
+                return JoystickType.LOCAL;
+            default:
+                return JoystickType.ROS;
+        }
+    }
+
     private void configureDriveCommand() {
-        m_drive.setDefaultCommand(m_passthroughRosCommand);
-        m_joystick.getLeftTriggerButton().whileTrue(m_joystickDriveCommand);
+        m_drive.setDefaultCommand(m_switchableJoystickCommand);
         userButton.whileTrue(new CoastDriveMotors(m_drive));
+
+        Trigger toggleFieldRelative = m_joystick.getBButton();
+        toggleFieldRelative.onTrue(new InstantCommand(() -> {
+            boolean new_state = !m_drive.getSwerve().commandsAreFieldRelative();
+            System.out.println("Setting field relative commands to " + new_state);
+            m_drive.getSwerve().setFieldRelativeCommands(new_state);
+        }));
+        m_autos = Map.of(
+                "square", FollowTrajectory.fromJSON(m_drive, m_localization, "SquareGarage.path.json"),
+                "apartment", FollowTrajectory.fromJSON(m_drive, m_localization, "Apartment.path.json"),
+                "straight", new FollowTrajectory(m_drive, m_localization, new Pose2d(1.0, 0.0, new Rotation2d())),
+                "", new WaitCommand(15.0));
     }
 
     private void configurePeriodics(Robot robot) {
         robot.addPeriodic(m_drive.getSwerve()::controllerPeriodic,
                 frc.robot.diffswerve.Constants.DifferentialSwerveModule.kDt, 0.0025);
+        robot.addPeriodic(this::updateSelectedAuto, 0.5);
+    }
+
+    private void updateSelectedAuto() {
+        String value = m_autonomousPreferenceConstant.getValue();
+        if (!setSelectedAuto(value)) {
+            System.out.println("Invalid auto supplied: " + value);
+        }
+    }
+
+    private boolean setSelectedAuto(String value) {
+        if (!m_autos.containsKey(value)) {
+            return false;
+        }
+        if (m_selectedAutonomous != value) {
+            System.out.println("Selecting auto: " + value);
+            CommandBase cmd = m_autos.get(m_selectedAutonomous);
+            if (cmd instanceof FollowTrajectory) {
+                FollowTrajectory follow = (FollowTrajectory) (cmd);
+                m_bridge.sendAutoInfo(follow.getTrajectory());
+            }
+        }
+        m_selectedAutonomous = value;
+        return true;
     }
 
     public void setEnableDrive(boolean enabled) {
@@ -75,7 +132,7 @@ public class RobotContainer {
     }
 
     public void autonomousInit() {
-        m_bridge.startBag();
+        // m_bridge.startBag();
         m_bridge.sendAutonomousMatchPeriod();
     }
 
@@ -93,8 +150,6 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        // return new FollowTrajectory(m_drive, m_localization, new Pose2d(1.0, 0.0, new
-        // Rotation2d()));
-        return new WaitCommand(15.0);
+        return m_autos.get(m_selectedAutonomous);
     }
 }
