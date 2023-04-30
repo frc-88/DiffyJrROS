@@ -36,4 +36,9 @@ public class ROSLocalization implements Localization {
     public boolean isValid() {
         return tf_compact.canTransform(DiffyJrCoprocessorBridge.MAP_FRAME, DiffyJrCoprocessorBridge.BASE_FRAME);
     }
+
+    @Override
+    public void reset(Pose2d pose) {
+
+    }
 }

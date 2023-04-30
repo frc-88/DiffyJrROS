@@ -9,6 +9,7 @@ import frc.robot.commands.FollowTrajectory;
 import frc.robot.commands.SwitchableJoystickCommand;
 import frc.robot.commands.SwitchableJoystickCommand.JoystickType;
 import frc.robot.localization.Localization;
+import frc.robot.localization.OdometryLocalization;
 import frc.robot.localization.ROSLocalization;
 import frc.robot.preferenceconstants.IntPreferenceConstant;
 import frc.robot.preferenceconstants.StringPreferenceConstant;
@@ -25,6 +26,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -42,7 +44,8 @@ public class RobotContainer {
     private final DriveSubsystem m_drive = new DriveSubsystem();
     private final SwerveJoystick m_joystick = new SwerveJoystick(SwerveControllerType.XBOX);
     private final DiffyJrCoprocessorBridge m_bridge = new DiffyJrCoprocessorBridge(m_drive);
-    private final Localization m_localization = new ROSLocalization(m_drive, m_bridge);
+    private final Localization m_ros_localization = new ROSLocalization(m_drive, m_bridge);
+    private final Localization m_odom_localization = new OdometryLocalization(m_drive);
 
     private final IntPreferenceConstant joystickPreferenceConstant = new IntPreferenceConstant("joystick", 0);
     private final CommandBase m_switchableJoystickCommand = new SwitchableJoystickCommand(m_drive,
@@ -91,16 +94,23 @@ public class RobotContainer {
         }));
         m_autos = Map.of(
                 "square",
-                FollowTrajectory.fromJSONHolonomic(m_drive, m_localization, "SquareGarage.wpilib.json",
-                        garageOrigin),
+                makeTrajectory("SquareGarage.wpilib.json", garageOrigin),
                 "apartment",
-                FollowTrajectory.fromJSONHolonomic(m_drive, m_localization, "Apartment.wpilib.json",
-                        apartmentOrigin),
+                makeTrajectory("Apartment.wpilib.json", apartmentOrigin),
                 "test",
-                FollowTrajectory.fromJSONHolonomic(m_drive, m_localization, "Test Auto.wpilib.json",
-                        chargedUpOrigin),
-                "straight", new FollowTrajectory(m_drive, m_localization, new Pose2d(1.0, 0.0, new Rotation2d())),
+                makeTrajectory("Test Auto.wpilib.json", chargedUpOrigin),
+                "straight", new FollowTrajectory(m_drive, m_ros_localization, new Pose2d(1.0, 0.0, new Rotation2d())),
                 "", new WaitCommand(15.0));
+    }
+
+    private CommandBase makeTrajectory(String filePath, Pose2d origin) {
+        return new SequentialCommandGroup(
+                new InstantCommand(() -> {
+                    Pose2d resetPose = m_ros_localization.getPose();
+                    System.out.println("Resetting odometry to " + resetPose);
+                    m_odom_localization.reset(resetPose);
+                }),
+                FollowTrajectory.fromJSONHolonomic(m_drive, m_ros_localization, filePath, origin));
     }
 
     private void configurePeriodics(Robot robot) {

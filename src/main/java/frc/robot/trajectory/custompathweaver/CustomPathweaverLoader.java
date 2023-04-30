@@ -10,19 +10,24 @@ import frc.robot.trajectory.RotationSequence;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 public class CustomPathweaverLoader {
     private final static Gson ginst = new Gson();
 
     public static Pair<Trajectory, RotationSequence> fromPathweaverJson(Path path) throws IOException {
         String jsonString = Files.readString(path);
-        PathweaverTrajectoryJSON response = ginst.fromJson(jsonString, PathweaverTrajectoryJSON.class);
+        ArrayList<PathweaverTrajectoryElement> data = ginst.fromJson(jsonString,
+                new TypeToken<List<PathweaverTrajectoryElement>>() {
+                }.getType());
         Trajectory trajectory = new Trajectory();
         TreeMap<Double, Rotation2d> rotations = new TreeMap<>();
-        for (PathweaverTrajectoryElement element : response.trajectory) {
+        for (PathweaverTrajectoryElement element : data) {
             trajectory.getStates()
                     .add(new State(
                             element.time,
@@ -34,9 +39,12 @@ public class CustomPathweaverLoader {
                                     new Rotation2d(element.pose.rotation.radians)),
                             element.curvature));
             rotations.put(element.time, Rotation2d.fromDegrees(element.holonomicRotation));
-            // TODO: add holonomic angular velocities:
-            // new RotationSequence.State(Rotation2d.fromDegrees(element.holonomicRotation),
-            // element.holonomicAngularVelocity)
+            /*
+             * TODO: add holonomic angular velocities:
+             * new
+             * RotationSequence.State(Rotation2d.fromDegrees(traj_elem.holonomicRotation),
+             * traj_elem.holonomicAngularVelocity)
+             */
         }
         RotationSequence rotationSequence = new RotationSequence(rotations);
         return new Pair<Trajectory, RotationSequence>(trajectory, rotationSequence);

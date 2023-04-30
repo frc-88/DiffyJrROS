@@ -31,133 +31,131 @@ import edu.wpi.first.math.trajectory.Trajectory;
  * drivetrain should
  * point toward. This heading reference is profiled for smoothness.
  */
-@SuppressWarnings("MemberName")
 public class CustomHolonomicDriveController {
-  private Pose2d m_poseError = new Pose2d();
-  private Rotation2d m_rotationError = new Rotation2d();
-  private Pose2d m_poseTolerance = new Pose2d();
-  private boolean m_enabled = true;
+    private Pose2d m_poseError = new Pose2d();
+    private Rotation2d m_rotationError = new Rotation2d();
+    private Pose2d m_poseTolerance = new Pose2d();
+    private boolean m_enabled = true;
 
-  private final PIDController m_xController;
-  private final PIDController m_yController;
-  private final PIDController m_thetaController;
+    private final PIDController m_xController;
+    private final PIDController m_yController;
+    private final PIDController m_thetaController;
 
-  /**
-   * Constructs a holonomic drive controller.
-   *
-   * @param xController     A PID Controller to respond to error in the
-   *                        field-relative x direction.
-   * @param yController     A PID Controller to respond to error in the
-   *                        field-relative y direction.
-   * @param thetaController A PID controller to respond to error in angle.
-   */
-  @SuppressWarnings("ParameterName")
-  public CustomHolonomicDriveController(
-      PIDController xController, PIDController yController, PIDController thetaController) {
-    m_xController = xController;
-    m_yController = yController;
-    m_thetaController = thetaController;
-    m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
-  }
-
-  /**
-   * Returns true if the pose error is within tolerance of the reference.
-   *
-   * @return True if the pose error is within tolerance of the reference.
-   */
-  public boolean atReference() {
-    final var eTranslate = m_poseError.getTranslation();
-    final var eRotate = m_rotationError;
-    final var tolTranslate = m_poseTolerance.getTranslation();
-    final var tolRotate = m_poseTolerance.getRotation();
-    return Math.abs(eTranslate.getX()) < tolTranslate.getX()
-        && Math.abs(eTranslate.getY()) < tolTranslate.getY()
-        && Math.abs(eRotate.getRadians()) < tolRotate.getRadians();
-  }
-
-  /**
-   * Sets the pose error which is considered tolerance for use with atReference().
-   *
-   * @param tolerance The pose error which is tolerable.
-   */
-  public void setTolerance(Pose2d tolerance) {
-    m_poseTolerance = tolerance;
-  }
-
-  public void reset() {
-    m_xController.reset();
-    m_yController.reset();
-    m_thetaController.reset();
-  }
-
-  /**
-   * Returns the next output of the holonomic drive controller.
-   *
-   * @param currentPose             The current pose.
-   * @param poseRef                 The desired pose.
-   * @param linearVelocityRefMeters The linear velocity reference.
-   * @param angleRef                The angular reference.
-   * @param angleVelocityRefRadians The angular velocity reference.
-   * @return The next output of the holonomic drive controller.
-   */
-  @SuppressWarnings("LocalVariableName")
-  public ChassisSpeeds calculate(
-      Pose2d currentPose,
-      Pose2d poseRef,
-      double linearVelocityRefMeters,
-      Rotation2d angleRef,
-      double angleVelocityRefRadians) {
-
-    // Calculate feedforward velocities (field-relative).
-    double xFF = linearVelocityRefMeters * poseRef.getRotation().getCos();
-    double yFF = linearVelocityRefMeters * poseRef.getRotation().getSin();
-    double thetaFF = angleVelocityRefRadians;
-
-    m_poseError = poseRef.relativeTo(currentPose);
-    m_rotationError = angleRef.minus(currentPose.getRotation());
-
-    if (!m_enabled) {
-      return ChassisSpeeds.fromFieldRelativeSpeeds(xFF, yFF, thetaFF, currentPose.getRotation());
+    /**
+     * Constructs a holonomic drive controller.
+     *
+     * @param xController     A PID Controller to respond to error in the
+     *                        field-relative x direction.
+     * @param yController     A PID Controller to respond to error in the
+     *                        field-relative y direction.
+     * @param thetaController A PID controller to respond to error in angle.
+     */
+    public CustomHolonomicDriveController(
+            PIDController xController, PIDController yController, PIDController thetaController) {
+        m_xController = xController;
+        m_yController = yController;
+        m_thetaController = thetaController;
+        m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
     }
 
-    // Calculate feedback velocities (based on position error).
-    double xFeedback = m_xController.calculate(0.0, m_poseError.getX());
-    double yFeedback = m_yController.calculate(0.0, m_poseError.getY());
-    double thetaFeedback = m_thetaController.calculate(0.0, m_rotationError.getRadians());
+    /**
+     * Returns true if the pose error is within tolerance of the reference.
+     *
+     * @return True if the pose error is within tolerance of the reference.
+     */
+    public boolean atReference() {
+        final var eTranslate = m_poseError.getTranslation();
+        final var eRotate = m_rotationError;
+        final var tolTranslate = m_poseTolerance.getTranslation();
+        final var tolRotate = m_poseTolerance.getRotation();
+        return Math.abs(eTranslate.getX()) < tolTranslate.getX()
+                && Math.abs(eTranslate.getY()) < tolTranslate.getY()
+                && Math.abs(eRotate.getRadians()) < tolRotate.getRadians();
+    }
 
-    // Return next output.
-    return ChassisSpeeds.fromFieldRelativeSpeeds(
-        xFF + xFeedback, yFF + yFeedback, thetaFF + thetaFeedback, currentPose.getRotation());
-  }
+    /**
+     * Sets the pose error which is considered tolerance for use with atReference().
+     *
+     * @param tolerance The pose error which is tolerable.
+     */
+    public void setTolerance(Pose2d tolerance) {
+        m_poseTolerance = tolerance;
+    }
 
-  /**
-   * Returns the next output of the holonomic drive controller.
-   *
-   * @param currentPose            The current pose.
-   * @param driveState             The desired drive trajectory state.
-   * @param holonomicRotationState The desired holonomic rotation state.
-   * @return The next output of the holonomic drive controller.
-   */
-  public ChassisSpeeds calculate(
-      Pose2d currentPose,
-      Trajectory.State driveState,
-      RotationSequence.State holonomicRotationState) {
-    return calculate(
-        currentPose,
-        driveState.poseMeters,
-        driveState.velocityMetersPerSecond,
-        holonomicRotationState.position,
-        holonomicRotationState.velocityRadiansPerSec);
-  }
+    public void reset() {
+        m_xController.reset();
+        m_yController.reset();
+        m_thetaController.reset();
+    }
 
-  /**
-   * Enables and disables the controller for troubleshooting problems. When
-   * calculate() is called on
-   * a disabled controller, only feedforward values are returned.
-   *
-   * @param enabled If the controller is enabled or not.
-   */
-  public void setEnabled(boolean enabled) {
-    m_enabled = enabled;
-  }
+    /**
+     * Returns the next output of the holonomic drive controller.
+     *
+     * @param currentPose             The current pose.
+     * @param poseRef                 The desired pose.
+     * @param linearVelocityRefMeters The linear velocity reference.
+     * @param angleRef                The angular reference.
+     * @param angleVelocityRefRadians The angular velocity reference.
+     * @return The next output of the holonomic drive controller.
+     */
+    public ChassisSpeeds calculate(
+            Pose2d currentPose,
+            Pose2d poseRef,
+            double linearVelocityRefMeters,
+            Rotation2d angleRef,
+            double angleVelocityRefRadians) {
+
+        // Calculate feedforward velocities (field-relative).
+        double xFF = linearVelocityRefMeters * poseRef.getRotation().getCos();
+        double yFF = linearVelocityRefMeters * poseRef.getRotation().getSin();
+        double thetaFF = angleVelocityRefRadians;
+
+        m_poseError = poseRef.relativeTo(currentPose);
+        m_rotationError = angleRef.minus(currentPose.getRotation());
+
+        if (!m_enabled) {
+            return ChassisSpeeds.fromFieldRelativeSpeeds(xFF, yFF, thetaFF, currentPose.getRotation());
+        }
+
+        // Calculate feedback velocities (based on position error).
+        double xFeedback = m_xController.calculate(currentPose.getX(), poseRef.getX());
+        double yFeedback = m_yController.calculate(currentPose.getY(), poseRef.getY());
+        double thetaFeedback = m_thetaController.calculate(currentPose.getRotation().getRadians(),
+                angleRef.getRadians());
+
+        // Return next output.
+        return ChassisSpeeds.fromFieldRelativeSpeeds(
+                xFF + xFeedback, yFF + yFeedback, thetaFF + thetaFeedback, currentPose.getRotation());
+    }
+
+    /**
+     * Returns the next output of the holonomic drive controller.
+     *
+     * @param currentPose            The current pose.
+     * @param driveState             The desired drive trajectory state.
+     * @param holonomicRotationState The desired holonomic rotation state.
+     * @return The next output of the holonomic drive controller.
+     */
+    public ChassisSpeeds calculate(
+            Pose2d currentPose,
+            Trajectory.State driveState,
+            RotationSequence.State holonomicRotationState) {
+        return calculate(
+                currentPose,
+                driveState.poseMeters,
+                driveState.velocityMetersPerSecond,
+                holonomicRotationState.position,
+                holonomicRotationState.velocityRadiansPerSec);
+    }
+
+    /**
+     * Enables and disables the controller for troubleshooting problems. When
+     * calculate() is called on
+     * a disabled controller, only feedforward values are returned.
+     *
+     * @param enabled If the controller is enabled or not.
+     */
+    public void setEnabled(boolean enabled) {
+        m_enabled = enabled;
+    }
 }
