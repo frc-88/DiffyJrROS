@@ -23,7 +23,6 @@ import frc.team88.ros.messages.std_msgs.Time;
 import frc.team88.ros.messages.TimePrimitive;
 import frc.team88.ros.messages.geometry_msgs.Point;
 import frc.team88.ros.messages.geometry_msgs.Pose;
-import frc.team88.ros.messages.geometry_msgs.PoseArray;
 import frc.team88.ros.messages.geometry_msgs.PoseStamped;
 import frc.team88.ros.messages.geometry_msgs.PoseWithCovariance;
 import frc.team88.ros.messages.geometry_msgs.Quaternion;

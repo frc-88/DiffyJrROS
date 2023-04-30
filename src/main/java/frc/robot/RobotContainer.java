@@ -55,6 +55,7 @@ public class RobotContainer {
 
     private final Pose2d garageOrigin = new Pose2d(-39.0, -26.2, new Rotation2d());
     private final Pose2d apartmentOrigin = new Pose2d(-4.2, -1.69, new Rotation2d());
+    private final Pose2d chargedUpOrigin = new Pose2d(-8.25, -4.0, new Rotation2d());
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -90,11 +91,14 @@ public class RobotContainer {
         }));
         m_autos = Map.of(
                 "square",
-                FollowTrajectory.fromJSON(m_drive, m_localization, "SquareGarage.wpilib.json",
+                FollowTrajectory.fromJSONHolonomic(m_drive, m_localization, "SquareGarage.wpilib.json",
                         garageOrigin),
                 "apartment",
-                FollowTrajectory.fromJSON(m_drive, m_localization, "Apartment.wpilib.json",
+                FollowTrajectory.fromJSONHolonomic(m_drive, m_localization, "Apartment.wpilib.json",
                         apartmentOrigin),
+                "test",
+                FollowTrajectory.fromJSONHolonomic(m_drive, m_localization, "Test Auto.wpilib.json",
+                        chargedUpOrigin),
                 "straight", new FollowTrajectory(m_drive, m_localization, new Pose2d(1.0, 0.0, new Rotation2d())),
                 "", new WaitCommand(15.0));
     }
