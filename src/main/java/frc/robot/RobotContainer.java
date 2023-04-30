@@ -17,11 +17,15 @@ import frc.robot.subsystems.DiffyJrCoprocessorBridge;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.SwerveJoystick;
 import frc.robot.subsystems.SwerveJoystick.SwerveControllerType;
+import frc.robot.trajectory.RotationSequence;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -54,18 +58,19 @@ public class RobotContainer {
 
     private final StringPreferenceConstant m_autonomousPreferenceConstant = new StringPreferenceConstant("auto", "");
     private String m_selectedAutonomous = "";
-    private Map<String, CommandBase> m_autos;
+    private Map<String, CommandBase> m_autos = new HashMap<>();
+    private Map<String, FollowTrajectory> m_trajectories;
 
-    private final Pose2d garageOrigin = new Pose2d(-39.0, -26.2, new Rotation2d());
-    private final Pose2d apartmentOrigin = new Pose2d(-4.2, -1.69, new Rotation2d());
-    private final Pose2d chargedUpOrigin = new Pose2d(-8.25, -4.0, new Rotation2d());
+    private final Pose2d garageOrigin = new Pose2d(39.0, 26.2, new Rotation2d());
+    private final Pose2d apartmentOrigin = new Pose2d(4.2, 1.69, new Rotation2d());
+    private final Pose2d chargedUpOrigin = new Pose2d(8.25, 4.0, new Rotation2d());
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer(Robot robot) {
         System.out.println("RobotContainer initializing");
-        configureDriveCommand();
+        configureCommands();
         configurePeriodics(robot);
         m_drive.getSwerve().setAngleControllerEnabled(false);
         System.out.println("RobotContainer initialization complete");
@@ -82,7 +87,7 @@ public class RobotContainer {
         }
     }
 
-    private void configureDriveCommand() {
+    private void configureCommands() {
         m_drive.setDefaultCommand(m_switchableJoystickCommand);
         userButton.whileTrue(new CoastDriveMotors(m_drive));
 
@@ -92,25 +97,34 @@ public class RobotContainer {
             System.out.println("Setting field relative commands to " + new_state);
             m_drive.getSwerve().setFieldRelativeCommands(new_state);
         }));
-        m_autos = Map.of(
+        // All auto selector stuff here is kinda hacky. This is in service of pushing
+        // the active trajectory to ROS. An autonomous builder object should be created
+        // to do this in future
+        m_trajectories = Map.of(
                 "square",
                 makeTrajectory("SquareGarage.wpilib.json", garageOrigin),
                 "apartment",
                 makeTrajectory("Apartment.wpilib.json", apartmentOrigin),
+                "backwards",
+                makeTrajectory("Backwards Apartment.wpilib.json", apartmentOrigin),
                 "test",
                 makeTrajectory("Test Auto.wpilib.json", chargedUpOrigin),
-                "straight", new FollowTrajectory(m_drive, m_ros_localization, new Pose2d(1.0, 0.0, new Rotation2d())),
-                "", new WaitCommand(15.0));
+                "straight", new FollowTrajectory(m_drive, m_ros_localization, new Pose2d(1.0, 0.0, new Rotation2d())));
+        for (String key : m_trajectories.keySet()) {
+            m_autos.put(key,
+                    new SequentialCommandGroup(
+                            new InstantCommand(() -> {
+                                Pose2d resetPose = m_ros_localization.getPose();
+                                System.out.println("Resetting odometry to " + resetPose);
+                                m_odom_localization.reset(resetPose);
+                            }),
+                            m_trajectories.get(key)));
+        }
+        m_autos.put("", new WaitCommand(15.0));
     }
 
-    private CommandBase makeTrajectory(String filePath, Pose2d origin) {
-        return new SequentialCommandGroup(
-                new InstantCommand(() -> {
-                    Pose2d resetPose = m_ros_localization.getPose();
-                    System.out.println("Resetting odometry to " + resetPose);
-                    m_odom_localization.reset(resetPose);
-                }),
-                FollowTrajectory.fromJSONHolonomic(m_drive, m_ros_localization, filePath, origin));
+    private FollowTrajectory makeTrajectory(String filePath, Pose2d origin) {
+        return FollowTrajectory.fromJSONHolonomic(m_drive, m_ros_localization, filePath, origin);
     }
 
     private void configurePeriodics(Robot robot) {
@@ -133,10 +147,11 @@ public class RobotContainer {
         if (!m_selectedAutonomous.equals(value)) {
             System.out.println(String.format("Selecting auto %s. Was %s", value, m_selectedAutonomous));
             m_selectedAutonomous = value;
-            CommandBase cmd = m_autos.get(m_selectedAutonomous);
-            if (cmd instanceof FollowTrajectory) {
-                FollowTrajectory follow = (FollowTrajectory) (cmd);
-                m_bridge.sendAutoInfo(follow.getTrajectory());
+            if (m_trajectories.containsKey(m_selectedAutonomous)) {
+                FollowTrajectory follow = m_trajectories.get(m_selectedAutonomous);
+                m_bridge.sendAutoInfo(follow.getTrajectory(), follow.getRotationSequence());
+            } else {
+                m_bridge.sendAutoInfo(new Trajectory(), new RotationSequence(new TreeMap<>()));
             }
         }
         return true;

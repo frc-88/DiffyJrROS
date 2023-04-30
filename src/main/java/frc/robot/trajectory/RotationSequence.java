@@ -9,6 +9,8 @@ package frc.robot.trajectory;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import java.util.Map.Entry;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 
 /**
@@ -73,6 +75,14 @@ public class RotationSequence {
         }
 
         return new State(new Rotation2d(positionRadians), velocityRadiansPerSec);
+    }
+
+    public List<State> getStates() {
+        ArrayList<State> states = new ArrayList<>();
+        for (double timestamp : sequence.keySet()) {
+            states.add(this.sample(timestamp));
+        }
+        return states;
     }
 
     /** Represents a state in a rotation sequence with a position and velocity. */

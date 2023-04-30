@@ -1,17 +1,19 @@
 package frc.robot.subsystems;
 
+import java.util.List;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.ros.bridge.JointPublisher;
 import frc.robot.ros.messages.tj2_interfaces.NavX;
+import frc.robot.trajectory.RotationSequence;
 import frc.robot.ros.messages.tj2_interfaces.Match;
 import frc.robot.ros.messages.tj2_interfaces.MatchPeriod;
 import frc.team88.ros.bridge.BridgePublisher;
@@ -205,12 +207,22 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
         m_startBagPub.send(new Time(now));
     }
 
-    public void sendAutoInfo(Trajectory trajectory) {
+    public void sendAutoInfo(Trajectory trajectory, RotationSequence rotationSequence) {
+        List<Trajectory.State> traj_states = trajectory.getStates();
+        List<RotationSequence.State> rotate_states = rotationSequence.getStates();
+        if (traj_states.size() != rotate_states.size()) {
+            System.out.println("Trajectory and rotation sequences don't match! Not sending info.");
+            return;
+        }
+        System.out.println("Sending auto info. Path length is " + traj_states.size());
+
         Path path = new Path();
         Header header = m_autoPathPub.getHeader(MAP_FRAME);
         path.setHeader(header);
-        for (State state : trajectory.getStates()) {
-            Pose pose3d = ROSConversions.wpiToRosPose(new Pose3d(state.poseMeters));
+        for (int index = 0; index < traj_states.size(); index++) {
+            Pose2d pose2d = new Pose2d(traj_states.get(index).poseMeters.getTranslation(),
+                    rotate_states.get(index).position);
+            Pose pose3d = ROSConversions.wpiToRosPose(new Pose3d(pose2d));
             path.getPoses().add(new PoseStamped(header, pose3d));
         }
         m_autoPathPub.send(path);

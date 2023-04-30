@@ -154,7 +154,7 @@ public class FollowTrajectory extends CommandBase {
             DriverStation.reportError("Unable to open trajectory: " + filePath, ex.getStackTrace());
             return new FollowTrajectory(drive, localization);
         }
-        Trajectory trajectory = data.getFirst().transformBy(new Transform2d(new Pose2d(), origin));
+        Trajectory trajectory = data.getFirst().relativeTo(origin);
         RotationSequence rotationSequence = data.getSecond();
         return new FollowTrajectory(drive, localization, trajectory, rotationSequence);
     }
