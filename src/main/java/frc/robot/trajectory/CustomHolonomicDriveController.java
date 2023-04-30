@@ -108,26 +108,25 @@ public class CustomHolonomicDriveController {
       Rotation2d angleRef,
       double angleVelocityRefRadians) {
 
-    // Calculate feedforward velocities (field-relative).
-    double xFF = linearVelocityRefMeters * poseRef.getRotation().getCos();
-    double yFF = linearVelocityRefMeters * poseRef.getRotation().getSin();
-    double thetaFF = angleVelocityRefRadians;
-
     m_poseError = poseRef.relativeTo(currentPose);
     m_rotationError = angleRef.minus(currentPose.getRotation());
 
+    // Calculate feedforward velocities.
+    double xFF = linearVelocityRefMeters * m_rotationError.getCos();
+    double yFF = linearVelocityRefMeters * m_rotationError.getSin();
+    double thetaFF = angleVelocityRefRadians;
+
     if (!m_enabled) {
-      return ChassisSpeeds.fromFieldRelativeSpeeds(xFF, yFF, thetaFF, currentPose.getRotation());
+      return new ChassisSpeeds(xFF, yFF, thetaFF);
     }
 
     // Calculate feedback velocities (based on position error).
-    double xFeedback = m_xController.calculate(currentPose.getX(), poseRef.getX());
-    double yFeedback = m_yController.calculate(currentPose.getY(), poseRef.getY());
-    double thetaFeedback = m_thetaController.calculate(currentPose.getRotation().getRadians(), angleRef.getRadians());
+    double xFeedback = m_xController.calculate(0.0, m_poseError.getX());
+    double yFeedback = m_yController.calculate(0.0, m_poseError.getY());
+    double thetaFeedback = m_thetaController.calculate(0.0, m_rotationError.getRadians());
 
     // Return next output.
-    return ChassisSpeeds.fromFieldRelativeSpeeds(
-        xFF + xFeedback, yFF + yFeedback, thetaFF + thetaFeedback, currentPose.getRotation());
+    return new ChassisSpeeds(xFF + xFeedback, yFF + yFeedback, thetaFF + thetaFeedback);
   }
 
   /**

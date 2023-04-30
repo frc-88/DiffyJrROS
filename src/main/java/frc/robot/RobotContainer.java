@@ -53,6 +53,9 @@ public class RobotContainer {
     private String m_selectedAutonomous = "";
     private Map<String, CommandBase> m_autos;
 
+    private final Pose2d garageOrigin = new Pose2d(-39.0, -26.2, new Rotation2d());
+    private final Pose2d apartmentOrigin = new Pose2d(-4.2, -1.69, new Rotation2d());
+
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
@@ -86,8 +89,12 @@ public class RobotContainer {
             m_drive.getSwerve().setFieldRelativeCommands(new_state);
         }));
         m_autos = Map.of(
-                "square", FollowTrajectory.fromJSON(m_drive, m_localization, "SquareGarage.path.json"),
-                "apartment", FollowTrajectory.fromJSON(m_drive, m_localization, "Apartment.path.json"),
+                "square",
+                FollowTrajectory.fromJSON(m_drive, m_localization, "SquareGarage.wpilib.json",
+                        garageOrigin),
+                "apartment",
+                FollowTrajectory.fromJSON(m_drive, m_localization, "Apartment.wpilib.json",
+                        apartmentOrigin),
                 "straight", new FollowTrajectory(m_drive, m_localization, new Pose2d(1.0, 0.0, new Rotation2d())),
                 "", new WaitCommand(15.0));
     }
@@ -109,15 +116,15 @@ public class RobotContainer {
         if (!m_autos.containsKey(value)) {
             return false;
         }
-        if (m_selectedAutonomous != value) {
-            System.out.println("Selecting auto: " + value);
+        if (!m_selectedAutonomous.equals(value)) {
+            System.out.println(String.format("Selecting auto %s. Was %s", value, m_selectedAutonomous));
+            m_selectedAutonomous = value;
             CommandBase cmd = m_autos.get(m_selectedAutonomous);
             if (cmd instanceof FollowTrajectory) {
                 FollowTrajectory follow = (FollowTrajectory) (cmd);
                 m_bridge.sendAutoInfo(follow.getTrajectory());
             }
         }
-        m_selectedAutonomous = value;
         return true;
     }
 

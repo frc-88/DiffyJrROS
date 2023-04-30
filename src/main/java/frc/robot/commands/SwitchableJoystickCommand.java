@@ -24,6 +24,7 @@ public class SwitchableJoystickCommand extends CommandBase {
         this.ros_command = new PassthroughRosCommand(drive, twistSub);
         this.local_command = new DriveSwerveJoystickCommand(drive, joystick);
         this.joystickTypeSupplier = joystickTypeSupplier;
+        addRequirements(drive, joystick);
     }
 
     @Override

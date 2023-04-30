@@ -88,7 +88,12 @@ public class FollowTrajectory extends CommandBase {
         this.drive = drive;
         this.localization = localization;
 
-        Pose2d currentPose = getPose();
+        Pose2d currentPose;
+        if (isPoseValid()) {
+            currentPose = getPose();
+        } else {
+            currentPose = new Pose2d();
+        }
         Transform2d transform = new Transform2d(new Pose2d(), currentPose);
         Pose2d goalPose = relativeGoalPose.transformBy(transform);
 
@@ -104,7 +109,8 @@ public class FollowTrajectory extends CommandBase {
         addRequirements(drive);
     }
 
-    public static FollowTrajectory fromJSON(DriveSubsystem drive, Localization localization, String filePath) {
+    public static FollowTrajectory fromJSON(DriveSubsystem drive, Localization localization, String filePath,
+            Pose2d origin) {
         filePath = "pathplanner/generatedJSON/" + filePath;
         Trajectory trajectory = new Trajectory();
         try {
@@ -113,6 +119,7 @@ public class FollowTrajectory extends CommandBase {
         } catch (IOException ex) {
             DriverStation.reportError("Unable to open trajectory: " + filePath, ex.getStackTrace());
         }
+        trajectory = trajectory.transformBy(new Transform2d(new Pose2d(), origin));
         TreeMap<Double, Rotation2d> holonomicWaypoints = new TreeMap<>();
 
         for (State state : trajectory.getStates()) {
@@ -132,6 +139,14 @@ public class FollowTrajectory extends CommandBase {
                 .addConstraint(
                         new CentripetalAccelerationConstraint(Constants.DriveTrain.MAX_CHASSIS_CENTRIPITAL_ACCEL))
                 .addConstraints(extraConstraints);
+    }
+
+    private boolean isPoseValid() {
+        boolean state = this.localization.isValid();
+        if (!state) {
+            DriverStation.reportError("Failed to get transform from ROS!!", false);
+        }
+        return state;
     }
 
     private Pose2d getPose() {
@@ -174,8 +189,12 @@ public class FollowTrajectory extends CommandBase {
         Trajectory.State driveState = trajectory.sample(timer.get());
         RotationSequence.State holonomicRotationState = rotationSequence.sample(timer.get());
 
-        ChassisSpeeds nextDriveState = driveController.calculate(getPose(), driveState, holonomicRotationState);
-        drive.drive(nextDriveState);
+        if (isPoseValid()) {
+            ChassisSpeeds nextDriveState = driveController.calculate(getPose(), driveState, holonomicRotationState);
+            drive.drive(nextDriveState);
+        } else {
+            drive.stop();
+        }
     }
 
     // Called once the command ends or is interrupted.

@@ -20,4 +20,9 @@ public class OdometryLocalization implements Localization {
     public ChassisSpeeds getVelocity() {
         return this.drive.getSwerve().getChassisSpeeds();
     }
+
+    @Override
+    public boolean isValid() {
+        return true;
+    }
 }
