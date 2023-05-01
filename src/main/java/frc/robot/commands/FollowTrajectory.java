@@ -22,6 +22,7 @@ import edu.wpi.first.math.trajectory.TrajectoryUtil;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.math.trajectory.constraint.CentripetalAccelerationConstraint;
 import edu.wpi.first.math.trajectory.constraint.TrajectoryConstraint;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Timer;
@@ -29,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.diffswerve.Constants;
 import frc.robot.localization.Localization;
 import frc.robot.preferenceconstants.PIDPreferenceConstants;
+import frc.robot.preferenceconstants.DoublePreferenceConstant;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.trajectory.CustomHolonomicDriveController;
 import frc.robot.trajectory.CustomTrajectoryGenerator;
@@ -44,8 +46,13 @@ public class FollowTrajectory extends CommandBase {
 
     private PIDPreferenceConstants linearConstants = new PIDPreferenceConstants("TrajectoryLinearPID");
     private PIDPreferenceConstants angularConstants = new PIDPreferenceConstants("TrajectoryAngularPID");
+    private DoublePreferenceConstant distanceStartThreshold = new DoublePreferenceConstant("distanceStartThreshold",
+            0.25);
+    private DoublePreferenceConstant angleStartThreshold = new DoublePreferenceConstant("angleStartThreshold",
+            Units.degreesToRadians(5.0));
 
     private final Timer timer = new Timer();
+    private boolean failed = false;
 
     private final PIDController xController = new PIDController(0.0, 0.0, 0.0);
     private final PIDController yController = new PIDController(0.0, 0.0, 0.0);
@@ -193,6 +200,21 @@ public class FollowTrajectory extends CommandBase {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
+        Pose2d startPose = trajectory.sample(0.0).poseMeters;
+        Rotation2d startRotation = rotationSequence.sample(0.0).position;
+        double distanceToStart = getPose().getTranslation().getDistance(startPose.getTranslation());
+        double angleToStart = Math.abs(getPose().getRotation().minus(startRotation).getRadians());
+        if (distanceToStart > distanceStartThreshold.getValue()) {
+            failed = true;
+            System.out.println("Distance to start point exceeds threshold: " + distanceToStart);
+            return;
+        }
+        if (angleToStart > angleStartThreshold.getValue()) {
+            failed = true;
+            System.out.println("Angle to start point exceeds threshold: " + angleToStart);
+            return;
+        }
+        failed = false;
         xController.setPID(
                 linearConstants.getKP().getValue(),
                 linearConstants.getKI().getValue(),
@@ -235,6 +257,6 @@ public class FollowTrajectory extends CommandBase {
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-        return timer.hasElapsed(trajectory.getTotalTimeSeconds());
+        return failed || timer.hasElapsed(trajectory.getTotalTimeSeconds());
     }
 }
