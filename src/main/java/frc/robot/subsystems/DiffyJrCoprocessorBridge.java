@@ -8,8 +8,10 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.ros.bridge.JointPublisher;
 import frc.robot.ros.messages.tj2_interfaces.NavX;
@@ -48,6 +50,8 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
 
     private final BridgeSubscriber<Twist> m_twistSub;
     private final BridgeSubscriber<Float64> m_pingSendSub;
+    private final BridgeSubscriber<Bool> m_fieldRelativeSub;
+    private final BridgeSubscriber<PoseStamped> m_nearestConeSub;
 
     private final BridgePublisher<Odometry> m_odomPub;
     private final BridgePublisher<NavX> m_imuPub;
@@ -55,8 +59,11 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
     private final BridgePublisher<Match> m_matchPub;
     private final BridgePublisher<MatchPeriod> m_matchPeriodPub;
     private final BridgePublisher<Time> m_startBagPub;
+    private final BridgePublisher<Path> m_autoPathPub;
+    private final BridgePublisher<PoseStamped> m_autoStartPub;
 
     private final TFListenerCompact m_tfListenerCompact;
+    private final JointPublisher m_jointPublisher;
 
     public static final String MAP_FRAME = "map";
     public static final String ODOM_FRAME = "odom";
@@ -87,9 +94,6 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
             "base_link_to_wheel_2_joint",
             "base_link_to_wheel_3_joint"
     };
-    private final JointPublisher m_jointPublisher;
-    private final BridgeSubscriber<Bool> m_fieldRelativeSub;
-    private final BridgePublisher<Path> m_autoPathPub;
 
     public DiffyJrCoprocessorBridge(
             DriveSubsystem drive) {
@@ -100,17 +104,19 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
         m_twistSub = new BridgeSubscriber<>(m_ros_interface, "cmd_vel", Twist.class);
         m_pingSendSub = new BridgeSubscriber<>(m_ros_interface, "ping_send", Float64.class);
         m_fieldRelativeSub = new BridgeSubscriber<>(m_ros_interface, "field_relative", Bool.class);
+        m_nearestConeSub = new BridgeSubscriber<>(m_ros_interface, "nearest_cone", PoseStamped.class);
 
         m_odomPub = new BridgePublisher<>(m_ros_interface, "odom");
         m_imuPub = new BridgePublisher<>(m_ros_interface, "imu");
         m_pingReturnPub = new BridgePublisher<>(m_ros_interface, "ping_return");
-        m_jointPublisher = new JointPublisher(m_ros_interface, "joint");
         m_matchPub = new BridgePublisher<>(m_ros_interface, "match");
         m_matchPeriodPub = new BridgePublisher<>(m_ros_interface, "match_period");
         m_startBagPub = new BridgePublisher<>(m_ros_interface, "start_bag");
         m_autoPathPub = new BridgePublisher<>(m_ros_interface, "auto/path");
+        m_autoStartPub = new BridgePublisher<>(m_ros_interface, "auto/start");
 
         m_tfListenerCompact = new TFListenerCompact(m_ros_interface, "/tf_compact");
+        m_jointPublisher = new JointPublisher(m_ros_interface, "joint");
 
         m_drive = drive;
         m_imu = m_drive.getImu();
@@ -144,6 +150,22 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
         if ((msg = m_fieldRelativeSub.receive()) != null) {
             m_drive.getSwerve().setFieldRelativeCommands(msg.getData());
             m_drive.getSwerve().resetFieldOffset();
+        }
+    }
+
+    private void checkNearestCone() {
+        PoseStamped msg;
+        if ((msg = m_nearestConeSub.receive()) != null) {
+            Pose3d cone = ROSConversions.rosToWpiPose(msg.getPose());
+
+            double roll = cone.getRotation().getX();
+            double yaw = cone.getRotation().getZ();
+            boolean is_standing = Math.abs(roll) < Math.PI / 4;
+
+            SmartDashboard.putNumber("Nearest cone x", cone.getX());
+            SmartDashboard.putNumber("Nearest cone y", cone.getY());
+            SmartDashboard.putNumber("Nearest cone angle (degrees)", Units.radiansToDegrees(yaw));
+            SmartDashboard.putBoolean("Nearest cone is standing", is_standing);
         }
     }
 
@@ -225,7 +247,11 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
             Pose pose3d = ROSConversions.wpiToRosPose(new Pose3d(pose2d));
             path.getPoses().add(new PoseStamped(header, pose3d));
         }
+
+        PoseStamped startPose = path.getPoses().get(0);
+
         m_autoPathPub.send(path);
+        m_autoStartPub.send(startPose);
     }
 
     // ---
@@ -244,6 +270,7 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
         sendImu();
         checkPing();
         checkFieldRelative();
+        checkNearestCone();
         m_tfListenerCompact.update();
         if (m_updateCounter % SLOW_INTERVAL == 0) {
             slowPeriodic();
