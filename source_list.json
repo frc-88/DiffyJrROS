@@ -3,6 +3,15 @@
         "tj2_interfaces/GameObjectsStamped",
         "tj2_interfaces/Match",
         "tj2_interfaces/MatchPeriod",
-        "tj2_interfaces/NavX"
+        "tj2_interfaces/NavX",
+        "apriltag_ros/AprilTagDetection",
+        "apriltag_ros/AprilTagDetectionArray"
+    ],
+    "repos": [
+        {
+            "local-name": "apriltag_ros",
+            "uri": "https://github.com/AprilRobotics/apriltag_ros.git",
+            "version": "master"
+        }
     ]
 }
