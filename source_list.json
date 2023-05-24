@@ -12,6 +12,21 @@
             "local-name": "apriltag_ros",
             "uri": "https://github.com/AprilRobotics/apriltag_ros.git",
             "version": "master"
+        },
+        {
+            "local-name": "std_msgs",
+            "uri": "https://github.com/ros/std_msgs.git",
+            "version": "kinetic-devel"
+        },
+        {
+            "local-name": "common_msgs",
+            "uri": "https://github.com/ros/common_msgs.git",
+            "version": "noetic-devel"
+        },
+        {
+            "local-name": "tj2_interfaces",
+            "uri": "file:///home/benw/tj2_ros/src/tj2_interfaces",
+            "version": ""
         }
     ]
 }

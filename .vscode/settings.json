@@ -30,5 +30,10 @@
   "editor.formatOnSave": true,
   "python.analysis.typeCheckingMode": "basic",
   "java.compile.nullAnalysis.nullable": [],
-	"java.compile.nullAnalysis.nonnull": []
+  "java.compile.nullAnalysis.nonnull": [],
+  "ros.distro": "noetic",
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "python.formatting.provider": "none"
 }
