@@ -72,20 +72,20 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
 
     private final Odometry m_odomMsg = new Odometry(new Header(0, new TimePrimitive(), ODOM_FRAME), BASE_FRAME,
             new PoseWithCovariance(new Pose(new Point(0, 0, 0), new Quaternion(0, 0, 0, 1)), new Double[] {
-                    5e-2, 0.0, 0.0, 0.0, 0.0, 0.0,
-                    0.0, 5e-2, 0.0, 0.0, 0.0, 0.0,
-                    0.0, 0.0, 5e-2, 0.0, 0.0, 0.0,
-                    0.0, 0.0, 0.0, 5e-2, 0.0, 0.0,
-                    0.0, 0.0, 0.0, 0.0, 5e-2, 0.0,
-                    0.0, 0.0, 0.0, 0.0, 0.0, 5e-2
+                    5e-4, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    0.0, 5e-4, 0.0, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 5e-4, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 5e-4, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0, 5e-4, 0.0,
+                    0.0, 0.0, 0.0, 0.0, 0.0, 5e-4
             }),
             new TwistWithCovariance(new Twist(new Vector3(0, 0, 0), new Vector3(0, 0, 0)), new Double[] {
-                    10e-2, 0.0, 0.0, 0.0, 0.0, 0.0,
-                    0.0, 10e-2, 0.0, 0.0, 0.0, 0.0,
-                    0.0, 0.0, 10e-2, 0.0, 0.0, 0.0,
-                    0.0, 0.0, 0.0, 10e-2, 0.0, 0.0,
-                    0.0, 0.0, 0.0, 0.0, 10e-2, 0.0,
-                    0.0, 0.0, 0.0, 0.0, 0.0, 10e-2
+                    1e-4, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    0.0, 1e-4, 0.0, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 1e-4, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 1e-4, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0, 1e-4, 0.0,
+                    0.0, 0.0, 0.0, 0.0, 0.0, 1e-4
             }));
 
     private final String[] JOINT_NAMES = new String[] {
