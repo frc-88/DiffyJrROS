@@ -15,6 +15,7 @@ import frc.robot.preferenceconstants.IntPreferenceConstant;
 import frc.robot.preferenceconstants.StringPreferenceConstant;
 import frc.robot.subsystems.DiffyJrCoprocessorBridge;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.LaserTurret;
 import frc.robot.subsystems.SwerveJoystick;
 import frc.robot.subsystems.SwerveJoystick.SwerveControllerType;
 import frc.robot.trajectory.RotationSequence;
@@ -50,6 +51,7 @@ public class RobotContainer {
     private final DiffyJrCoprocessorBridge m_bridge = new DiffyJrCoprocessorBridge(m_drive);
     private final Localization m_ros_localization = new ROSLocalization(m_drive, m_bridge);
     private final Localization m_odom_localization = new OdometryLocalization(m_drive);
+    private final LaserTurret m_laser_turret = new LaserTurret(0, 1, 2);
 
     private final IntPreferenceConstant joystickPreferenceConstant = new IntPreferenceConstant("joystick", 0);
     private final CommandBase m_switchableJoystickCommand = new SwitchableJoystickCommand(m_drive,
