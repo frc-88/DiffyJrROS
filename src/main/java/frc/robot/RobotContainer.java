@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.RobotController;
@@ -51,7 +52,7 @@ public class RobotContainer {
     private final DiffyJrCoprocessorBridge m_bridge = new DiffyJrCoprocessorBridge(m_drive);
     private final Localization m_ros_localization = new ROSLocalization(m_drive, m_bridge);
     private final Localization m_odom_localization = new OdometryLocalization(m_drive);
-    private final LaserTurret m_laser_turret = new LaserTurret(0, 1, 2);
+    private final LaserTurret m_laser_turret = new LaserTurret(SerialPort.Port.kMXP);
 
     private final IntPreferenceConstant joystickPreferenceConstant = new IntPreferenceConstant("joystick", 0);
     private final CommandBase m_switchableJoystickCommand = new SwitchableJoystickCommand(m_drive,

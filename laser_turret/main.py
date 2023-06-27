@@ -1,6 +1,6 @@
 from machine import Pin, PWM, UART
 import utime
-import json
+import ujson
 
 
 class Servo:
@@ -64,39 +64,54 @@ class Laser:
         self.laser.toggle()
 
 
-class Comms:
-    def __init__(self, tx_pin: int, rx_pin: int) -> None:
-        self.uart = UART(1, baudrate=9600, tx=Pin(tx_pin), rx=Pin(rx_pin))
-
-    def write(self, data: str) -> None:
-        self.uart.write(data)
-
-
 def main():
+    def data_callback(data: dict) -> None:
+        if type(data) != dict:
+            return
+        command = data.get("command", None)
+        if command == "laser":
+            state = bool(data.get("state", False))
+            laser.set(state)
+        elif command == "servo":
+            servo_num = data.get("channel", 0)
+            angle = data.get("angle", 0)
+            if servo_num == 1:
+                servo1.set(angle)
+            elif servo_num == 2:
+                servo2.set(angle)
+
+    def publish_state() -> None:
+        data = {
+            "servo1": servo1.current_angle,
+            "servo2": servo2.current_angle,
+            "laser": laser.led.value(),
+        }
+        comms.write(ujson.dumps(data).encode() + b"\n")
+
     servo1 = Servo(2)
     servo2 = Servo(3)
     laser = Laser(6)
-    comms = Comms(8, 9)
+    comms = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9))
     laser.set(True)
-
-    start_time = utime.ticks_ms()
+    buffer = b""
+    prev_report_time = utime.ticks_ms()
 
     while True:
         now = utime.ticks_ms()
-        if now - start_time > 1000:
-            comms.uart.write("something\r\n")
-            start_time = now
-        if comms.uart.any():
-            char = comms.uart.read(1)
-            laser.toggle()
-            if char == "e":
-                comms.uart.write("something else\n")
-            elif char == "a":
-                servo1.set(45)
-                servo2.set(45)
-            elif char == "b":
-                servo1.set(135)
-                servo2.set(135)
+        if now - prev_report_time > 100:
+            publish_state()
+            prev_report_time = now
+        if comms.any():
+            char = comms.read(1)
+            if char == b"\n":
+                try:
+                    data = ujson.loads(buffer.decode())
+                    data_callback(data)
+                    buffer = b""
+                except (ujson.JSONDecodeError, UnicodeDecodeError):
+                    pass
+            else:
+                buffer += char
 
 
 if __name__ == "__main__":
