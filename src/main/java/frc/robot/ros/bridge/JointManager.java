@@ -7,12 +7,12 @@ import frc.team88.ros.bridge.BridgePublisher;
 import frc.team88.ros.bridge.ROSNetworkTablesBridge;
 import frc.team88.ros.messages.std_msgs.Float64;
 
-public class JointPublisher {
+public class JointManager {
     private final ROSNetworkTablesBridge bridge;
     private final Map<String, BridgePublisher<Float64>> joints = new HashMap<>();
     private final String namespace;
 
-    public JointPublisher(ROSNetworkTablesBridge bridge, String namespace) {
+    public JointManager(ROSNetworkTablesBridge bridge, String namespace) {
         this.bridge = bridge;
         if (namespace.charAt(namespace.length() - 1) != '/') {
             namespace += "/";

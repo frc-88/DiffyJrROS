@@ -48,11 +48,11 @@ public class LaserTurret extends SubsystemBase {
     }
 
     public void setPanPosition(double new_angle) {
-        writeString(ginst.toJson(new ServoCommand(1, new_angle)));
+        writeString(ginst.toJson(new ServoCommand(2, new_angle)));
     }
 
     public void setTiltPosition(double new_angle) {
-        writeString(ginst.toJson(new ServoCommand(2, new_angle)));
+        writeString(ginst.toJson(new ServoCommand(1, new_angle)));
     }
 
     public void setLaser(boolean new_state) {
@@ -60,11 +60,11 @@ public class LaserTurret extends SubsystemBase {
     }
 
     public double getPanPosition() {
-        return state.servo1;
+        return state.servo2;
     }
 
     public double getTiltPosition() {
-        return state.servo2;
+        return state.servo1;
     }
 
     public boolean isLaserOn() {

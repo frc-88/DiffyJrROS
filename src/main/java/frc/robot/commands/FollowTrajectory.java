@@ -25,6 +25,7 @@ import edu.wpi.first.math.trajectory.constraint.TrajectoryConstraint;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.diffswerve.Constants;
@@ -107,12 +108,9 @@ public class FollowTrajectory extends CommandBase {
         this.drive = drive;
         this.localization = localization;
 
-        Pose2d currentPose;
-        if (isPoseValid()) {
-            currentPose = getPose();
-        } else {
-            currentPose = new Pose2d();
-        }
+        Pose2d currentPose = new Pose2d(); // TODO this constructor doesn't work. Need to get current pose from
+                                           // localization but it's not fully initialized
+
         Transform2d transform = new Transform2d(new Pose2d(), currentPose);
         Pose2d goalPose = relativeGoalPose.transformBy(transform);
 

@@ -2,26 +2,24 @@ package frc.robot.localization;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.robot.ros.bridge.Frames;
 import frc.robot.subsystems.DiffyJrCoprocessorBridge;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.team88.ros.conversions.TFListenerCompact;
 import frc.team88.ros.conversions.Transform3dStamped;
 
 public class ROSLocalization implements Localization {
-    private final DiffyJrCoprocessorBridge bridge;
     private final DriveSubsystem drive;
     private final TFListenerCompact tf_compact;
 
-    public ROSLocalization(DriveSubsystem drive, DiffyJrCoprocessorBridge bridge) {
-        this.bridge = bridge;
+    public ROSLocalization(DriveSubsystem drive, TFListenerCompact tf_compact) {
         this.drive = drive;
-        this.tf_compact = this.bridge.getTFListener();
+        this.tf_compact = tf_compact;
     }
 
     @Override
     public Pose2d getPose() {
-        Transform3dStamped tfStamped = tf_compact.lookupTransform(DiffyJrCoprocessorBridge.MAP_FRAME,
-                DiffyJrCoprocessorBridge.BASE_FRAME);
+        Transform3dStamped tfStamped = tf_compact.lookupTransform(Frames.MAP_FRAME, Frames.BASE_FRAME);
         return new Pose2d(
                 tfStamped.transform.getTranslation().toTranslation2d(),
                 tfStamped.transform.getRotation().toRotation2d());
@@ -34,7 +32,7 @@ public class ROSLocalization implements Localization {
 
     @Override
     public boolean isValid() {
-        return tf_compact.canTransform(DiffyJrCoprocessorBridge.MAP_FRAME, DiffyJrCoprocessorBridge.BASE_FRAME);
+        return tf_compact.canTransform(Frames.MAP_FRAME, Frames.BASE_FRAME);
     }
 
     @Override
