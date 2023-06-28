@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import frc.robot.commands.CalibrateLaserTurret;
 import frc.robot.commands.CoastDriveMotors;
 import frc.robot.commands.DriveSwerveJoystickCommand;
 import frc.robot.driverinput.JoystickInterface;
@@ -20,6 +21,7 @@ import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -43,8 +45,6 @@ public class RobotContainer {
     private final AutonomousManager m_auto_manager = new AutonomousManager(m_drive, m_ros_localization,
             m_odom_localization, m_bridge.autoPathManager);
 
-    private Trigger userButton = new Trigger(() -> RobotController.getUserButton());
-
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
@@ -58,6 +58,8 @@ public class RobotContainer {
 
     private void configureCommands() {
         m_drive.setDefaultCommand(new DriveSwerveJoystickCommand(m_drive, m_joystick, m_bridge.motorEnablePublisher));
+
+        Trigger userButton = new Trigger(() -> RobotController.getUserButton());
         userButton.whileTrue(new CoastDriveMotors(m_drive));
 
         Trigger toggleFieldRelative = new Trigger(() -> this.m_joystick.isButtonBPressed());
@@ -67,6 +69,10 @@ public class RobotContainer {
             m_drive.getSwerve().setFieldRelativeCommands(new_state);
             m_drive.getSwerve().resetFieldOffset();
         }));
+
+        CalibrateLaserTurret calibrateTurretCommand = new CalibrateLaserTurret(m_drive, m_laser_turret, m_joystick);
+        Trigger toggleTurretManual = new Trigger(() -> this.m_joystick.isButtonXPressed());
+        toggleTurretManual.toggleOnTrue(calibrateTurretCommand);
     }
 
     private void configurePeriodics(Robot robot) {

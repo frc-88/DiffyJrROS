@@ -3,9 +3,11 @@ package frc.robot.subsystems;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.preferenceconstants.DoublePreferenceConstant;
 
 public class LaserTurret extends SubsystemBase {
 
@@ -40,23 +42,32 @@ public class LaserTurret extends SubsystemBase {
     private State state = new State();
     private String buffer = "";
 
+    private final long UPDATE_INTERVAL = 40_000;
+    private long last_update = 0;
+
+    private ServoCommand servo1_command = new ServoCommand(1,
+            new DoublePreferenceConstant("LaserTurret/default_tilt", 0).getValue());
+    private ServoCommand servo2_command = new ServoCommand(2,
+            new DoublePreferenceConstant("LaserTurret/default_pan", 0).getValue());
+    private LaserCommand laser_command = new LaserCommand(false);
+
     public LaserTurret(SerialPort.Port port) {
-        device = new SerialPort(9600, port);
-        SmartDashboard.putBoolean("LaserTurret/command/laser", false);
-        SmartDashboard.putNumber("LaserTurret/command/pan", 0);
-        SmartDashboard.putNumber("LaserTurret/command/tilt", 0);
+        device = new SerialPort(115200, port);
     }
 
     public void setPanPosition(double new_angle) {
-        writeString(ginst.toJson(new ServoCommand(2, new_angle)));
+        SmartDashboard.putNumber("LaserTurret/command/pan", new_angle);
+        servo2_command = new ServoCommand(2, new_angle);
     }
 
     public void setTiltPosition(double new_angle) {
-        writeString(ginst.toJson(new ServoCommand(1, new_angle)));
+        SmartDashboard.putNumber("LaserTurret/command/tilt", new_angle);
+        servo1_command = new ServoCommand(1, new_angle);
     }
 
     public void setLaser(boolean new_state) {
-        writeString(ginst.toJson(new LaserCommand(new_state)));
+        SmartDashboard.putBoolean("LaserTurret/command/laser", new_state);
+        laser_command = new LaserCommand(new_state);
     }
 
     public double getPanPosition() {
@@ -72,6 +83,7 @@ public class LaserTurret extends SubsystemBase {
     }
 
     private void writeString(String command) {
+        System.out.println("Sending command: " + command);
         device.writeString(command + "\n");
     }
 
@@ -91,23 +103,17 @@ public class LaserTurret extends SubsystemBase {
         }
     }
 
+    private void writeCommands() {
+        writeString(ginst.toJson(servo1_command) + "\n"
+                + ginst.toJson(servo2_command) + "\n"
+                + ginst.toJson(laser_command));
+    }
+
     @Override
     public void periodic() {
-        boolean laser_state = SmartDashboard.getBoolean("LaserTurret/command/laser", false);
-        if (laser_state != isLaserOn()) {
-            setLaser(laser_state);
-        }
-        double pan_command = SmartDashboard.getNumber("LaserTurret/command/pan", 0);
-        if (pan_command != getPanPosition()) {
-            setPanPosition(pan_command);
-        }
-        double tilt_command = SmartDashboard.getNumber("LaserTurret/command/tilt", 0);
-        if (tilt_command != getTiltPosition()) {
-            setTiltPosition(tilt_command);
-        }
-
         int received = device.getBytesReceived();
         if (received > 0) {
+            System.out.println("Received " + received + " bytes");
             String read_buffer = device.readString(received);
             buffer += read_buffer;
             String packets;
@@ -126,6 +132,12 @@ public class LaserTurret extends SubsystemBase {
             for (String packet : packets.split("\n")) {
                 parsePacket(packet);
             }
+        }
+
+        long now = RobotController.getFPGATime();
+        if (now - last_update > UPDATE_INTERVAL) {
+            writeCommands();
+            last_update = now;
         }
     }
 }

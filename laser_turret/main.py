@@ -91,8 +91,9 @@ def main():
     servo1 = Servo(2)
     servo2 = Servo(3)
     laser = Laser(6)
-    comms = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9))
-    laser.set(True)
+    UART(0, baudrate=115200)
+    comms = UART(1, baudrate=115200, tx=Pin(8), rx=Pin(9))
+    laser.led.value(True)
     buffer = b""
     prev_report_time = utime.ticks_ms()
 
