@@ -3,7 +3,6 @@ package frc.robot.calibration_pointer;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -48,45 +47,52 @@ public class CalibrationPointer extends SubsystemBase {
     private final String pointer_pan_joint = "pointer_pan_joint";
     private final String pointer_tilt_joint = "pointer_tilt_joint";
 
-    private final long UPDATE_INTERVAL = 40_000;
-    private long last_update = 0;
-
-    private ServoCommand servo1_command = new ServoCommand(1,
-            new DoublePreferenceConstant("CalibrationPointer/default_tilt", 0).getValue());
-    private ServoCommand servo2_command = new ServoCommand(2,
-            new DoublePreferenceConstant("CalibrationPointer/default_pan", 0).getValue());
+    private ServoCommand servo1_command = new ServoCommand(1, 0.0);
+    private ServoCommand servo2_command = new ServoCommand(2, 0.0);
     private LaserCommand laser_command = new LaserCommand(false);
 
-    private double pan_servo_value_1 = new DoublePreferenceConstant("CalibrationPointer/pan_servo_value_1", 0)
-            .getValue();
-    private double pan_servo_value_2 = new DoublePreferenceConstant("CalibrationPointer/pan_servo_value_2", 180)
-            .getValue();
-    private double pan_servo_angle_1 = new DoublePreferenceConstant("CalibrationPointer/pan_servo_angle_1", 0)
-            .getValue();
-    private double pan_servo_angle_2 = new DoublePreferenceConstant("CalibrationPointer/pan_servo_angle_2", 180)
-            .getValue();
-    private double tilt_servo_value_1 = new DoublePreferenceConstant("CalibrationPointer/tilt_servo_value_1", 0)
-            .getValue();
-    private double tilt_servo_value_2 = new DoublePreferenceConstant("CalibrationPointer/tilt_servo_value_2", 180)
-            .getValue();
-    private double tilt_servo_angle_1 = new DoublePreferenceConstant("CalibrationPointer/tilt_servo_angle_1", 0)
-            .getValue();
-    private double tilt_servo_angle_2 = new DoublePreferenceConstant("CalibrationPointer/tilt_servo_angle_2", 180)
-            .getValue();
+    private final DoublePreferenceConstant defaultTiltCommand = new DoublePreferenceConstant(
+            "CalibrationPointer/default_tilt", 0);
+    private final DoublePreferenceConstant defaultPanCommand = new DoublePreferenceConstant(
+            "CalibrationPointer/default_pan", 0);
+
+    private double calibrationPanServoValue1 = new DoublePreferenceConstant(
+            "CalibrationPointer/pan_servo_value_1", 0).getValue();
+    private double calibrationPanServoValue2 = new DoublePreferenceConstant(
+            "CalibrationPointer/pan_servo_value_2", 180).getValue();
+    private double calibrationPanServoAngle1 = new DoublePreferenceConstant(
+            "CalibrationPointer/pan_servo_angle_1", 0).getValue();
+    private double calibrationPanServoAngle2 = new DoublePreferenceConstant(
+            "CalibrationPointer/pan_servo_angle_2", 180).getValue();
+    private double calibrationTiltServoValue1 = new DoublePreferenceConstant(
+            "CalibrationPointer/tilt_servo_value_1", 0).getValue();
+    private double calibrationTiltServoValue2 = new DoublePreferenceConstant(
+            "CalibrationPointer/tilt_servo_value_2", 180).getValue();
+    private double calibrationTiltServoAngle1 = new DoublePreferenceConstant(
+            "CalibrationPointer/tilt_servo_angle_1", 0).getValue();
+    private double calibrationTiltServoAngle2 = new DoublePreferenceConstant(
+            "CalibrationPointer/tilt_servo_angle_2", 180).getValue();
 
     public CalibrationPointer(SerialPort.Port port, JointManager jointPublisher) {
         this.device = new SerialPort(115200, port);
         this.jointManager = jointPublisher;
+        setToDefaultAngles();
     }
 
     public void setPanAngle(double new_angle) {
-        double command = mapPanServoAngleToValue(new_angle);
+        setPanValue(mapPanServoAngleToValue(new_angle));
+    }
+
+    public void setPanValue(double command) {
         SmartDashboard.putNumber("CalibrationPointer/command/pan", command);
         servo2_command = new ServoCommand(2, command);
     }
 
     public void setTiltAngle(double new_angle) {
-        double command = mapTiltServoAngleToValue(new_angle);
+        setTiltValue(mapTiltServoAngleToValue(new_angle));
+    }
+
+    public void setTiltValue(double command) {
         SmartDashboard.putNumber("CalibrationPointer/command/tilt", command);
         servo1_command = new ServoCommand(1, command);
     }
@@ -100,20 +106,24 @@ public class CalibrationPointer extends SubsystemBase {
         return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
 
-    private double mapPanServoAngleToValue(double servo_value) {
-        return map(servo_value, pan_servo_value_1, pan_servo_value_2, pan_servo_angle_1, pan_servo_angle_2);
+    private double mapPanServoAngleToValue(double servo_angle) {
+        return map(servo_angle, calibrationPanServoAngle1, calibrationPanServoAngle2, calibrationPanServoValue1,
+                calibrationPanServoValue2);
     }
 
-    private double mapPanServoValueToAngle(double servo_angle) {
-        return map(servo_angle, pan_servo_angle_1, pan_servo_angle_2, pan_servo_value_1, pan_servo_value_2);
+    private double mapPanServoValueToAngle(double servo_value) {
+        return map(servo_value, calibrationPanServoValue1,
+                calibrationPanServoValue2, calibrationPanServoAngle1, calibrationPanServoAngle2);
     }
 
-    private double mapTiltServoAngleToValue(double servo_value) {
-        return map(servo_value, tilt_servo_value_1, tilt_servo_value_2, tilt_servo_angle_1, tilt_servo_angle_2);
+    private double mapTiltServoAngleToValue(double servo_angle) {
+        return map(servo_angle, calibrationTiltServoAngle1, calibrationTiltServoAngle2, calibrationTiltServoValue1,
+                calibrationTiltServoValue2);
     }
 
-    private double mapTiltServoValueToAngle(double servo_angle) {
-        return map(servo_angle, tilt_servo_angle_1, tilt_servo_angle_2, tilt_servo_value_1, tilt_servo_value_2);
+    private double mapTiltServoValueToAngle(double servo_value) {
+        return map(servo_value, calibrationTiltServoValue1, calibrationTiltServoValue2, calibrationTiltServoAngle1,
+                calibrationTiltServoAngle2);
     }
 
     public double getPanValue() {
@@ -176,6 +186,11 @@ public class CalibrationPointer extends SubsystemBase {
         }
     }
 
+    public void setToDefaultAngles() {
+        setPanValue(defaultPanCommand.getValue());
+        setTiltValue(defaultTiltCommand.getValue());
+    }
+
     @Override
     public void periodic() {
         int received = device.getBytesReceived();
@@ -200,11 +215,7 @@ public class CalibrationPointer extends SubsystemBase {
             }
         }
 
-        long now = RobotController.getFPGATime();
-        if (now - last_update > UPDATE_INTERVAL) {
-            writeCommands();
-            updateJointStates();
-            last_update = now;
-        }
+        writeCommands();
+        updateJointStates();
     }
 }

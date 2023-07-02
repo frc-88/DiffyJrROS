@@ -76,7 +76,8 @@ public class RobotContainer {
         // calibrationPointer, joystick,
         // bridge.pointerPublisher, bridge.tagSubscriber));
         togglePointer
-                .toggleOnTrue(new AutoFocusLaser(calibrationPointer, bridge.pointerPublisher, bridge.tagSubscriber));
+                .toggleOnTrue(new AutoFocusLaser(calibrationPointer, bridge.pointerPublisher,
+                        bridge.tagSubscriber));
 
     }
 

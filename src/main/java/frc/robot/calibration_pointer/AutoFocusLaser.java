@@ -32,6 +32,7 @@ public class AutoFocusLaser extends CommandBase {
     public void initialize() {
         calibrationPointer.setEnableROSJoints(true);
         calibrationPointer.setLaser(true);
+        calibrationPointer.setToDefaultAngles();
     }
 
     // Called every time the scheduler runs while the command is scheduled.

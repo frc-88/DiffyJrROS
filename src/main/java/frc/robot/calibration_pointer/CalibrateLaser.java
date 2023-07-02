@@ -17,7 +17,7 @@ import frc.team88.ros.messages.geometry_msgs.PointStamped;
 public class CalibrateLaser extends CommandBase {
     private final JoystickInterface joystick;
     private final CalibrationPointer calibrationPointer;
-    private final double speedMultiplier = 2.0;
+    private final double speedMultiplier = 1.5;
     private final double deadzone = 0.1;
     private final PointerPublisher pointerPublisher;
     private final TagSubscriber tagSubscriber;
@@ -41,6 +41,7 @@ public class CalibrateLaser extends CommandBase {
     public void initialize() {
         calibrationPointer.setEnableROSJoints(false);
         calibrationPointer.setLaser(true);
+        calibrationPointer.setToDefaultAngles();
     }
 
     // Called every time the scheduler runs while the command is scheduled.
@@ -72,10 +73,10 @@ public class CalibrateLaser extends CommandBase {
         double tiltValue = -speedMultiplier * joystick.getRightStickY();
 
         if (Math.abs(panValue) > deadzone) {
-            calibrationPointer.setPanAngle(limitServo(calibrationPointer.getPanValue() + panValue));
+            calibrationPointer.setPanValue(limitServo(calibrationPointer.getPanValue() + panValue));
         }
         if (Math.abs(tiltValue) > deadzone) {
-            calibrationPointer.setTiltAngle(limitServo(calibrationPointer.getTiltValue() + tiltValue));
+            calibrationPointer.setTiltValue(limitServo(calibrationPointer.getTiltValue() + tiltValue));
         }
 
         Optional<AprilTagDetectionArray> detections = tagSubscriber.receive();
@@ -99,6 +100,7 @@ public class CalibrateLaser extends CommandBase {
     @Override
     public void end(boolean interrupted) {
         calibrationPointer.setEnableROSJoints(true);
+        calibrationPointer.setLaser(false);
     }
 
     // Returns true when the command should end.
