@@ -2,9 +2,8 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands;
+package frc.robot.drive_subsystem;
 
-import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.diffswerve.Constants;
 import frc.robot.driverinput.Helpers;
@@ -15,9 +14,9 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 /** An example command that uses an example subsystem. */
 public class DriveSwerveJoystickCommand extends CommandBase {
     @SuppressWarnings({ "PMD.UnusedPrivateField", "PMD.SingularField" })
-    private final DriveSubsystem m_drive;
-    private final JoystickInterface m_joystick;
-    private final MotorEnablePublisher m_motorEnablePublisher;
+    private final DriveSubsystem driveSubsystem;
+    private final JoystickInterface joystick;
+    private final MotorEnablePublisher motorEnablePublisher;
     private final double JOYSTICK_DEADBAND = 0.1;
     private final double[] LINEAR_MULTIPLIERS = { 0.1, 0.25, 0.5, 0.9, 1.0 };
     private final double[] ANGULAR_MULTIPLIERS = { 0.1, 0.125, 0.15, 0.2, 1.0 };
@@ -27,15 +26,15 @@ public class DriveSwerveJoystickCommand extends CommandBase {
     /**
      * Creates a new DriveSwerveJoystickCommand.
      *
-     * @param drive The subsystem used by this command.
+     * @param driveSubsystem The subsystem used by this command.
      */
-    public DriveSwerveJoystickCommand(DriveSubsystem drive, JoystickInterface joystick,
-            MotorEnablePublisher motor_enable_publisher) {
-        m_drive = drive;
-        m_joystick = joystick;
-        m_motorEnablePublisher = motor_enable_publisher;
+    public DriveSwerveJoystickCommand(DriveSubsystem driveSubsystem, JoystickInterface joystick,
+            MotorEnablePublisher motorEnablePublisher) {
+        this.driveSubsystem = driveSubsystem;
+        this.joystick = joystick;
+        this.motorEnablePublisher = motorEnablePublisher;
         // Use addRequirements() here to declare subsystem dependencies.
-        addRequirements(drive);
+        addRequirements(driveSubsystem);
     }
 
     // Called when the command is initially scheduled.
@@ -56,15 +55,15 @@ public class DriveSwerveJoystickCommand extends CommandBase {
     }
 
     public double getVelocityX() {
-        return m_joystick.getLeftStickY();
+        return joystick.getLeftStickY();
     }
 
     public double getVelocityY() {
-        return m_joystick.getLeftStickX();
+        return joystick.getLeftStickX();
     }
 
     public double getVelocityTheta() {
-        return m_joystick.getRightStickX();
+        return joystick.getRightStickX();
     }
 
     // Called every time the scheduler runs while the command is scheduled.
@@ -72,14 +71,14 @@ public class DriveSwerveJoystickCommand extends CommandBase {
     public void execute() {
         updateMotorEnable();
         updateSpeedMode();
-        m_drive.drive(getChassisSpeeds());
+        driveSubsystem.drive(getChassisSpeeds());
     }
 
     private void updateMotorEnable() {
-        if (m_joystick.isButtonLeftBumperPressed() && m_joystick.isButtonStartPressed()) {
-            m_motorEnablePublisher.setMotorEnable(true);
-        } else if (m_joystick.isButtonLeftBumperPressed() || m_joystick.isButtonRightBumperPressed()) {
-            m_motorEnablePublisher.setMotorEnable(false);
+        if (joystick.isButtonLeftBumperPressed() && joystick.isButtonStartPressed()) {
+            motorEnablePublisher.setMotorEnable(true);
+        } else if (joystick.isButtonLeftBumperPressed() || joystick.isButtonRightBumperPressed()) {
+            motorEnablePublisher.setMotorEnable(false);
         }
     }
 
@@ -96,9 +95,9 @@ public class DriveSwerveJoystickCommand extends CommandBase {
     }
 
     private int getDpadState() {
-        if (m_joystick.getDpadVertical() > 0.5) {
+        if (joystick.getDpadVertical() > 0.5) {
             return 1;
-        } else if (m_joystick.getDpadVertical() < -0.5) {
+        } else if (joystick.getDpadVertical() < -0.5) {
             return -1;
         } else {
             return 0;
@@ -144,7 +143,7 @@ public class DriveSwerveJoystickCommand extends CommandBase {
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
-        m_drive.stop();
+        driveSubsystem.stop();
     }
 
     // Returns true when the command should end.

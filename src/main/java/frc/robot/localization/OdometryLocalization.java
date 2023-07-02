@@ -3,7 +3,7 @@ package frc.robot.localization;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.drive_subsystem.DriveSubsystem;
 
 public class OdometryLocalization implements Localization {
     private final DriveSubsystem drive;

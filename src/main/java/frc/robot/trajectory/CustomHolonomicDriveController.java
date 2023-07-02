@@ -32,14 +32,14 @@ import edu.wpi.first.math.trajectory.Trajectory;
  * point toward. This heading reference is profiled for smoothness.
  */
 public class CustomHolonomicDriveController {
-    private Pose2d m_poseError = new Pose2d();
-    private Rotation2d m_rotationError = new Rotation2d();
-    private Pose2d m_poseTolerance = new Pose2d();
-    private boolean m_enabled = true;
+    private Pose2d poseError = new Pose2d();
+    private Rotation2d rotationError = new Rotation2d();
+    private Pose2d poseTolerance = new Pose2d();
+    private boolean enabled = true;
 
-    private final PIDController m_xController;
-    private final PIDController m_yController;
-    private final PIDController m_thetaController;
+    private final PIDController xController;
+    private final PIDController yController;
+    private final PIDController thetaController;
 
     /**
      * Constructs a holonomic drive controller.
@@ -52,10 +52,10 @@ public class CustomHolonomicDriveController {
      */
     public CustomHolonomicDriveController(
             PIDController xController, PIDController yController, PIDController thetaController) {
-        m_xController = xController;
-        m_yController = yController;
-        m_thetaController = thetaController;
-        m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
+        this.xController = xController;
+        this.yController = yController;
+        this.thetaController = thetaController;
+        this.thetaController.enableContinuousInput(-Math.PI, Math.PI);
     }
 
     /**
@@ -64,10 +64,10 @@ public class CustomHolonomicDriveController {
      * @return True if the pose error is within tolerance of the reference.
      */
     public boolean atReference() {
-        final var eTranslate = m_poseError.getTranslation();
-        final var eRotate = m_rotationError;
-        final var tolTranslate = m_poseTolerance.getTranslation();
-        final var tolRotate = m_poseTolerance.getRotation();
+        final var eTranslate = poseError.getTranslation();
+        final var eRotate = rotationError;
+        final var tolTranslate = poseTolerance.getTranslation();
+        final var tolRotate = poseTolerance.getRotation();
         return Math.abs(eTranslate.getX()) < tolTranslate.getX()
                 && Math.abs(eTranslate.getY()) < tolTranslate.getY()
                 && Math.abs(eRotate.getRadians()) < tolRotate.getRadians();
@@ -79,13 +79,13 @@ public class CustomHolonomicDriveController {
      * @param tolerance The pose error which is tolerable.
      */
     public void setTolerance(Pose2d tolerance) {
-        m_poseTolerance = tolerance;
+        poseTolerance = tolerance;
     }
 
     public void reset() {
-        m_xController.reset();
-        m_yController.reset();
-        m_thetaController.reset();
+        xController.reset();
+        yController.reset();
+        thetaController.reset();
     }
 
     /**
@@ -110,17 +110,17 @@ public class CustomHolonomicDriveController {
         double yFF = linearVelocityRefMeters * poseRef.getRotation().getSin();
         double thetaFF = angleVelocityRefRadians;
 
-        m_poseError = poseRef.relativeTo(currentPose);
-        m_rotationError = angleRef.minus(currentPose.getRotation());
+        poseError = poseRef.relativeTo(currentPose);
+        rotationError = angleRef.minus(currentPose.getRotation());
 
-        if (!m_enabled) {
+        if (!enabled) {
             return ChassisSpeeds.fromFieldRelativeSpeeds(xFF, yFF, thetaFF, currentPose.getRotation());
         }
 
         // Calculate feedback velocities (based on position error).
-        double xFeedback = m_xController.calculate(currentPose.getX(), poseRef.getX());
-        double yFeedback = m_yController.calculate(currentPose.getY(), poseRef.getY());
-        double thetaFeedback = m_thetaController.calculate(currentPose.getRotation().getRadians(),
+        double xFeedback = xController.calculate(currentPose.getX(), poseRef.getX());
+        double yFeedback = yController.calculate(currentPose.getY(), poseRef.getY());
+        double thetaFeedback = thetaController.calculate(currentPose.getRotation().getRadians(),
                 angleRef.getRadians());
 
         // Return next output.
@@ -156,6 +156,6 @@ public class CustomHolonomicDriveController {
      * @param enabled If the controller is enabled or not.
      */
     public void setEnabled(boolean enabled) {
-        m_enabled = enabled;
+        enabled = enabled;
     }
 }

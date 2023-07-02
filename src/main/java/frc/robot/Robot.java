@@ -19,9 +19,9 @@ import frc.robot.preferenceconstants.PreferenceConstants;
  * project.
  */
 public class Robot extends TimedRobot {
-    private Command m_autonomousCommand;
+    private Command autonomousCommand;
 
-    private RobotContainer m_robotContainer;
+    private RobotContainer robotContainer;
 
     /**
      * This function is run when the robot is first started up and should be used
@@ -33,7 +33,7 @@ public class Robot extends TimedRobot {
         // Instantiate our RobotContainer. This will perform all our button bindings,
         // and put our
         // autonomous chooser on the dashboard.
-        m_robotContainer = new RobotContainer(this);
+        robotContainer = new RobotContainer(this);
     }
 
     /**
@@ -62,16 +62,16 @@ public class Robot extends TimedRobot {
     /** This function is called once each time the robot enters Disabled mode. */
     @Override
     public void disabledInit() {
-        m_robotContainer.disabledInit();
-        m_robotContainer.setEnableDrive(false);
-        if (m_autonomousCommand != null) {
-            m_autonomousCommand.cancel();
+        robotContainer.disabledInit();
+        robotContainer.setEnableDrive(false);
+        if (autonomousCommand != null) {
+            autonomousCommand.cancel();
         }
     }
 
     @Override
     public void disabledPeriodic() {
-        m_robotContainer.disabledPeriodic();
+        robotContainer.disabledPeriodic();
     }
 
     /**
@@ -80,13 +80,13 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousInit() {
-        m_robotContainer.autonomousInit();
-        m_robotContainer.setEnableDrive(true);
-        m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+        robotContainer.autonomousInit();
+        robotContainer.setEnableDrive(true);
+        autonomousCommand = robotContainer.getAutonomousCommand();
 
         // schedule the autonomous command (example)
-        if (m_autonomousCommand != null) {
-            m_autonomousCommand.schedule();
+        if (autonomousCommand != null) {
+            autonomousCommand.schedule();
         }
     }
 
@@ -101,10 +101,10 @@ public class Robot extends TimedRobot {
         // teleop starts running. If you want the autonomous to
         // continue until interrupted by another command, remove
         // this line or comment it out.
-        m_robotContainer.teleopInit();
-        m_robotContainer.setEnableDrive(true);
-        if (m_autonomousCommand != null) {
-            m_autonomousCommand.cancel();
+        robotContainer.teleopInit();
+        robotContainer.setEnableDrive(true);
+        if (autonomousCommand != null) {
+            autonomousCommand.cancel();
         }
     }
 
@@ -116,7 +116,7 @@ public class Robot extends TimedRobot {
     @Override
     public void testInit() {
         // Cancels all running commands at the start of test mode.
-        m_robotContainer.setEnableDrive(true);
+        robotContainer.setEnableDrive(true);
         CommandScheduler.getInstance().cancelAll();
     }
 

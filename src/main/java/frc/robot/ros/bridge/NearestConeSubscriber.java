@@ -11,16 +11,16 @@ import frc.team88.ros.conversions.ROSConversions;
 import frc.team88.ros.messages.geometry_msgs.PoseStamped;
 
 public class NearestConeSubscriber implements Subscriber<PoseStamped> {
-    private final BridgeSubscriber<PoseStamped> m_nearestConeSub;
+    private final BridgeSubscriber<PoseStamped> nearestConeSub;
 
     public NearestConeSubscriber(ROSNetworkTablesBridge bridge) {
-        m_nearestConeSub = new BridgeSubscriber<>(bridge, "nearest_cone", PoseStamped.class);
+        nearestConeSub = new BridgeSubscriber<>(bridge, "nearest_cone", PoseStamped.class);
     }
 
     @Override
     public Optional<PoseStamped> receive() {
         PoseStamped msg;
-        if ((msg = m_nearestConeSub.receive()) != null) {
+        if ((msg = nearestConeSub.receive()) != null) {
             Pose3d cone = ROSConversions.rosToWpiPose(msg.getPose());
 
             double roll = cone.getRotation().getX();

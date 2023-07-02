@@ -6,14 +6,14 @@ import frc.team88.ros.messages.TimePrimitive;
 import frc.team88.ros.messages.std_msgs.Time;
 
 public class StartBagManager {
-    private final BridgePublisher<Time> m_startBagPub;
+    private final BridgePublisher<Time> startBagPub;
 
     public StartBagManager(ROSNetworkTablesBridge bridge) {
-        m_startBagPub = new BridgePublisher<>(bridge, "start_bag");
+        startBagPub = new BridgePublisher<>(bridge, "start_bag");
     }
 
     public void startBag() {
-        TimePrimitive now = m_startBagPub.getNow();
-        m_startBagPub.send(new Time(now));
+        TimePrimitive now = startBagPub.getNow();
+        startBagPub.send(new Time(now));
     }
 }

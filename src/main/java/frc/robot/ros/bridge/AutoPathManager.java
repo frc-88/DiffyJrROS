@@ -15,12 +15,12 @@ import frc.team88.ros.messages.nav_msgs.Path;
 import frc.team88.ros.messages.std_msgs.Header;
 
 public class AutoPathManager {
-    private final BridgePublisher<Path> m_autoPathPub;
-    private final BridgePublisher<PoseStamped> m_autoStartPub;
+    private final BridgePublisher<Path> autoPathPub;
+    private final BridgePublisher<PoseStamped> autoStartPub;
 
     public AutoPathManager(ROSNetworkTablesBridge bridge) {
-        m_autoPathPub = new BridgePublisher<>(bridge, "auto/path");
-        m_autoStartPub = new BridgePublisher<>(bridge, "auto/start");
+        autoPathPub = new BridgePublisher<>(bridge, "auto/path");
+        autoStartPub = new BridgePublisher<>(bridge, "auto/start");
     }
 
     public void sendAutoInfo(Trajectory trajectory, RotationSequence rotationSequence) {
@@ -33,7 +33,7 @@ public class AutoPathManager {
         System.out.println("Sending auto info. Path length is " + traj_states.size());
 
         Path path = new Path();
-        Header header = m_autoPathPub.getHeader(Frames.MAP_FRAME);
+        Header header = autoPathPub.getHeader(Frames.MAP_FRAME);
         path.setHeader(header);
         for (int index = 0; index < traj_states.size(); index++) {
             Pose2d pose2d = new Pose2d(traj_states.get(index).poseMeters.getTranslation(),
@@ -44,7 +44,7 @@ public class AutoPathManager {
 
         PoseStamped startPose = path.getPoses().get(0);
 
-        m_autoPathPub.send(path);
-        m_autoStartPub.send(startPose);
+        autoPathPub.send(path);
+        autoStartPub.send(startPose);
     }
 }

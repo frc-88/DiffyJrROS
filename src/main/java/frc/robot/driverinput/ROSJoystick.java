@@ -63,15 +63,17 @@ public class ROSJoystick extends SubsystemBase implements JoystickInterface {
     private boolean getButtonIndex(ButtonMapping button) {
         ArrayList<java.lang.Integer> buttons = msg.getButtons();
         if (buttons.size() <= button.index) {
+            System.err.println("Button index out of range: " + button.index);
             return false;
         } else {
-            return buttons.get(button.index) == 1 ? true : false;
+            return buttons.get(button.index) == 1;
         }
     }
 
     private double getAxisIndex(AxisMapping axis) {
         ArrayList<java.lang.Float> axes = msg.getAxes();
         if (axes.size() <= axis.index) {
+            System.err.println("Axis index out of range: " + axis.index);
             return 0.0;
         } else {
             return axes.get(axis.index);

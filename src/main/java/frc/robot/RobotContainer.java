@@ -4,24 +4,23 @@
 
 package frc.robot;
 
-import frc.robot.commands.CalibrateLaserTurret;
-import frc.robot.commands.CoastDriveMotors;
-import frc.robot.commands.DriveSwerveJoystickCommand;
+import frc.robot.autos.AutonomousManager;
+import frc.robot.calibration_pointer.AutoFocusLaser;
+import frc.robot.calibration_pointer.CalibrateLaser;
+import frc.robot.calibration_pointer.CalibrationPointer;
+import frc.robot.drive_subsystem.CoastDriveMotors;
+import frc.robot.drive_subsystem.DriveSubsystem;
+import frc.robot.drive_subsystem.DriveSwerveJoystickCommand;
 import frc.robot.driverinput.JoystickInterface;
 import frc.robot.driverinput.ROSJoystick;
 import frc.robot.localization.Localization;
 import frc.robot.localization.OdometryLocalization;
 import frc.robot.localization.ROSLocalization;
-import frc.robot.subsystems.AutonomousManager;
-import frc.robot.subsystems.DiffyJrCoprocessorBridge;
-import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.LaserTurret;
-
+import frc.robot.ros.DiffyJrCoprocessorBridge;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -35,15 +34,16 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
     // The robot's subsystems and commands are defined here...
-    private final DriveSubsystem m_drive = new DriveSubsystem();
+    private final DriveSubsystem driveSubsystem = new DriveSubsystem();
 
-    private final DiffyJrCoprocessorBridge m_bridge = new DiffyJrCoprocessorBridge(m_drive);
-    private final JoystickInterface m_joystick = new ROSJoystick(m_bridge.joystickSubscriber);
-    private final Localization m_ros_localization = new ROSLocalization(m_drive, m_bridge.tfListenerCompact);
-    private final Localization m_odom_localization = new OdometryLocalization(m_drive);
-    private final LaserTurret m_laser_turret = new LaserTurret(SerialPort.Port.kMXP);
-    private final AutonomousManager m_auto_manager = new AutonomousManager(m_drive, m_ros_localization,
-            m_odom_localization, m_bridge.autoPathManager);
+    private final DiffyJrCoprocessorBridge bridge = new DiffyJrCoprocessorBridge(driveSubsystem);
+    private final JoystickInterface joystick = new ROSJoystick(bridge.joystickSubscriber);
+    private final Localization rosLocalization = new ROSLocalization(driveSubsystem, bridge.tfListenerCompact);
+    private final Localization odomLocalization = new OdometryLocalization(driveSubsystem);
+    private final CalibrationPointer calibrationPointer = new CalibrationPointer(SerialPort.Port.kMXP,
+            bridge.jointManager);
+    private final AutonomousManager autoManager = new AutonomousManager(driveSubsystem, rosLocalization,
+            odomLocalization, bridge.autoPathManager);
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -52,51 +52,56 @@ public class RobotContainer {
         System.out.println("RobotContainer initializing");
         configureCommands();
         configurePeriodics(robot);
-        m_drive.getSwerve().setAngleControllerEnabled(false);
+        driveSubsystem.getSwerve().setAngleControllerEnabled(false);
         System.out.println("RobotContainer initialization complete");
     }
 
     private void configureCommands() {
-        m_drive.setDefaultCommand(new DriveSwerveJoystickCommand(m_drive, m_joystick, m_bridge.motorEnablePublisher));
+        driveSubsystem.setDefaultCommand(
+                new DriveSwerveJoystickCommand(driveSubsystem, joystick, bridge.motorEnablePublisher));
 
         Trigger userButton = new Trigger(() -> RobotController.getUserButton());
-        userButton.whileTrue(new CoastDriveMotors(m_drive));
+        userButton.whileTrue(new CoastDriveMotors(driveSubsystem));
 
-        Trigger toggleFieldRelative = new Trigger(() -> this.m_joystick.isButtonBPressed());
+        Trigger toggleFieldRelative = new Trigger(() -> this.joystick.isButtonBPressed());
         toggleFieldRelative.onTrue(new InstantCommand(() -> {
-            boolean new_state = !m_drive.getSwerve().commandsAreFieldRelative();
+            boolean new_state = !driveSubsystem.getSwerve().commandsAreFieldRelative();
             System.out.println("Setting field relative commands to " + new_state);
-            m_drive.getSwerve().setFieldRelativeCommands(new_state);
-            m_drive.getSwerve().resetFieldOffset();
+            driveSubsystem.getSwerve().setFieldRelativeCommands(new_state);
+            driveSubsystem.getSwerve().resetFieldOffset();
         }));
 
-        CalibrateLaserTurret calibrateTurretCommand = new CalibrateLaserTurret(m_drive, m_laser_turret, m_joystick);
-        Trigger toggleTurretManual = new Trigger(() -> this.m_joystick.isButtonXPressed());
-        toggleTurretManual.toggleOnTrue(calibrateTurretCommand);
+        Trigger togglePointer = new Trigger(() -> this.joystick.isButtonXPressed());
+        // togglePointer.toggleOnTrue(new CalibrateLaser(driveSubsystem,
+        // calibrationPointer, joystick,
+        // bridge.pointerPublisher, bridge.tagSubscriber));
+        togglePointer
+                .toggleOnTrue(new AutoFocusLaser(calibrationPointer, bridge.pointerPublisher, bridge.tagSubscriber));
+
     }
 
     private void configurePeriodics(Robot robot) {
-        robot.addPeriodic(m_drive.getSwerve()::controllerPeriodic,
+        robot.addPeriodic(driveSubsystem.getSwerve()::controllerPeriodic,
                 frc.robot.diffswerve.Constants.DifferentialSwerveModule.kDt, 0.0025);
     }
 
     public void setEnableDrive(boolean enabled) {
         System.out.println("Set drive motors to " + enabled);
-        m_drive.setEnabled(enabled);
-        m_drive.setCoast(!enabled);
+        driveSubsystem.setEnabled(enabled);
+        driveSubsystem.setCoast(!enabled);
     }
 
     public void disabledInit() {
-        m_bridge.matchManager.sendDisableMatchPeriod();
+        bridge.matchManager.sendDisableMatchPeriod();
     }
 
     public void autonomousInit() {
-        // m_bridge.startBag();
-        m_bridge.matchManager.sendAutonomousMatchPeriod();
+        // bridge.startBag();
+        bridge.matchManager.sendAutonomousMatchPeriod();
     }
 
     public void teleopInit() {
-        m_bridge.matchManager.sendTeleopMatchPeriod();
+        bridge.matchManager.sendTeleopMatchPeriod();
     }
 
     public void disabledPeriodic() {
@@ -109,6 +114,6 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return m_auto_manager.getAutonomousCommand();
+        return autoManager.getAutonomousCommand();
     }
 }

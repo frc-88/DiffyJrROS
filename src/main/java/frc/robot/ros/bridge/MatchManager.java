@@ -7,35 +7,35 @@ import frc.team88.ros.bridge.BridgePublisher;
 import frc.team88.ros.bridge.ROSNetworkTablesBridge;
 
 public class MatchManager {
-    private final BridgePublisher<Match> m_matchPub;
-    private final BridgePublisher<MatchPeriod> m_matchPeriodPub;
-    private MatchPeriod m_matchPeriod = new MatchPeriod(MatchPeriod.DISABLED);
+    private final BridgePublisher<Match> matchPub;
+    private final BridgePublisher<MatchPeriod> matchPeriodPub;
+    private MatchPeriod matchPeriod = new MatchPeriod(MatchPeriod.DISABLED);
 
     public MatchManager(ROSNetworkTablesBridge bridge) {
-        m_matchPub = new BridgePublisher<>(bridge, "match");
-        m_matchPeriodPub = new BridgePublisher<>(bridge, "match_period");
+        matchPub = new BridgePublisher<>(bridge, "match");
+        matchPeriodPub = new BridgePublisher<>(bridge, "match_period");
     }
 
     public void sendDisableMatchPeriod() {
-        m_matchPeriod = new MatchPeriod(MatchPeriod.DISABLED);
-        m_matchPeriodPub.send(m_matchPeriod);
+        matchPeriod = new MatchPeriod(MatchPeriod.DISABLED);
+        matchPeriodPub.send(matchPeriod);
     }
 
     public void sendAutonomousMatchPeriod() {
-        m_matchPeriod = new MatchPeriod(MatchPeriod.AUTONOMOUS);
-        m_matchPeriodPub.send(m_matchPeriod);
+        matchPeriod = new MatchPeriod(MatchPeriod.AUTONOMOUS);
+        matchPeriodPub.send(matchPeriod);
     }
 
     public void sendTeleopMatchPeriod() {
-        m_matchPeriod = new MatchPeriod(MatchPeriod.TELEOP);
-        m_matchPeriodPub.send(m_matchPeriod);
+        matchPeriod = new MatchPeriod(MatchPeriod.TELEOP);
+        matchPeriodPub.send(matchPeriod);
     }
 
     public void sendMatch() {
-        m_matchPub.send(new Match(
+        matchPub.send(new Match(
                 DriverStation.getMatchTime(),
                 DriverStation.getAlliance().name(),
                 (byte) DriverStation.getLocation(),
-                m_matchPeriod));
+                matchPeriod));
     }
 }
