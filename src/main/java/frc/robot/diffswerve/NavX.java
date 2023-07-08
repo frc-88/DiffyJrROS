@@ -89,17 +89,4 @@ public class NavX {
     public AHRS getBase() {
         return this.base;
     }
-
-    // public FrcImu getMessage() {
-    //     return new FrcImu(
-    //         getRoll(),
-    //         getPitch(),
-    //         getYaw(),
-    //         getYawRate(),
-    //         getAccelX(),
-    //         getAccelY(),
-    //         getAccelZ()
-    //     );
-    // }
-
 }

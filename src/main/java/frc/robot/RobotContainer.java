@@ -44,6 +44,7 @@ public class RobotContainer {
             bridge.jointManager);
     private final AutonomousManager autoManager = new AutonomousManager(driveSubsystem, rosLocalization,
             odomLocalization, bridge.autoPathManager);
+    private final boolean calibratePointer = false;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -72,10 +73,13 @@ public class RobotContainer {
         }));
 
         Trigger togglePointer = new Trigger(() -> this.joystick.isButtonXPressed());
-        // togglePointer.toggleOnTrue(new CalibrateLaser(driveSubsystem,
-        // calibrationPointer, joystick,
-        // bridge.pointerPublisher, bridge.tagSubscriber));
-        togglePointer.toggleOnTrue(new ROSControlledLaser(calibrationPointer));
+        if (calibratePointer) {
+            togglePointer.toggleOnTrue(new CalibrateLaser(driveSubsystem,
+                    calibrationPointer, joystick,
+                    bridge.pointerPublisher, bridge.tagSubscriber));
+        } else {
+            togglePointer.toggleOnTrue(new ROSControlledLaser(calibrationPointer));
+        }
 
     }
 

@@ -1,8 +1,6 @@
 package frc.robot.driverinput;
 
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 public class XboxController extends Joystick implements JoystickInterface {
     private static final int LEFT_HORIZ_AXIS = 0;
