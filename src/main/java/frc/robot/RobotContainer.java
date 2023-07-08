@@ -5,7 +5,7 @@
 package frc.robot;
 
 import frc.robot.autos.AutonomousManager;
-import frc.robot.calibration_pointer.AutoFocusLaser;
+import frc.robot.calibration_pointer.ROSControlledLaser;
 import frc.robot.calibration_pointer.CalibrateLaser;
 import frc.robot.calibration_pointer.CalibrationPointer;
 import frc.robot.drive_subsystem.CoastDriveMotors;
@@ -75,9 +75,7 @@ public class RobotContainer {
         // togglePointer.toggleOnTrue(new CalibrateLaser(driveSubsystem,
         // calibrationPointer, joystick,
         // bridge.pointerPublisher, bridge.tagSubscriber));
-        togglePointer
-                .toggleOnTrue(new AutoFocusLaser(calibrationPointer, bridge.pointerPublisher,
-                        bridge.tagSubscriber));
+        togglePointer.toggleOnTrue(new ROSControlledLaser(calibrationPointer));
 
     }
 
