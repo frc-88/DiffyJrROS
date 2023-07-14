@@ -3,11 +3,15 @@ package frc.robot.driverinput;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.ros.bridge.JoystickSubscriber;
 import frc.team88.ros.messages.sensor_msgs.Joy;
 
 public class ROSJoystick extends SubsystemBase implements JoystickInterface {
+    private long prevMessageTime = 0;
+    private final long MESSAGE_TIMEOUT = 250_000;
+
     private enum ButtonMapping {
         A(0),
         B(1),
@@ -57,7 +61,15 @@ public class ROSJoystick extends SubsystemBase implements JoystickInterface {
         Optional<Joy> new_msg = joySub.receive();
         if (!new_msg.isEmpty()) {
             msg = new_msg.get();
+            prevMessageTime = getTime();
         }
+        if (getTime() - prevMessageTime > MESSAGE_TIMEOUT) {
+            msg = new Joy();
+        }
+    }
+
+    private long getTime() {
+        return RobotController.getFPGATime();
     }
 
     private boolean getButtonIndex(ButtonMapping button) {
