@@ -5,6 +5,7 @@
 package frc.robot;
 
 import frc.robot.autos.AutonomousManager;
+import frc.robot.battery_tracker.CameraScanner;
 import frc.robot.calibration_pointer.ROSControlledLaser;
 import frc.robot.calibration_pointer.CalibrateLaser;
 import frc.robot.calibration_pointer.CalibrationPointer;
@@ -44,6 +45,7 @@ public class RobotContainer {
             bridge.jointManager);
     private final AutonomousManager autoManager = new AutonomousManager(driveSubsystem, rosLocalization,
             odomLocalization, bridge.autoPathManager);
+    private final CameraScanner cameraScanner = new CameraScanner();
     private final boolean calibratePointer = false;
 
     /**
