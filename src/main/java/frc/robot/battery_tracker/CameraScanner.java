@@ -12,10 +12,12 @@ import edu.wpi.first.cscore.CvSource;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
 
 public class CameraScanner extends SubsystemBase {
     public CameraScanner() {
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         Thread m_visionThread = new Thread(
                 () -> {
                     // Get the UsbCamera from CameraServer
@@ -33,6 +35,8 @@ public class CameraScanner extends SubsystemBase {
                     // reuse this Mat.
                     Mat mat = new Mat();
 
+                    System.out.println("Initialized camera");
+
                     // This cannot be 'true'. The program will never exit if it is. This
                     // lets the robot stop this thread when restarting robot code or
                     // deploying.
@@ -44,13 +48,14 @@ public class CameraScanner extends SubsystemBase {
                             outputStream.notifyError(cvSink.getError());
                             // skip the rest of the current iteration
                             continue;
-
                         }
                         // Process image
                         List<String> decoded_info = new ArrayList<String>();
                         boolean hasDetections = detector.detectAndDecodeMulti(mat, decoded_info);
                         if (hasDetections) {
+                            System.out.println(String.format("Found %d codes", decoded_info.size()));
                             if (decoded_info.size() != 1) {
+                                System.out.println("Found multiple QR codes. Ignoring frame.");
                                 continue;
                             }
                             String qr_code_text = decoded_info.get(0);
