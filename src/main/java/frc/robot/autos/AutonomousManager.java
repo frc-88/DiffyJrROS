@@ -12,7 +12,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -30,7 +30,7 @@ public class AutonomousManager extends SubsystemBase {
 
     private final StringPreferenceConstant autonomousPreferenceConstant = new StringPreferenceConstant("auto", "");
     private String selectedAutonomous = "";
-    private Map<String, CommandBase> autos = new HashMap<>();
+    private Map<String, Command> autos = new HashMap<>();
 
     public final Pose2d garageOrigin = new Pose2d(39.0, 26.2, new Rotation2d());
     public final Pose2d apartmentOrigin = new Pose2d(4.2, 1.69, new Rotation2d());

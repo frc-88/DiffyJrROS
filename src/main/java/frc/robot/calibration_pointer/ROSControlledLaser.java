@@ -4,9 +4,9 @@
 
 package frc.robot.calibration_pointer;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 
-public class ROSControlledLaser extends CommandBase {
+public class ROSControlledLaser extends Command {
     private final CalibrationPointer calibrationPointer;
 
     /** Creates a new AutoFocusLaserTurret. */

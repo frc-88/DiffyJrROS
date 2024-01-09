@@ -6,12 +6,12 @@ package frc.robot.drive_subsystem;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.team88.ros.bridge.BridgeSubscriber;
 import frc.team88.ros.conversions.ROSConversions;
 import frc.team88.ros.messages.geometry_msgs.Twist;
 
-public class PassthroughRosCommand extends CommandBase {
+public class PassthroughRosCommand extends Command {
     private final DriveSubsystem driveSubsystem;
     private final BridgeSubscriber<Twist> twistSub;
     private long prevTime = 0;

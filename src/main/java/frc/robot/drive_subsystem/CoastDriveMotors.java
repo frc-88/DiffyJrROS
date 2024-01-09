@@ -4,9 +4,9 @@
 
 package frc.robot.drive_subsystem;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 
-public class CoastDriveMotors extends CommandBase {
+public class CoastDriveMotors extends Command {
     private final DriveSubsystem driveSubsystem;
 
     /** Creates a new CoastDriveMotors. */

@@ -6,7 +6,7 @@ package frc.robot.calibration_pointer;
 
 import java.util.Optional;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.drive_subsystem.DriveSubsystem;
 import frc.robot.driverinput.JoystickInterface;
 import frc.robot.ros.bridge.PointerPublisher;
@@ -14,7 +14,7 @@ import frc.robot.ros.bridge.TagSubscriber;
 import frc.robot.ros.messages.apriltag_ros.AprilTagDetectionArray;
 import frc.team88.ros.messages.geometry_msgs.PointStamped;
 
-public class CalibrateLaser extends CommandBase {
+public class CalibrateLaser extends Command {
     private final JoystickInterface joystick;
     private final CalibrationPointer calibrationPointer;
     private final double speedMultiplier = 1.5;

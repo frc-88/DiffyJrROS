@@ -14,7 +14,7 @@ import edu.wpi.first.math.trajectory.constraint.TrajectoryConstraint;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.diffswerve.Constants;
 import frc.robot.drive_subsystem.DriveSubsystem;
 import frc.robot.localization.Localization;
@@ -24,7 +24,7 @@ import frc.robot.trajectory.CustomHolonomicDriveController;
 import frc.robot.trajectory.CustomTrajectoryGenerator;
 import frc.robot.trajectory.RotationSequence;
 
-public class FollowTrajectoryBase extends CommandBase {
+public class FollowTrajectoryBase extends Command {
     protected final DriveSubsystem drive;
     protected final Localization localization;
     protected Trajectory trajectory = new Trajectory();

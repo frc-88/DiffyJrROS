@@ -9,10 +9,10 @@ import frc.robot.diffswerve.Constants;
 import frc.robot.driverinput.Helpers;
 import frc.robot.driverinput.JoystickInterface;
 import frc.robot.ros.bridge.MotorEnablePublisher;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 
 /** An example command that uses an example subsystem. */
-public class DriveSwerveJoystickCommand extends CommandBase {
+public class DriveSwerveJoystickCommand extends Command {
     @SuppressWarnings({ "PMD.UnusedPrivateField", "PMD.SingularField" })
     private final DriveSubsystem driveSubsystem;
     private final JoystickInterface joystick;
