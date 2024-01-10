@@ -1,6 +1,10 @@
 package frc.robot.ros.bridge;
 
+import java.util.Optional;
+import java.util.OptionalInt;
+
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.ros.messages.tj2_interfaces.Match;
 import frc.robot.ros.messages.tj2_interfaces.MatchPeriod;
 import frc.team88.ros.bridge.BridgePublisher;
@@ -32,10 +36,10 @@ public class MatchManager {
     }
 
     public void sendMatch() {
-        matchPub.send(new Match(
-                DriverStation.getMatchTime(),
-                DriverStation.getAlliance().name(),
-                (byte) DriverStation.getLocation(),
-                matchPeriod));
+        Optional<Alliance> alliance = DriverStation.getAlliance();
+        OptionalInt location = DriverStation.getLocation();
+        byte locationValue = (byte) (location.isPresent() ? location.getAsInt() : -1);
+        String allianceValue = alliance.isPresent() ? alliance.get().toString() : "UNKNOWN";
+        matchPub.send(new Match(DriverStation.getMatchTime(), allianceValue, locationValue, matchPeriod));
     }
 }

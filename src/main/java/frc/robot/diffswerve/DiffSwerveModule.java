@@ -10,6 +10,7 @@ import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.LinearSystemLoop;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -48,14 +49,14 @@ public class DiffSwerveModule {
                 azimuthCanifierID, azimuthPwmChannel, azimuthOffsetRadians,
                 Constants.DifferentialSwerveModule.AZIMUTH_ROTATIONS_TO_RADIANS, false);
 
-        diffMatrix = Matrix.mat(Nat.N2(), Nat.N2()).fill(
+        diffMatrix = MatBuilder.fill(Nat.N2(), Nat.N2(),
                 Constants.DifferentialSwerveModule.GEAR_M11, Constants.DifferentialSwerveModule.GEAR_M12,
                 Constants.DifferentialSwerveModule.GEAR_M21, Constants.DifferentialSwerveModule.GEAR_M22);
         inverseDiffMatrix = diffMatrix.inv();
 
         swerveControlLoop = initControlLoop();
         input = VecBuilder.fill(0, 0);
-        reference = Matrix.mat(Nat.N3(), Nat.N1()).fill(0, 0, 0);
+        reference = MatBuilder.fill(Nat.N3(), Nat.N1(), 0, 0, 0);
 
         this.moduleLocation = moduleLocation;
     }
@@ -69,7 +70,6 @@ public class DiffSwerveModule {
         is_enabled = enabled;
     }
 
-
     private LinearSystemLoop<N3, N2, N3> initControlLoop() {
 
         // Creates a Linear System of our Differential Swerve Module.
@@ -81,16 +81,14 @@ public class DiffSwerveModule {
                 Nat.N3(),
                 Nat.N3(),
                 swerveModuleModel,
-                Matrix.mat(Nat.N3(), Nat.N1())
-                        .fill(
-                                Constants.DifferentialSwerveModule.MODEL_AZIMUTH_ANGLE_NOISE,
-                                Constants.DifferentialSwerveModule.MODEL_AZIMUTH_ANG_VELOCITY_NOISE,
-                                Constants.DifferentialSwerveModule.MODEL_WHEEL_ANG_VELOCITY_NOISE),
-                Matrix.mat(Nat.N3(), Nat.N1())
-                        .fill(
-                                Constants.DifferentialSwerveModule.SENSOR_AZIMUTH_ANGLE_NOISE,
-                                Constants.DifferentialSwerveModule.SENSOR_AZIMUTH_ANG_VELOCITY_NOISE,
-                                Constants.DifferentialSwerveModule.SENSOR_WHEEL_ANG_VELOCITY_NOISE),
+                MatBuilder.fill(Nat.N3(), Nat.N1(),
+                        Constants.DifferentialSwerveModule.MODEL_AZIMUTH_ANGLE_NOISE,
+                        Constants.DifferentialSwerveModule.MODEL_AZIMUTH_ANG_VELOCITY_NOISE,
+                        Constants.DifferentialSwerveModule.MODEL_WHEEL_ANG_VELOCITY_NOISE),
+                MatBuilder.fill(Nat.N3(), Nat.N1(),
+                        Constants.DifferentialSwerveModule.SENSOR_AZIMUTH_ANGLE_NOISE,
+                        Constants.DifferentialSwerveModule.SENSOR_AZIMUTH_ANG_VELOCITY_NOISE,
+                        Constants.DifferentialSwerveModule.SENSOR_WHEEL_ANG_VELOCITY_NOISE),
                 Constants.DifferentialSwerveModule.kDt);
         // Creates an LQR controller for our Swerve Module.
         LinearQuadraticRegulator<N3, N2, N3> swerveController = new LinearQuadraticRegulator<>(
@@ -137,20 +135,20 @@ public class DiffSwerveModule {
         Matrix<N2, N2> A_subset = inverseDiffMatrix.times(inverseDiffMatrix).times(-K_t / (K_v * R * J_w));
         Matrix<N2, N2> B_subset = inverseDiffMatrix.times(K_t / (R * J_w));
 
-        var A = Matrix.mat(Nat.N3(), Nat.N3()).fill(
+        var A = MatBuilder.fill(Nat.N3(), Nat.N3(),
                 0.0, 1.0, 0.0,
                 0.0, A_subset.get(0, 0), A_subset.get(0, 1),
                 0.0, A_subset.get(1, 0), A_subset.get(1, 1));
 
-        var B = Matrix.mat(Nat.N3(), Nat.N2()).fill(
+        var B = MatBuilder.fill(Nat.N3(), Nat.N2(),
                 0.0, 0.0,
                 B_subset.get(0, 0), B_subset.get(0, 1),
                 B_subset.get(1, 0), B_subset.get(1, 1));
-        var C = Matrix.mat(Nat.N3(), Nat.N3()).fill(
+        var C = MatBuilder.fill(Nat.N3(), Nat.N3(),
                 1.0, 0.0, 0.0,
                 0.0, 1.0, 0.0,
                 0.0, 0.0, 1.0);
-        var D = Matrix.mat(Nat.N3(), Nat.N2()).fill(
+        var D = MatBuilder.fill(Nat.N3(), Nat.N2(),
                 0.0, 0.0,
                 0.0, 0.0,
                 0.0, 0.0);
@@ -242,9 +240,8 @@ public class DiffSwerveModule {
     // velocity)
     private Pair<Double, Double> getAngularVelocities() {
         Matrix<N2, N1> outputs = getDifferentialOutputs(
-            loMotor.getVelocityRadiansPerSecond(),
-            hiMotor.getVelocityRadiansPerSecond()
-        );
+                loMotor.getVelocityRadiansPerSecond(),
+                hiMotor.getVelocityRadiansPerSecond());
         return new Pair<Double, Double>(outputs.get(0, 0), outputs.get(1, 0));
     }
 
