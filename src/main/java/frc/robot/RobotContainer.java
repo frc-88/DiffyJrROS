@@ -86,6 +86,11 @@ public class RobotContainer {
     private void configurePeriodics(Robot robot) {
         robot.addPeriodic(driveSubsystem.getSwerve()::controllerPeriodic,
                 frc.robot.diffswerve.Constants.DifferentialSwerveModule.kDt, 0.0025);
+        robot.addPeriodic(this::publishBatteryState, 0.1);
+    }
+
+    public void publishBatteryState() {
+        bridge.batteryStatePublisher.publish();
     }
 
     public void setEnableDrive(boolean enabled) {

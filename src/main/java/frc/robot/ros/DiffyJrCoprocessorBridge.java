@@ -5,6 +5,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.drive_subsystem.DriveSubsystem;
 import frc.robot.ros.bridge.AutoPathManager;
+import frc.robot.ros.bridge.BatteryStatePublisher;
 import frc.robot.ros.bridge.ImuPublisher;
 import frc.robot.ros.bridge.JointManager;
 import frc.robot.ros.bridge.JoystickSubscriber;
@@ -42,6 +43,7 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
     public final TFListenerCompact tfListenerCompact;
     public final PointerPublisher pointerPublisher;
     public final TagSubscriber tagSubscriber;
+    public final BatteryStatePublisher batteryStatePublisher;
 
     private final String[] JOINT_NAMES = new String[] {
             "base_link_to_wheel_0_joint",
@@ -71,6 +73,7 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
         tfListenerCompact = new TFListenerCompact(bridge, "/tf_compact");
         pointerPublisher = new PointerPublisher(bridge);
         tagSubscriber = new TagSubscriber(bridge);
+        batteryStatePublisher = new BatteryStatePublisher(bridge);
 
         publishers = new Publisher[] {
                 imuPublisher,
