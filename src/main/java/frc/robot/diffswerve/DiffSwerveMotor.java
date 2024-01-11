@@ -1,11 +1,11 @@
 package frc.robot.diffswerve;
 
 import com.ctre.phoenix.ErrorCode;
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
-import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
 public class DiffSwerveMotor {
@@ -75,9 +75,7 @@ public class DiffSwerveMotor {
                 voltage,
                 -Constants.DifferentialSwerveModule.VOLTAGE,
                 Constants.DifferentialSwerveModule.VOLTAGE);
-        talon.set(
-                TalonFXControlMode.PercentOutput,
-                limVoltage / Constants.DifferentialSwerveModule.VOLTAGE);
+        talon.set(ControlMode.PercentOutput, limVoltage / Constants.DifferentialSwerveModule.VOLTAGE);
     }
 
     public double getVoltage() {
