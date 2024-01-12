@@ -16,7 +16,7 @@ import frc.robot.ros.bridge.OdomPublisher;
 import frc.robot.ros.bridge.PingPublisher;
 import frc.robot.ros.bridge.PointerPublisher;
 import frc.robot.ros.bridge.Publisher;
-import frc.robot.ros.bridge.StartBagManager;
+import frc.robot.ros.bridge.BagManager;
 import frc.robot.ros.bridge.TagSubscriber;
 import frc.robot.ros.bridge.TwistSubscriber;
 import frc.team88.ros.bridge.ROSNetworkTablesBridge;
@@ -38,7 +38,7 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
     public final NearestConeSubscriber nearestConeSubscriber;
     public final OdomPublisher odometryPublisher;
     public final PingPublisher pingPublisher;
-    public final StartBagManager startBagPublisher;
+    public final BagManager bagManager;
     public final TwistSubscriber twistSubscriber;
     public final TFListenerCompact tfListenerCompact;
     public final PointerPublisher pointerPublisher;
@@ -68,7 +68,7 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
         nearestConeSubscriber = new NearestConeSubscriber(bridge);
         odometryPublisher = new OdomPublisher(drive, bridge);
         pingPublisher = new PingPublisher(bridge);
-        startBagPublisher = new StartBagManager(bridge);
+        bagManager = new BagManager(bridge);
         twistSubscriber = new TwistSubscriber(bridge);
         tfListenerCompact = new TFListenerCompact(bridge, "/tf_compact");
         pointerPublisher = new PointerPublisher(bridge);

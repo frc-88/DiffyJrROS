@@ -2,10 +2,10 @@ package frc.robot.ros.bridge;
 
 import frc.team88.ros.bridge.BridgePublisher;
 import frc.team88.ros.bridge.ROSNetworkTablesBridge;
-import frc.team88.ros.messages.std_msgs.Bool;
+import frc.team88.ros.messages.std_msgs.RosBool;
 
 public class MotorEnablePublisher implements Publisher {
-    private final BridgePublisher<Bool> setMotorEnablePub;
+    private final BridgePublisher<RosBool> setMotorEnablePub;
     private boolean enable = false;
 
     public MotorEnablePublisher(ROSNetworkTablesBridge bridge) {
@@ -13,7 +13,7 @@ public class MotorEnablePublisher implements Publisher {
     }
 
     public void publish() {
-        setMotorEnablePub.send(new Bool(enable));
+        setMotorEnablePub.send(new RosBool(enable));
     }
 
     public void setMotorEnable(boolean enable) {

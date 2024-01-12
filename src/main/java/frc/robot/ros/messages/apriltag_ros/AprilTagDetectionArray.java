@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 public class AprilTagDetectionArray extends frc.team88.ros.messages.RosMessage {
 
-    private frc.team88.ros.messages.std_msgs.Header header = new frc.team88.ros.messages.std_msgs.Header();
+    private frc.team88.ros.messages.std_msgs.RosHeader header = new frc.team88.ros.messages.std_msgs.RosHeader();
     private ArrayList<frc.robot.ros.messages.apriltag_ros.AprilTagDetection> detections = new ArrayList<>();
 
     @Expose(serialize = false, deserialize = false)
@@ -19,26 +19,26 @@ public class AprilTagDetectionArray extends frc.team88.ros.messages.RosMessage {
 
     }
 
-    public AprilTagDetectionArray(frc.team88.ros.messages.std_msgs.Header header, frc.robot.ros.messages.apriltag_ros.AprilTagDetection[] detections) {
+    public AprilTagDetectionArray(frc.team88.ros.messages.std_msgs.RosHeader header, frc.robot.ros.messages.apriltag_ros.AprilTagDetection[] detections) {
         this.header = header;
         this.detections = new ArrayList<>(Arrays.asList(detections));
     }
 
     public AprilTagDetectionArray(JsonObject jsonObj) {
-        this.header = new frc.team88.ros.messages.std_msgs.Header(jsonObj.get("header").getAsJsonObject());
+        this.header = new frc.team88.ros.messages.std_msgs.RosHeader(jsonObj.get("header").getAsJsonObject());
         for (JsonElement detections_element : jsonObj.getAsJsonArray("detections")) {
             this.detections.add(new frc.robot.ros.messages.apriltag_ros.AprilTagDetection(detections_element.getAsJsonObject()));
         }
     }
 
-    public frc.team88.ros.messages.std_msgs.Header getHeader() {
+    public frc.team88.ros.messages.std_msgs.RosHeader getHeader() {
         return this.header;
     }
     public ArrayList<frc.robot.ros.messages.apriltag_ros.AprilTagDetection> getDetections() {
         return this.detections;
     }
 
-    public void setHeader(frc.team88.ros.messages.std_msgs.Header header) {
+    public void setHeader(frc.team88.ros.messages.std_msgs.RosHeader header) {
         this.header = header;
     }
     public void setDetections(ArrayList<frc.robot.ros.messages.apriltag_ros.AprilTagDetection> detections) {

@@ -18,6 +18,7 @@ import frc.robot.localization.OdometryLocalization;
 import frc.robot.localization.ROSLocalization;
 import frc.robot.ros.DiffyJrCoprocessorBridge;
 import edu.wpi.first.wpilibj.SerialPort;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -81,6 +82,9 @@ public class RobotContainer {
             togglePointer.toggleOnTrue(new ROSControlledLaser(calibrationPointer));
         }
 
+        SmartDashboard.putData("Start bag", new InstantCommand(() -> bridge.bagManager.startBag()));
+        SmartDashboard.putData("Stop bag", new InstantCommand(() -> bridge.bagManager.stopBag()));
+        SmartDashboard.putData("Start SVO", new InstantCommand(() -> bridge.bagManager.startSvo()));
     }
 
     private void configurePeriodics(Robot robot) {
@@ -104,7 +108,6 @@ public class RobotContainer {
     }
 
     public void autonomousInit() {
-        // bridge.startBag();
         bridge.matchManager.sendAutonomousMatchPeriod();
     }
 

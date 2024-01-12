@@ -6,7 +6,7 @@ import frc.robot.ros.messages.apriltag_ros.AprilTagDetection;
 import frc.robot.ros.messages.apriltag_ros.AprilTagDetectionArray;
 import frc.team88.ros.messages.geometry_msgs.Point;
 import frc.team88.ros.messages.geometry_msgs.PointStamped;
-import frc.team88.ros.messages.std_msgs.Header;
+import frc.team88.ros.messages.std_msgs.RosHeader;
 
 public class AutoPointAtTag {
     public static Optional<PointStamped> compute(AprilTagDetectionArray detections) {
@@ -23,7 +23,7 @@ public class AutoPointAtTag {
             }
         }
         if (closestDistance != Double.MAX_VALUE) {
-            Header header = detections.getHeader();
+            RosHeader header = detections.getHeader();
             Point point = closestTag.getPose().getPose().getPose().getPosition();
             return Optional.of(new PointStamped(header, point));
         } else {
