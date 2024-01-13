@@ -11,6 +11,7 @@ import frc.robot.calibration_pointer.CalibrationPointer;
 import frc.robot.drive_subsystem.CoastDriveMotors;
 import frc.robot.drive_subsystem.DriveSubsystem;
 import frc.robot.drive_subsystem.DriveSwerveJoystickCommand;
+import frc.robot.driverinput.InstantCommandAnyMode;
 import frc.robot.driverinput.JoystickInterface;
 import frc.robot.driverinput.ROSJoystick;
 import frc.robot.localization.Localization;
@@ -66,7 +67,7 @@ public class RobotContainer {
         userButton.whileTrue(new CoastDriveMotors(driveSubsystem));
 
         Trigger toggleFieldRelative = new Trigger(() -> this.joystick.isButtonBPressed());
-        toggleFieldRelative.onTrue(new InstantCommand(() -> {
+        toggleFieldRelative.onTrue(new InstantCommandAnyMode(() -> {
             boolean new_state = !driveSubsystem.getSwerve().commandsAreFieldRelative();
             System.out.println("Setting field relative commands to " + new_state);
             driveSubsystem.getSwerve().setFieldRelativeCommands(new_state);
@@ -82,9 +83,21 @@ public class RobotContainer {
             togglePointer.toggleOnTrue(new ROSControlledLaser(calibrationPointer));
         }
 
-        SmartDashboard.putData("Start bag", new InstantCommand(() -> bridge.bagManager.startBag()));
-        SmartDashboard.putData("Stop bag", new InstantCommand(() -> bridge.bagManager.stopBag()));
-        SmartDashboard.putData("Start SVO", new InstantCommand(() -> bridge.bagManager.startSvo()));
+        Trigger toggleRecording = new Trigger(() -> this.joystick.isButtonYPressed());
+        toggleRecording.toggleOnTrue(new InstantCommandAnyMode(() -> {
+            boolean new_state = !bridge.bagManager.isRecording();
+            System.out.println("Setting recording to " + new_state);
+            if (new_state) {
+                bridge.bagManager.startBag();
+                // bridge.bagManager.startSvo();
+            } else {
+                bridge.bagManager.stopBag();
+            }
+        }));
+
+        SmartDashboard.putData("Start bag", new InstantCommandAnyMode(() -> bridge.bagManager.startBag()));
+        SmartDashboard.putData("Stop bag", new InstantCommandAnyMode(() -> bridge.bagManager.stopBag()));
+        SmartDashboard.putData("Start SVO", new InstantCommandAnyMode(() -> bridge.bagManager.startSvo()));
     }
 
     private void configurePeriodics(Robot robot) {

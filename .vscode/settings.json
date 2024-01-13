@@ -28,7 +28,7 @@
     },
   ],
   "java.test.defaultConfig": "WPIlibUnitTests",
-  "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx16G -Xms16G -Xlog:disable",
+  "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx32G -Xms16G -Xlog:disable",
   "editor.formatOnSave": true,
   "python.analysis.typeCheckingMode": "basic",
   "java.compile.nullAnalysis.nullable": [],
