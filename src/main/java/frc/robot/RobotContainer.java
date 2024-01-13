@@ -89,7 +89,7 @@ public class RobotContainer {
             System.out.println("Setting recording to " + new_state);
             if (new_state) {
                 bridge.bagManager.startBag();
-                // bridge.bagManager.startSvo();
+                bridge.bagManager.startSvo();
             } else {
                 bridge.bagManager.stopBag();
             }
