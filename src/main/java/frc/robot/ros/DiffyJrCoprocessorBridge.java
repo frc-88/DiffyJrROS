@@ -28,6 +28,7 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
     private final ROSNetworkTablesBridge bridge;
     private final long SLOW_INTERVAL = 5; // every 5 periodic ticks, slow update is called
     private long updateCounter = 0;
+    private final int POWER_MODE = 6;
 
     public final AutoPathManager autoPathManager;
     public final ImuPublisher imuPublisher;
@@ -67,7 +68,7 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
         motorEnablePublisher = new MotorEnablePublisher(bridge);
         nearestConeSubscriber = new NearestConeSubscriber(bridge);
         odometryPublisher = new OdomPublisher(drive, bridge);
-        pingPublisher = new PingPublisher(bridge);
+        pingPublisher = new PingPublisher(bridge, POWER_MODE);
         bagManager = new BagManager(bridge);
         twistSubscriber = new TwistSubscriber(bridge);
         tfListenerCompact = new TFListenerCompact(bridge, "/tf_compact");
