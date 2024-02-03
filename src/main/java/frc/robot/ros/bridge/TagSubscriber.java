@@ -15,11 +15,7 @@ public class TagSubscriber implements Subscriber<AprilTagDetectionArray> {
     }
 
     public Optional<AprilTagDetectionArray> receive() {
-        AprilTagDetectionArray msg;
-        if ((msg = tagSub.receive()) != null) {
-            lastTag = msg;
-        }
-        return Optional.ofNullable(msg);
+        return tagSub.receive();
     }
 
     public AprilTagDetectionArray getLastTag() {

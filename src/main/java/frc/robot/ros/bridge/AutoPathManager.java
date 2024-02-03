@@ -12,7 +12,7 @@ import frc.team88.ros.conversions.ROSConversions;
 import frc.team88.ros.messages.geometry_msgs.Pose;
 import frc.team88.ros.messages.geometry_msgs.PoseStamped;
 import frc.team88.ros.messages.nav_msgs.Path;
-import frc.team88.ros.messages.std_msgs.Header;
+import frc.team88.ros.messages.std_msgs.RosHeader;
 
 public class AutoPathManager {
     private final BridgePublisher<Path> autoPathPub;
@@ -33,7 +33,7 @@ public class AutoPathManager {
         System.out.println("Sending auto info. Path length is " + traj_states.size());
 
         Path path = new Path();
-        Header header = autoPathPub.getHeader(Frames.MAP_FRAME);
+        RosHeader header = autoPathPub.getHeader(Frames.MAP_FRAME);
         path.setHeader(header);
         for (int index = 0; index < traj_states.size(); index++) {
             Pose2d pose2d = new Pose2d(traj_states.get(index).poseMeters.getTranslation(),

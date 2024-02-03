@@ -14,6 +14,6 @@ public class JoystickSubscriber implements Subscriber<Joy> {
     }
 
     public Optional<Joy> receive() {
-        return Optional.ofNullable(joySub.receive());
+        return joySub.receive();
     }
 }

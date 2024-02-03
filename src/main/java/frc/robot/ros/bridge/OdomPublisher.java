@@ -16,7 +16,7 @@ import frc.team88.ros.messages.geometry_msgs.Twist;
 import frc.team88.ros.messages.geometry_msgs.TwistWithCovariance;
 import frc.team88.ros.messages.geometry_msgs.Vector3;
 import frc.team88.ros.messages.nav_msgs.Odometry;
-import frc.team88.ros.messages.std_msgs.Header;
+import frc.team88.ros.messages.std_msgs.RosHeader;
 
 public class OdomPublisher implements Publisher {
     private final DriveSubsystem driveSubsystem;
@@ -27,7 +27,7 @@ public class OdomPublisher implements Publisher {
         odomPub = new BridgePublisher<>(bridge, "odom");
     }
 
-    private final Odometry odomMsg = new Odometry(new Header(0, new TimePrimitive(), Frames.ODOM_FRAME),
+    private final Odometry odomMsg = new Odometry(new RosHeader(0, new TimePrimitive(), Frames.ODOM_FRAME),
             Frames.BASE_FRAME,
             new PoseWithCovariance(new Pose(new Point(0, 0, 0), new Quaternion(0, 0, 0, 1)), new Double[] {
                     5e-4, 0.0, 0.0, 0.0, 0.0, 0.0,

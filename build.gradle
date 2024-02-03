@@ -58,6 +58,7 @@ dependencies {
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
     implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'com.github.frc-88:ROSNetworkTablesBridge:v2024-02-03'
 
     roborioDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.roborio)
     roborioDebug wpi.java.vendor.jniDebug(wpi.platforms.roborio)
@@ -75,8 +76,6 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    implementation 'com.github.frc-88:ROSNetworkTablesBridge:v2023-06-24'
 }
 
 test {

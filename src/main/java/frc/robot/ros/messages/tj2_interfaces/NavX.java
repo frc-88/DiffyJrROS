@@ -6,7 +6,7 @@ import com.google.gson.annotations.Expose;
 
 public class NavX extends frc.team88.ros.messages.RosMessage {
 
-    private frc.team88.ros.messages.std_msgs.Header header = new frc.team88.ros.messages.std_msgs.Header();
+    private frc.team88.ros.messages.std_msgs.RosHeader header = new frc.team88.ros.messages.std_msgs.RosHeader();
     private frc.team88.ros.messages.geometry_msgs.Quaternion orientation = new frc.team88.ros.messages.geometry_msgs.Quaternion();
     private frc.team88.ros.messages.geometry_msgs.Vector3 angular_velocity = new frc.team88.ros.messages.geometry_msgs.Vector3();
     private frc.team88.ros.messages.geometry_msgs.Vector3 linear_acceleration = new frc.team88.ros.messages.geometry_msgs.Vector3();
@@ -18,7 +18,7 @@ public class NavX extends frc.team88.ros.messages.RosMessage {
 
     }
 
-    public NavX(frc.team88.ros.messages.std_msgs.Header header, frc.team88.ros.messages.geometry_msgs.Quaternion orientation, frc.team88.ros.messages.geometry_msgs.Vector3 angular_velocity, frc.team88.ros.messages.geometry_msgs.Vector3 linear_acceleration) {
+    public NavX(frc.team88.ros.messages.std_msgs.RosHeader header, frc.team88.ros.messages.geometry_msgs.Quaternion orientation, frc.team88.ros.messages.geometry_msgs.Vector3 angular_velocity, frc.team88.ros.messages.geometry_msgs.Vector3 linear_acceleration) {
         this.header = header;
         this.orientation = orientation;
         this.angular_velocity = angular_velocity;
@@ -26,13 +26,13 @@ public class NavX extends frc.team88.ros.messages.RosMessage {
     }
 
     public NavX(JsonObject jsonObj) {
-        this.header = new frc.team88.ros.messages.std_msgs.Header(jsonObj.get("header").getAsJsonObject());
+        this.header = new frc.team88.ros.messages.std_msgs.RosHeader(jsonObj.get("header").getAsJsonObject());
         this.orientation = new frc.team88.ros.messages.geometry_msgs.Quaternion(jsonObj.get("orientation").getAsJsonObject());
         this.angular_velocity = new frc.team88.ros.messages.geometry_msgs.Vector3(jsonObj.get("angular_velocity").getAsJsonObject());
         this.linear_acceleration = new frc.team88.ros.messages.geometry_msgs.Vector3(jsonObj.get("linear_acceleration").getAsJsonObject());
     }
 
-    public frc.team88.ros.messages.std_msgs.Header getHeader() {
+    public frc.team88.ros.messages.std_msgs.RosHeader getHeader() {
         return this.header;
     }
     public frc.team88.ros.messages.geometry_msgs.Quaternion getOrientation() {
@@ -45,7 +45,7 @@ public class NavX extends frc.team88.ros.messages.RosMessage {
         return this.linear_acceleration;
     }
 
-    public void setHeader(frc.team88.ros.messages.std_msgs.Header header) {
+    public void setHeader(frc.team88.ros.messages.std_msgs.RosHeader header) {
         this.header = header;
     }
     public void setOrientation(frc.team88.ros.messages.geometry_msgs.Quaternion orientation) {

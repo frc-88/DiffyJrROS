@@ -1,5 +1,7 @@
 package frc.robot.localization;
 
+import java.util.Optional;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.drive_subsystem.DriveSubsystem;
@@ -18,10 +20,13 @@ public class ROSLocalization implements Localization {
 
     @Override
     public Pose2d getPose() {
-        Transform3dStamped tfStamped = tf_compact.lookupTransform(Frames.MAP_FRAME, Frames.BASE_FRAME);
+        Optional<Transform3dStamped> tfStamped = tf_compact.lookupTransform(Frames.MAP_FRAME, Frames.BASE_FRAME);
+        if (tfStamped.isEmpty()) {
+            return new Pose2d();
+        }
         return new Pose2d(
-                tfStamped.transform.getTranslation().toTranslation2d(),
-                tfStamped.transform.getRotation().toRotation2d());
+                tfStamped.get().transform.getTranslation().toTranslation2d(),
+                tfStamped.get().transform.getRotation().toRotation2d());
     }
 
     @Override

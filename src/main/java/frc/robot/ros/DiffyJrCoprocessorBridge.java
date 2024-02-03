@@ -55,7 +55,7 @@ public class DiffyJrCoprocessorBridge extends SubsystemBase {
     public DiffyJrCoprocessorBridge(DriveSubsystem drive) {
         NetworkTableInstance instance = NetworkTableInstance.getDefault();
 
-        bridge = new ROSNetworkTablesBridge(instance.getTable(""), 0.02);
+        bridge = new ROSNetworkTablesBridge(instance.getTable(""), 20);
 
         autoPathManager = new AutoPathManager(bridge);
         imuPublisher = new ImuPublisher(drive, bridge);

@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 public class GameObjectsStamped extends frc.team88.ros.messages.RosMessage {
 
-    private frc.team88.ros.messages.std_msgs.Header header = new frc.team88.ros.messages.std_msgs.Header();
+    private frc.team88.ros.messages.std_msgs.RosHeader header = new frc.team88.ros.messages.std_msgs.RosHeader();
     private ArrayList<frc.robot.ros.messages.tj2_interfaces.GameObject> objects = new ArrayList<>();
     private int width = 0;
     private int height = 0;
@@ -21,7 +21,7 @@ public class GameObjectsStamped extends frc.team88.ros.messages.RosMessage {
 
     }
 
-    public GameObjectsStamped(frc.team88.ros.messages.std_msgs.Header header, frc.robot.ros.messages.tj2_interfaces.GameObject[] objects, int width, int height) {
+    public GameObjectsStamped(frc.team88.ros.messages.std_msgs.RosHeader header, frc.robot.ros.messages.tj2_interfaces.GameObject[] objects, int width, int height) {
         this.header = header;
         this.objects = new ArrayList<>(Arrays.asList(objects));
         this.width = width;
@@ -29,7 +29,7 @@ public class GameObjectsStamped extends frc.team88.ros.messages.RosMessage {
     }
 
     public GameObjectsStamped(JsonObject jsonObj) {
-        this.header = new frc.team88.ros.messages.std_msgs.Header(jsonObj.get("header").getAsJsonObject());
+        this.header = new frc.team88.ros.messages.std_msgs.RosHeader(jsonObj.get("header").getAsJsonObject());
         for (JsonElement objects_element : jsonObj.getAsJsonArray("objects")) {
             this.objects.add(new frc.robot.ros.messages.tj2_interfaces.GameObject(objects_element.getAsJsonObject()));
         }
@@ -37,7 +37,7 @@ public class GameObjectsStamped extends frc.team88.ros.messages.RosMessage {
         this.height = jsonObj.get("height").getAsInt();
     }
 
-    public frc.team88.ros.messages.std_msgs.Header getHeader() {
+    public frc.team88.ros.messages.std_msgs.RosHeader getHeader() {
         return this.header;
     }
     public ArrayList<frc.robot.ros.messages.tj2_interfaces.GameObject> getObjects() {
@@ -50,7 +50,7 @@ public class GameObjectsStamped extends frc.team88.ros.messages.RosMessage {
         return this.height;
     }
 
-    public void setHeader(frc.team88.ros.messages.std_msgs.Header header) {
+    public void setHeader(frc.team88.ros.messages.std_msgs.RosHeader header) {
         this.header = header;
     }
     public void setObjects(ArrayList<frc.robot.ros.messages.tj2_interfaces.GameObject> objects) {

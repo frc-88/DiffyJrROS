@@ -2,16 +2,17 @@ package frc.robot.ros.bridge;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import frc.team88.ros.bridge.BridgePublisher;
 import frc.team88.ros.bridge.BridgeSubscriber;
 import frc.team88.ros.bridge.ROSNetworkTablesBridge;
-import frc.team88.ros.messages.std_msgs.Float64;
+import frc.team88.ros.messages.std_msgs.RosFloat64;
 
 public class JointManager {
     private final ROSNetworkTablesBridge bridge;
-    private final Map<String, BridgePublisher<Float64>> jointSendTopics = new HashMap<>();
-    private final Map<String, BridgeSubscriber<Float64>> jointReceiveTopics = new HashMap<>();
+    private final Map<String, BridgePublisher<RosFloat64>> jointSendTopics = new HashMap<>();
+    private final Map<String, BridgeSubscriber<RosFloat64>> jointReceiveTopics = new HashMap<>();
     private final Map<String, Double> jointCommands = new HashMap<>();
     private final String namespace;
 
@@ -30,7 +31,7 @@ public class JointManager {
         String sendTopic = namespace + name;
         jointSendTopics.put(name, new BridgePublisher<>(bridge, sendTopic));
         String commandTopic = namespace + name + "/command";
-        jointReceiveTopics.put(name, new BridgeSubscriber<>(bridge, commandTopic, Float64.class));
+        jointReceiveTopics.put(name, new BridgeSubscriber<>(bridge, commandTopic, RosFloat64.class));
         jointCommands.put(name, 0.0);
     }
 
@@ -42,14 +43,14 @@ public class JointManager {
         if (!isJoint(name)) {
             addJoint(name);
         }
-        jointSendTopics.get(name).send(new Float64(position));
+        jointSendTopics.get(name).send(new RosFloat64(position));
     }
 
     public void update() {
         for (String name : jointReceiveTopics.keySet()) {
-            Float64 command;
-            if ((command = jointReceiveTopics.get(name).receive()) != null) {
-                jointCommands.put(name, command.getData());
+            Optional<RosFloat64> command;
+            if ((command = jointReceiveTopics.get(name).receive()).isPresent()) {
+                jointCommands.put(name, command.get().getData());
             }
         }
     }

@@ -4,6 +4,8 @@
 
 package frc.robot.drive_subsystem;
 
+import java.util.Optional;
+
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -38,10 +40,10 @@ public class PassthroughRosCommand extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        Twist msg;
+        Optional<Twist> msg;
         long now = getTime();
-        if ((msg = twistSub.receive()) != null) {
-            cached = ROSConversions.rosToWpiTwist(msg);
+        if ((msg = twistSub.receive()).isPresent()) {
+            cached = ROSConversions.rosToWpiTwist(msg.get());
             prevTime = now;
         }
         if (getTime() - prevTime < TIMEOUT) {

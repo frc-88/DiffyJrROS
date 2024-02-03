@@ -15,8 +15,9 @@ public class TwistSubscriber implements Subscriber<ChassisSpeeds> {
     }
 
     public Optional<ChassisSpeeds> receive() {
-        Twist msg;
-        if ((msg = twistSub.receive()) != null) {
+        Optional<Twist> optMsg;
+        if ((optMsg = twistSub.receive()).isPresent()) {
+            Twist msg = optMsg.get();
             return Optional.of(new ChassisSpeeds(msg.getLinear().getX(), msg.getLinear().getY(),
                     msg.getAngular().getZ()));
         } else {

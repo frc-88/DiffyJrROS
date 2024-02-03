@@ -19,9 +19,9 @@ public class NearestConeSubscriber implements Subscriber<PoseStamped> {
 
     @Override
     public Optional<PoseStamped> receive() {
-        PoseStamped msg;
-        if ((msg = nearestConeSub.receive()) != null) {
-            Pose3d cone = ROSConversions.rosToWpiPose(msg.getPose());
+        Optional<PoseStamped> msg = nearestConeSub.receive();
+        if (msg.isPresent()) {
+            Pose3d cone = ROSConversions.rosToWpiPose(msg.get().getPose());
 
             double roll = cone.getRotation().getX();
             double yaw = cone.getRotation().getZ();
@@ -31,10 +31,8 @@ public class NearestConeSubscriber implements Subscriber<PoseStamped> {
             SmartDashboard.putNumber("Nearest cone y", cone.getY());
             SmartDashboard.putNumber("Nearest cone angle (degrees)", Units.radiansToDegrees(yaw));
             SmartDashboard.putBoolean("Nearest cone is standing", is_standing);
-            return Optional.of(msg);
-        } else {
-            return Optional.empty();
         }
+        return msg;
     }
 
 }
