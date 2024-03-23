@@ -4,6 +4,7 @@
         "tj2_interfaces/Match",
         "tj2_interfaces/MatchPeriod",
         "tj2_interfaces/NavX",
+        "tj2_interfaces/RequestFrames",
         "apriltag_ros/AprilTagDetection",
         "apriltag_ros/AprilTagDetectionArray"
     ],

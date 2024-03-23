@@ -34,7 +34,7 @@ public class UVBoundingBox extends frc.team88.ros.messages.RosMessage {
     public UVBoundingBox(JsonObject jsonObj) {
         int points_element_index = 0;
         for (JsonElement points_element : jsonObj.getAsJsonArray("points")) {
-            this.points[points_element_index] = new frc.robot.ros.messages.tj2_interfaces.UVKeypoint(points_element.getAsJsonObject());
+            this.points[points_element_index++] = new frc.robot.ros.messages.tj2_interfaces.UVKeypoint(points_element.getAsJsonObject());
         }
         this.width = jsonObj.get("width").getAsInt();
         this.height = jsonObj.get("height").getAsInt();

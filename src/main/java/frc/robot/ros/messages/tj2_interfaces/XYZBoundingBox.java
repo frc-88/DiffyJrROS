@@ -36,7 +36,7 @@ public class XYZBoundingBox extends frc.team88.ros.messages.RosMessage {
     public XYZBoundingBox(JsonObject jsonObj) {
         int points_element_index = 0;
         for (JsonElement points_element : jsonObj.getAsJsonArray("points")) {
-            this.points[points_element_index] = new frc.robot.ros.messages.tj2_interfaces.XYZKeypoint(points_element.getAsJsonObject());
+            this.points[points_element_index++] = new frc.robot.ros.messages.tj2_interfaces.XYZKeypoint(points_element.getAsJsonObject());
         }
         this.dimensions = new frc.team88.ros.messages.geometry_msgs.Vector3(jsonObj.get("dimensions").getAsJsonObject());
     }
